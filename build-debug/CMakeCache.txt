@@ -18,13 +18,13 @@
 BUILD_TESTING:BOOL=ON
 
 //Value Computed by CMake
-Binpacking_BINARY_DIR:STATIC=/home/roderich/Documents/BAP/build-debug
+Binpacking_BINARY_DIR:STATIC=/home/roderich/Documents/gitdir01/dwdforflowshops/BAP/build-debug
 
 //Value Computed by CMake
 Binpacking_IS_TOP_LEVEL:STATIC=ON
 
 //Value Computed by CMake
-Binpacking_SOURCE_DIR:STATIC=/home/roderich/Documents/BAP
+Binpacking_SOURCE_DIR:STATIC=/home/roderich/Documents/gitdir01/dwdforflowshops/BAP
 
 //Path to a program.
 CMAKE_ADDR2LINE:FILEPATH=/usr/bin/addr2line
@@ -265,7 +265,7 @@ CMAKE_ADDR2LINE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_AR
 CMAKE_AR-ADVANCED:INTERNAL=1
 //This is the directory where this CMakeCache.txt was created
-CMAKE_CACHEFILE_DIR:INTERNAL=/home/roderich/Documents/BAP/build-debug
+CMAKE_CACHEFILE_DIR:INTERNAL=/home/roderich/Documents/BAP/gitdor01/dwdforflowshops/build-debug
 //Major version of cmake used to create the current loaded cache
 CMAKE_CACHE_MAJOR_VERSION:INTERNAL=3
 //Minor version of cmake used to create the current loaded cache

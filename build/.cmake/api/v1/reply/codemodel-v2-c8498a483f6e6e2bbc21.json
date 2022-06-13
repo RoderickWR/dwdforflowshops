@@ -320,8 +320,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/home/roderich/Documents/BAP/build",
-		"source" : "/home/roderich/Documents/BAP"
+		"build" : "/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build",
+		"source" : "/home/roderich/Documents/BAP/gitdir01/dwdforflowshops"
 	},
 	"version" : 
 	{

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP
+CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/build
+CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build
 
 # Utility rule file for NightlyConfigure.
 
@@ -67,7 +67,7 @@ include check/CMakeFiles/NightlyConfigure.dir/compiler_depend.make
 include check/CMakeFiles/NightlyConfigure.dir/progress.make
 
 check/CMakeFiles/NightlyConfigure:
-	cd /home/roderich/Documents/BAP/build/check && /usr/bin/ctest -D NightlyConfigure
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check && /usr/bin/ctest -D NightlyConfigure
 
 NightlyConfigure: check/CMakeFiles/NightlyConfigure
 NightlyConfigure: check/CMakeFiles/NightlyConfigure.dir/build.make
@@ -78,10 +78,10 @@ check/CMakeFiles/NightlyConfigure.dir/build: NightlyConfigure
 .PHONY : check/CMakeFiles/NightlyConfigure.dir/build
 
 check/CMakeFiles/NightlyConfigure.dir/clean:
-	cd /home/roderich/Documents/BAP/build/check && $(CMAKE_COMMAND) -P CMakeFiles/NightlyConfigure.dir/cmake_clean.cmake
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check && $(CMAKE_COMMAND) -P CMakeFiles/NightlyConfigure.dir/cmake_clean.cmake
 .PHONY : check/CMakeFiles/NightlyConfigure.dir/clean
 
 check/CMakeFiles/NightlyConfigure.dir/depend:
-	cd /home/roderich/Documents/BAP/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP /home/roderich/Documents/BAP/check /home/roderich/Documents/BAP/build /home/roderich/Documents/BAP/build/check /home/roderich/Documents/BAP/build/check/CMakeFiles/NightlyConfigure.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP/gitdir01/dwdforflowshops /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/check /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check/CMakeFiles/NightlyConfigure.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : check/CMakeFiles/NightlyConfigure.dir/depend
 

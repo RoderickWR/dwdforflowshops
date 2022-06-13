@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP
+CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/build
+CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -125,14 +125,14 @@ check/clean: check/CMakeFiles/ContinuousSubmit.dir/clean
 CMakeFiles/binpacking.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/binpacking.dir/build.make CMakeFiles/binpacking.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/binpacking.dir/build.make CMakeFiles/binpacking.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target binpacking"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target binpacking"
 .PHONY : CMakeFiles/binpacking.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/binpacking.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/binpacking.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : CMakeFiles/binpacking.dir/rule
 
 # Convenience name for target.
@@ -151,14 +151,14 @@ CMakeFiles/binpacking.dir/clean:
 check/CMakeFiles/Experimental.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/Experimental.dir/build.make check/CMakeFiles/Experimental.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/Experimental.dir/build.make check/CMakeFiles/Experimental.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target Experimental"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target Experimental"
 .PHONY : check/CMakeFiles/Experimental.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/Experimental.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/Experimental.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/Experimental.dir/rule
 
 # Convenience name for target.
@@ -177,14 +177,14 @@ check/CMakeFiles/Experimental.dir/clean:
 check/CMakeFiles/Nightly.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/Nightly.dir/build.make check/CMakeFiles/Nightly.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/Nightly.dir/build.make check/CMakeFiles/Nightly.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target Nightly"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target Nightly"
 .PHONY : check/CMakeFiles/Nightly.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/Nightly.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/Nightly.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/Nightly.dir/rule
 
 # Convenience name for target.
@@ -203,14 +203,14 @@ check/CMakeFiles/Nightly.dir/clean:
 check/CMakeFiles/Continuous.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/Continuous.dir/build.make check/CMakeFiles/Continuous.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/Continuous.dir/build.make check/CMakeFiles/Continuous.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target Continuous"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target Continuous"
 .PHONY : check/CMakeFiles/Continuous.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/Continuous.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/Continuous.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/Continuous.dir/rule
 
 # Convenience name for target.
@@ -229,14 +229,14 @@ check/CMakeFiles/Continuous.dir/clean:
 check/CMakeFiles/NightlyMemoryCheck.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyMemoryCheck.dir/build.make check/CMakeFiles/NightlyMemoryCheck.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyMemoryCheck.dir/build.make check/CMakeFiles/NightlyMemoryCheck.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyMemoryCheck"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyMemoryCheck"
 .PHONY : check/CMakeFiles/NightlyMemoryCheck.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyMemoryCheck.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyMemoryCheck.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyMemoryCheck.dir/rule
 
 # Convenience name for target.
@@ -255,14 +255,14 @@ check/CMakeFiles/NightlyMemoryCheck.dir/clean:
 check/CMakeFiles/NightlyStart.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyStart.dir/build.make check/CMakeFiles/NightlyStart.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyStart.dir/build.make check/CMakeFiles/NightlyStart.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyStart"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyStart"
 .PHONY : check/CMakeFiles/NightlyStart.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyStart.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyStart.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyStart.dir/rule
 
 # Convenience name for target.
@@ -281,14 +281,14 @@ check/CMakeFiles/NightlyStart.dir/clean:
 check/CMakeFiles/NightlyUpdate.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyUpdate.dir/build.make check/CMakeFiles/NightlyUpdate.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyUpdate.dir/build.make check/CMakeFiles/NightlyUpdate.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyUpdate"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyUpdate"
 .PHONY : check/CMakeFiles/NightlyUpdate.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyUpdate.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyUpdate.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyUpdate.dir/rule
 
 # Convenience name for target.
@@ -307,14 +307,14 @@ check/CMakeFiles/NightlyUpdate.dir/clean:
 check/CMakeFiles/NightlyConfigure.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyConfigure.dir/build.make check/CMakeFiles/NightlyConfigure.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyConfigure.dir/build.make check/CMakeFiles/NightlyConfigure.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyConfigure"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyConfigure"
 .PHONY : check/CMakeFiles/NightlyConfigure.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyConfigure.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyConfigure.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyConfigure.dir/rule
 
 # Convenience name for target.
@@ -333,14 +333,14 @@ check/CMakeFiles/NightlyConfigure.dir/clean:
 check/CMakeFiles/NightlyBuild.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyBuild.dir/build.make check/CMakeFiles/NightlyBuild.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyBuild.dir/build.make check/CMakeFiles/NightlyBuild.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyBuild"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyBuild"
 .PHONY : check/CMakeFiles/NightlyBuild.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyBuild.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyBuild.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyBuild.dir/rule
 
 # Convenience name for target.
@@ -359,14 +359,14 @@ check/CMakeFiles/NightlyBuild.dir/clean:
 check/CMakeFiles/NightlyTest.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyTest.dir/build.make check/CMakeFiles/NightlyTest.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyTest.dir/build.make check/CMakeFiles/NightlyTest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyTest"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyTest"
 .PHONY : check/CMakeFiles/NightlyTest.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyTest.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyTest.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyTest.dir/rule
 
 # Convenience name for target.
@@ -385,14 +385,14 @@ check/CMakeFiles/NightlyTest.dir/clean:
 check/CMakeFiles/NightlyCoverage.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyCoverage.dir/build.make check/CMakeFiles/NightlyCoverage.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyCoverage.dir/build.make check/CMakeFiles/NightlyCoverage.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyCoverage"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyCoverage"
 .PHONY : check/CMakeFiles/NightlyCoverage.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyCoverage.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyCoverage.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyCoverage.dir/rule
 
 # Convenience name for target.
@@ -411,14 +411,14 @@ check/CMakeFiles/NightlyCoverage.dir/clean:
 check/CMakeFiles/NightlyMemCheck.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyMemCheck.dir/build.make check/CMakeFiles/NightlyMemCheck.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlyMemCheck.dir/build.make check/CMakeFiles/NightlyMemCheck.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlyMemCheck"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlyMemCheck"
 .PHONY : check/CMakeFiles/NightlyMemCheck.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlyMemCheck.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlyMemCheck.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlyMemCheck.dir/rule
 
 # Convenience name for target.
@@ -437,14 +437,14 @@ check/CMakeFiles/NightlyMemCheck.dir/clean:
 check/CMakeFiles/NightlySubmit.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlySubmit.dir/build.make check/CMakeFiles/NightlySubmit.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/NightlySubmit.dir/build.make check/CMakeFiles/NightlySubmit.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target NightlySubmit"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target NightlySubmit"
 .PHONY : check/CMakeFiles/NightlySubmit.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/NightlySubmit.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/NightlySubmit.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/NightlySubmit.dir/rule
 
 # Convenience name for target.
@@ -463,14 +463,14 @@ check/CMakeFiles/NightlySubmit.dir/clean:
 check/CMakeFiles/ExperimentalStart.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalStart.dir/build.make check/CMakeFiles/ExperimentalStart.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalStart.dir/build.make check/CMakeFiles/ExperimentalStart.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalStart"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalStart"
 .PHONY : check/CMakeFiles/ExperimentalStart.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalStart.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalStart.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalStart.dir/rule
 
 # Convenience name for target.
@@ -489,14 +489,14 @@ check/CMakeFiles/ExperimentalStart.dir/clean:
 check/CMakeFiles/ExperimentalUpdate.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalUpdate.dir/build.make check/CMakeFiles/ExperimentalUpdate.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalUpdate.dir/build.make check/CMakeFiles/ExperimentalUpdate.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalUpdate"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalUpdate"
 .PHONY : check/CMakeFiles/ExperimentalUpdate.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalUpdate.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalUpdate.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalUpdate.dir/rule
 
 # Convenience name for target.
@@ -515,14 +515,14 @@ check/CMakeFiles/ExperimentalUpdate.dir/clean:
 check/CMakeFiles/ExperimentalConfigure.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalConfigure.dir/build.make check/CMakeFiles/ExperimentalConfigure.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalConfigure.dir/build.make check/CMakeFiles/ExperimentalConfigure.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalConfigure"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalConfigure"
 .PHONY : check/CMakeFiles/ExperimentalConfigure.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalConfigure.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalConfigure.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalConfigure.dir/rule
 
 # Convenience name for target.
@@ -541,14 +541,14 @@ check/CMakeFiles/ExperimentalConfigure.dir/clean:
 check/CMakeFiles/ExperimentalBuild.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalBuild.dir/build.make check/CMakeFiles/ExperimentalBuild.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalBuild.dir/build.make check/CMakeFiles/ExperimentalBuild.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalBuild"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalBuild"
 .PHONY : check/CMakeFiles/ExperimentalBuild.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalBuild.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalBuild.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalBuild.dir/rule
 
 # Convenience name for target.
@@ -567,14 +567,14 @@ check/CMakeFiles/ExperimentalBuild.dir/clean:
 check/CMakeFiles/ExperimentalTest.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalTest.dir/build.make check/CMakeFiles/ExperimentalTest.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalTest.dir/build.make check/CMakeFiles/ExperimentalTest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalTest"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalTest"
 .PHONY : check/CMakeFiles/ExperimentalTest.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalTest.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalTest.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalTest.dir/rule
 
 # Convenience name for target.
@@ -593,14 +593,14 @@ check/CMakeFiles/ExperimentalTest.dir/clean:
 check/CMakeFiles/ExperimentalCoverage.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalCoverage.dir/build.make check/CMakeFiles/ExperimentalCoverage.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalCoverage.dir/build.make check/CMakeFiles/ExperimentalCoverage.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalCoverage"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalCoverage"
 .PHONY : check/CMakeFiles/ExperimentalCoverage.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalCoverage.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalCoverage.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalCoverage.dir/rule
 
 # Convenience name for target.
@@ -619,14 +619,14 @@ check/CMakeFiles/ExperimentalCoverage.dir/clean:
 check/CMakeFiles/ExperimentalMemCheck.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalMemCheck.dir/build.make check/CMakeFiles/ExperimentalMemCheck.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalMemCheck.dir/build.make check/CMakeFiles/ExperimentalMemCheck.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalMemCheck"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalMemCheck"
 .PHONY : check/CMakeFiles/ExperimentalMemCheck.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalMemCheck.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalMemCheck.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalMemCheck.dir/rule
 
 # Convenience name for target.
@@ -645,14 +645,14 @@ check/CMakeFiles/ExperimentalMemCheck.dir/clean:
 check/CMakeFiles/ExperimentalSubmit.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalSubmit.dir/build.make check/CMakeFiles/ExperimentalSubmit.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ExperimentalSubmit.dir/build.make check/CMakeFiles/ExperimentalSubmit.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ExperimentalSubmit"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ExperimentalSubmit"
 .PHONY : check/CMakeFiles/ExperimentalSubmit.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ExperimentalSubmit.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ExperimentalSubmit.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ExperimentalSubmit.dir/rule
 
 # Convenience name for target.
@@ -671,14 +671,14 @@ check/CMakeFiles/ExperimentalSubmit.dir/clean:
 check/CMakeFiles/ContinuousStart.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousStart.dir/build.make check/CMakeFiles/ContinuousStart.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousStart.dir/build.make check/CMakeFiles/ContinuousStart.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousStart"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousStart"
 .PHONY : check/CMakeFiles/ContinuousStart.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousStart.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousStart.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousStart.dir/rule
 
 # Convenience name for target.
@@ -697,14 +697,14 @@ check/CMakeFiles/ContinuousStart.dir/clean:
 check/CMakeFiles/ContinuousUpdate.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousUpdate.dir/build.make check/CMakeFiles/ContinuousUpdate.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousUpdate.dir/build.make check/CMakeFiles/ContinuousUpdate.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousUpdate"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousUpdate"
 .PHONY : check/CMakeFiles/ContinuousUpdate.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousUpdate.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousUpdate.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousUpdate.dir/rule
 
 # Convenience name for target.
@@ -723,14 +723,14 @@ check/CMakeFiles/ContinuousUpdate.dir/clean:
 check/CMakeFiles/ContinuousConfigure.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousConfigure.dir/build.make check/CMakeFiles/ContinuousConfigure.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousConfigure.dir/build.make check/CMakeFiles/ContinuousConfigure.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousConfigure"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousConfigure"
 .PHONY : check/CMakeFiles/ContinuousConfigure.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousConfigure.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousConfigure.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousConfigure.dir/rule
 
 # Convenience name for target.
@@ -749,14 +749,14 @@ check/CMakeFiles/ContinuousConfigure.dir/clean:
 check/CMakeFiles/ContinuousBuild.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousBuild.dir/build.make check/CMakeFiles/ContinuousBuild.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousBuild.dir/build.make check/CMakeFiles/ContinuousBuild.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousBuild"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousBuild"
 .PHONY : check/CMakeFiles/ContinuousBuild.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousBuild.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousBuild.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousBuild.dir/rule
 
 # Convenience name for target.
@@ -775,14 +775,14 @@ check/CMakeFiles/ContinuousBuild.dir/clean:
 check/CMakeFiles/ContinuousTest.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousTest.dir/build.make check/CMakeFiles/ContinuousTest.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousTest.dir/build.make check/CMakeFiles/ContinuousTest.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousTest"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousTest"
 .PHONY : check/CMakeFiles/ContinuousTest.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousTest.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousTest.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousTest.dir/rule
 
 # Convenience name for target.
@@ -801,14 +801,14 @@ check/CMakeFiles/ContinuousTest.dir/clean:
 check/CMakeFiles/ContinuousCoverage.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousCoverage.dir/build.make check/CMakeFiles/ContinuousCoverage.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousCoverage.dir/build.make check/CMakeFiles/ContinuousCoverage.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousCoverage"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousCoverage"
 .PHONY : check/CMakeFiles/ContinuousCoverage.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousCoverage.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousCoverage.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousCoverage.dir/rule
 
 # Convenience name for target.
@@ -827,14 +827,14 @@ check/CMakeFiles/ContinuousCoverage.dir/clean:
 check/CMakeFiles/ContinuousMemCheck.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousMemCheck.dir/build.make check/CMakeFiles/ContinuousMemCheck.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousMemCheck.dir/build.make check/CMakeFiles/ContinuousMemCheck.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousMemCheck"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousMemCheck"
 .PHONY : check/CMakeFiles/ContinuousMemCheck.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousMemCheck.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousMemCheck.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousMemCheck.dir/rule
 
 # Convenience name for target.
@@ -853,14 +853,14 @@ check/CMakeFiles/ContinuousMemCheck.dir/clean:
 check/CMakeFiles/ContinuousSubmit.dir/all:
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousSubmit.dir/build.make check/CMakeFiles/ContinuousSubmit.dir/depend
 	$(MAKE) $(MAKESILENT) -f check/CMakeFiles/ContinuousSubmit.dir/build.make check/CMakeFiles/ContinuousSubmit.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num= "Built target ContinuousSubmit"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num= "Built target ContinuousSubmit"
 .PHONY : check/CMakeFiles/ContinuousSubmit.dir/all
 
 # Build rule for subdir invocation for target.
 check/CMakeFiles/ContinuousSubmit.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 check/CMakeFiles/ContinuousSubmit.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles 0
 .PHONY : check/CMakeFiles/ContinuousSubmit.dir/rule
 
 # Convenience name for target.

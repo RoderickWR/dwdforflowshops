@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP
+CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/build
+CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/binpacking.dir/depend.make
@@ -72,100 +72,100 @@ include CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o: CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o: ../src/branch_ryanfoster.c
 CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o: CMakeFiles/binpacking.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o -MF CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o.d -o CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o -c /home/roderich/Documents/BAP/src/branch_ryanfoster.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o -MF CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o.d -o CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/branch_ryanfoster.c
 
 CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/src/branch_ryanfoster.c > CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.i
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/branch_ryanfoster.c > CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.i
 
 CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/src/branch_ryanfoster.c -o CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.s
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/branch_ryanfoster.c -o CMakeFiles/binpacking.dir/src/branch_ryanfoster.c.s
 
 CMakeFiles/binpacking.dir/src/cmain.c.o: CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/cmain.c.o: ../src/cmain.c
 CMakeFiles/binpacking.dir/src/cmain.c.o: CMakeFiles/binpacking.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/binpacking.dir/src/cmain.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/cmain.c.o -MF CMakeFiles/binpacking.dir/src/cmain.c.o.d -o CMakeFiles/binpacking.dir/src/cmain.c.o -c /home/roderich/Documents/BAP/src/cmain.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/binpacking.dir/src/cmain.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/cmain.c.o -MF CMakeFiles/binpacking.dir/src/cmain.c.o.d -o CMakeFiles/binpacking.dir/src/cmain.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/cmain.c
 
 CMakeFiles/binpacking.dir/src/cmain.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/binpacking.dir/src/cmain.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/src/cmain.c > CMakeFiles/binpacking.dir/src/cmain.c.i
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/cmain.c > CMakeFiles/binpacking.dir/src/cmain.c.i
 
 CMakeFiles/binpacking.dir/src/cmain.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/binpacking.dir/src/cmain.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/src/cmain.c -o CMakeFiles/binpacking.dir/src/cmain.c.s
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/cmain.c -o CMakeFiles/binpacking.dir/src/cmain.c.s
 
 CMakeFiles/binpacking.dir/src/cons_samediff.c.o: CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/cons_samediff.c.o: ../src/cons_samediff.c
 CMakeFiles/binpacking.dir/src/cons_samediff.c.o: CMakeFiles/binpacking.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/binpacking.dir/src/cons_samediff.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/cons_samediff.c.o -MF CMakeFiles/binpacking.dir/src/cons_samediff.c.o.d -o CMakeFiles/binpacking.dir/src/cons_samediff.c.o -c /home/roderich/Documents/BAP/src/cons_samediff.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/binpacking.dir/src/cons_samediff.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/cons_samediff.c.o -MF CMakeFiles/binpacking.dir/src/cons_samediff.c.o.d -o CMakeFiles/binpacking.dir/src/cons_samediff.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/cons_samediff.c
 
 CMakeFiles/binpacking.dir/src/cons_samediff.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/binpacking.dir/src/cons_samediff.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/src/cons_samediff.c > CMakeFiles/binpacking.dir/src/cons_samediff.c.i
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/cons_samediff.c > CMakeFiles/binpacking.dir/src/cons_samediff.c.i
 
 CMakeFiles/binpacking.dir/src/cons_samediff.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/binpacking.dir/src/cons_samediff.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/src/cons_samediff.c -o CMakeFiles/binpacking.dir/src/cons_samediff.c.s
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/cons_samediff.c -o CMakeFiles/binpacking.dir/src/cons_samediff.c.s
 
 CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o: CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o: ../src/pricer_binpacking.c
 CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o: CMakeFiles/binpacking.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o -MF CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o.d -o CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o -c /home/roderich/Documents/BAP/src/pricer_binpacking.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o -MF CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o.d -o CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/pricer_binpacking.c
 
 CMakeFiles/binpacking.dir/src/pricer_binpacking.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/binpacking.dir/src/pricer_binpacking.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/src/pricer_binpacking.c > CMakeFiles/binpacking.dir/src/pricer_binpacking.c.i
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/pricer_binpacking.c > CMakeFiles/binpacking.dir/src/pricer_binpacking.c.i
 
 CMakeFiles/binpacking.dir/src/pricer_binpacking.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/binpacking.dir/src/pricer_binpacking.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/src/pricer_binpacking.c -o CMakeFiles/binpacking.dir/src/pricer_binpacking.c.s
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/pricer_binpacking.c -o CMakeFiles/binpacking.dir/src/pricer_binpacking.c.s
 
 CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o: CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o: ../src/probdata_binpacking.c
 CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o: CMakeFiles/binpacking.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o -MF CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o.d -o CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o -c /home/roderich/Documents/BAP/src/probdata_binpacking.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o -MF CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o.d -o CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/probdata_binpacking.c
 
 CMakeFiles/binpacking.dir/src/probdata_binpacking.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/binpacking.dir/src/probdata_binpacking.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/src/probdata_binpacking.c > CMakeFiles/binpacking.dir/src/probdata_binpacking.c.i
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/probdata_binpacking.c > CMakeFiles/binpacking.dir/src/probdata_binpacking.c.i
 
 CMakeFiles/binpacking.dir/src/probdata_binpacking.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/binpacking.dir/src/probdata_binpacking.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/src/probdata_binpacking.c -o CMakeFiles/binpacking.dir/src/probdata_binpacking.c.s
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/probdata_binpacking.c -o CMakeFiles/binpacking.dir/src/probdata_binpacking.c.s
 
 CMakeFiles/binpacking.dir/src/reader_bpa.c.o: CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/reader_bpa.c.o: ../src/reader_bpa.c
 CMakeFiles/binpacking.dir/src/reader_bpa.c.o: CMakeFiles/binpacking.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/binpacking.dir/src/reader_bpa.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/reader_bpa.c.o -MF CMakeFiles/binpacking.dir/src/reader_bpa.c.o.d -o CMakeFiles/binpacking.dir/src/reader_bpa.c.o -c /home/roderich/Documents/BAP/src/reader_bpa.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building C object CMakeFiles/binpacking.dir/src/reader_bpa.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/reader_bpa.c.o -MF CMakeFiles/binpacking.dir/src/reader_bpa.c.o.d -o CMakeFiles/binpacking.dir/src/reader_bpa.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/reader_bpa.c
 
 CMakeFiles/binpacking.dir/src/reader_bpa.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/binpacking.dir/src/reader_bpa.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/src/reader_bpa.c > CMakeFiles/binpacking.dir/src/reader_bpa.c.i
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/reader_bpa.c > CMakeFiles/binpacking.dir/src/reader_bpa.c.i
 
 CMakeFiles/binpacking.dir/src/reader_bpa.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/binpacking.dir/src/reader_bpa.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/src/reader_bpa.c -o CMakeFiles/binpacking.dir/src/reader_bpa.c.s
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/reader_bpa.c -o CMakeFiles/binpacking.dir/src/reader_bpa.c.s
 
 CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o: CMakeFiles/binpacking.dir/flags.make
 CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o: ../src/vardata_binpacking.c
 CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o: CMakeFiles/binpacking.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o -MF CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o.d -o CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o -c /home/roderich/Documents/BAP/src/vardata_binpacking.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building C object CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o"
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o -MF CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o.d -o CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/vardata_binpacking.c
 
 CMakeFiles/binpacking.dir/src/vardata_binpacking.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/binpacking.dir/src/vardata_binpacking.c.i"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/src/vardata_binpacking.c > CMakeFiles/binpacking.dir/src/vardata_binpacking.c.i
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/vardata_binpacking.c > CMakeFiles/binpacking.dir/src/vardata_binpacking.c.i
 
 CMakeFiles/binpacking.dir/src/vardata_binpacking.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/binpacking.dir/src/vardata_binpacking.c.s"
-	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/src/vardata_binpacking.c -o CMakeFiles/binpacking.dir/src/vardata_binpacking.c.s
+	/usr/bin/gcc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/vardata_binpacking.c -o CMakeFiles/binpacking.dir/src/vardata_binpacking.c.s
 
 # Object files for target binpacking
 binpacking_OBJECTS = \
@@ -191,7 +191,7 @@ binpacking: CMakeFiles/binpacking.dir/build.make
 binpacking: /home/roderich/Documents/scipoptsuite-8.0.0/build-release/lib/libscip.so.8.0.0.0
 binpacking: /usr/lib/x86_64-linux-gnu/libm.so
 binpacking: CMakeFiles/binpacking.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roderich/Documents/BAP/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking C executable binpacking"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Linking C executable binpacking"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/binpacking.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -203,6 +203,6 @@ CMakeFiles/binpacking.dir/clean:
 .PHONY : CMakeFiles/binpacking.dir/clean
 
 CMakeFiles/binpacking.dir/depend:
-	cd /home/roderich/Documents/BAP/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP /home/roderich/Documents/BAP /home/roderich/Documents/BAP/build /home/roderich/Documents/BAP/build /home/roderich/Documents/BAP/build/CMakeFiles/binpacking.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP/gitdir01/dwdforflowshops /home/roderich/Documents/BAP/gitdir01/dwdforflowshops /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles/binpacking.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/binpacking.dir/depend
 

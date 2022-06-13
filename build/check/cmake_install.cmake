@@ -1,4 +1,4 @@
-# Install script for directory: /home/roderich/Documents/BAP/check
+# Install script for directory: /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/check
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP
+CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/build
+CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build
 
 # Utility rule file for Continuous.
 
@@ -67,7 +67,7 @@ include check/CMakeFiles/Continuous.dir/compiler_depend.make
 include check/CMakeFiles/Continuous.dir/progress.make
 
 check/CMakeFiles/Continuous:
-	cd /home/roderich/Documents/BAP/build/check && /usr/bin/ctest -D Continuous
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check && /usr/bin/ctest -D Continuous
 
 Continuous: check/CMakeFiles/Continuous
 Continuous: check/CMakeFiles/Continuous.dir/build.make
@@ -78,10 +78,10 @@ check/CMakeFiles/Continuous.dir/build: Continuous
 .PHONY : check/CMakeFiles/Continuous.dir/build
 
 check/CMakeFiles/Continuous.dir/clean:
-	cd /home/roderich/Documents/BAP/build/check && $(CMAKE_COMMAND) -P CMakeFiles/Continuous.dir/cmake_clean.cmake
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check && $(CMAKE_COMMAND) -P CMakeFiles/Continuous.dir/cmake_clean.cmake
 .PHONY : check/CMakeFiles/Continuous.dir/clean
 
 check/CMakeFiles/Continuous.dir/depend:
-	cd /home/roderich/Documents/BAP/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP /home/roderich/Documents/BAP/check /home/roderich/Documents/BAP/build /home/roderich/Documents/BAP/build/check /home/roderich/Documents/BAP/build/check/CMakeFiles/Continuous.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP/gitdir01/dwdforflowshops /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/check /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check/CMakeFiles/Continuous.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : check/CMakeFiles/Continuous.dir/depend
 

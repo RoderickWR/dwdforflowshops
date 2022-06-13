@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP
+CMAKE_SOURCE_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/build
+CMAKE_BINARY_DIR = /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build
 
 # Utility rule file for NightlyMemCheck.
 
@@ -67,7 +67,7 @@ include check/CMakeFiles/NightlyMemCheck.dir/compiler_depend.make
 include check/CMakeFiles/NightlyMemCheck.dir/progress.make
 
 check/CMakeFiles/NightlyMemCheck:
-	cd /home/roderich/Documents/BAP/build/check && /usr/bin/ctest -D NightlyMemCheck
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check && /usr/bin/ctest -D NightlyMemCheck
 
 NightlyMemCheck: check/CMakeFiles/NightlyMemCheck
 NightlyMemCheck: check/CMakeFiles/NightlyMemCheck.dir/build.make
@@ -78,10 +78,10 @@ check/CMakeFiles/NightlyMemCheck.dir/build: NightlyMemCheck
 .PHONY : check/CMakeFiles/NightlyMemCheck.dir/build
 
 check/CMakeFiles/NightlyMemCheck.dir/clean:
-	cd /home/roderich/Documents/BAP/build/check && $(CMAKE_COMMAND) -P CMakeFiles/NightlyMemCheck.dir/cmake_clean.cmake
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check && $(CMAKE_COMMAND) -P CMakeFiles/NightlyMemCheck.dir/cmake_clean.cmake
 .PHONY : check/CMakeFiles/NightlyMemCheck.dir/clean
 
 check/CMakeFiles/NightlyMemCheck.dir/depend:
-	cd /home/roderich/Documents/BAP/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP /home/roderich/Documents/BAP/check /home/roderich/Documents/BAP/build /home/roderich/Documents/BAP/build/check /home/roderich/Documents/BAP/build/check/CMakeFiles/NightlyMemCheck.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/roderich/Documents/BAP/gitdir01/dwdforflowshops /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/check /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/check/CMakeFiles/NightlyMemCheck.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : check/CMakeFiles/NightlyMemCheck.dir/depend
 
