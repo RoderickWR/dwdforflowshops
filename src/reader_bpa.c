@@ -98,6 +98,15 @@
 /**@} */
 
 
+/* create a struct for the one time pattern */
+
+typedef struct Pattern
+{
+   float start_times[5];
+   float end_times[5];
+} Pattern;
+
+
 /**@name Callback methods
  *
  * @{
@@ -122,6 +131,8 @@ SCIP_DECL_READERREAD(readerReadBpa)
    int weight;
    int nweights;
    int lineno;
+   Pattern p;
+
 
    *result = SCIP_DIDNOTRUN;
 

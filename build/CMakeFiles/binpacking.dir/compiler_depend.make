@@ -1627,7 +1627,6 @@ CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o: ../src/probdata_binpackin
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/cons_setppc.h
 
 CMakeFiles/binpacking.dir/src/reader_bpa.c.o: ../src/reader_bpa.c \
-  /home/roderich/Documents/BAP/src/reader_bpa.c \
   /usr/include/stdc-predef.h \
   /usr/include/assert.h \
   /usr/include/features.h \
@@ -1696,7 +1695,7 @@ CMakeFiles/binpacking.dir/src/reader_bpa.c.o: ../src/reader_bpa.c \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/type_scip.h \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/type_timing.h \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/type_heur.h \
-  /home/roderich/Documents/BAP/src/probdata_binpacking.h \
+  ../src/probdata_binpacking.h \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/scip.h \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/blockmemshell/memory.h \
   /usr/include/stdlib.h \
@@ -1861,7 +1860,7 @@ CMakeFiles/binpacking.dir/src/reader_bpa.c.o: ../src/reader_bpa.c \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/scip_tree.h \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/scip_validation.h \
   /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/scip_var.h \
-  /home/roderich/Documents/BAP/src/reader_bpa.h
+  ../src/reader_bpa.h
 
 CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o: ../src/vardata_binpacking.c \
   /home/roderich/Documents/BAP/src/vardata_binpacking.c \
@@ -2102,7 +2101,7 @@ CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o: ../src/vardata_binpacking.
 
 /home/roderich/Documents/BAP/src/vardata_binpacking.c:
 
-/home/roderich/Documents/BAP/src/reader_bpa.c:
+../src/reader_bpa.h:
 
 /home/roderich/Documents/BAP/src/pricer_binpacking.c:
 
@@ -2781,6 +2780,8 @@ CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o: ../src/vardata_binpacking.
 /home/roderich/Documents/scipoptsuite-8.0.0/build-release/scip/scip/config.h:
 
 /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/scip_solvingstats.h:
+
+../src/probdata_binpacking.h:
 
 /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/heur_alns.h:
 
