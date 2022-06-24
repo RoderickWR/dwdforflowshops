@@ -56,7 +56,7 @@ SCIP_RETCODE runShell(
    SCIPenableDebugSol(scip);
 
    /* include binpacking reader */
-   SCIP_CALL( SCIPincludeReaderBpa(scip) ); */
+   /*SCIP_CALL( SCIPincludeReaderBpa(scip) ); */
    /* create problem in SCIP and add non-NULL callbacks via setter functions */
    SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") );
 
@@ -76,8 +76,23 @@ SCIP_RETCODE runShell(
    /* turn off all separation algorithms */
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );
 
+
+   SCIP_VAR* var = NULL;
    
-   
+   SCIP_CALL(SCIPcreateVarBasic(scip, &var, "testvar2", 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY));
+   SCIP_CONS* cons = NULL;
+
+
+
+   SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "testcon1", 0, NULL, NULL, 1.0, 1.0));
+   {
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, var, 1.0) );
+   }
+
+
+
+
+   SCIPsolve(scip);
    /**********************************
     * Process command line arguments *
     **********************************/
