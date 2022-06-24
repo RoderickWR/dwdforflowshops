@@ -56,7 +56,9 @@ SCIP_RETCODE runShell(
    SCIPenableDebugSol(scip);
 
    /* include binpacking reader */
-   SCIP_CALL( SCIPincludeReaderBpa(scip) );
+   SCIP_CALL( SCIPincludeReaderBpa(scip) ); */
+   /* create problem in SCIP and add non-NULL callbacks via setter functions */
+   SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") );
 
    /* include binpacking branching and branching data */
    SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
@@ -73,6 +75,8 @@ SCIP_RETCODE runShell(
 
    /* turn off all separation algorithms */
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );
+
+   
    
    /**********************************
     * Process command line arguments *
