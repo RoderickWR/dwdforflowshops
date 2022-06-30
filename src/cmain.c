@@ -23,6 +23,7 @@
  *  the shell arguments if given.
  */
 #include <stdio.h>
+#include <string.h>
 
 #include "scip/scip.h"
 #include "scip/scipshell.h"
@@ -77,22 +78,85 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );
 
 
-   SCIP_VAR* var = NULL;
+   typedef struct singlePattern {
+      double start;
+      double end;   
+   } singlePattern;
    
-   SCIP_CALL(SCIPcreateVarBasic(scip, &var, "testvar2", 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY));
-   SCIP_CONS* cons = NULL;
+   typedef struct machinePatterns {
+      singlePattern patterOnMachine1[5];
+      int lastPatternIdx1;
+      singlePattern patterOnMachine2[5];
+      int lastPatternIdx2;
+   } machinePatterns;
+
+   
+   int nbrJobs = 2;
+   singlePattern sp1 = {0.0, 7.0};
+   singlePattern sp2 = {7.0, 8.0};
+
+   machinePatterns mp1 = {.patterOnMachine1[0] = sp1, .patterOnMachine1[1] = sp2, .lastPatternIdx1 = 1 , .patterOnMachine2[0] = sp1, .patterOnMachine2[1] = sp2, .lastPatternIdx2 = 1};
+ 
+   SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
+
+   SCIP_VAR *ptrLamb[5];
+   SCIP_VAR *ptrStart[5];
+   SCIP_VAR *ptrFinish[5];
+
+   char buf[256];
+   char *num; 
+   int i = 0;
+   for( i = 0; i < mp1.lastPatternIdx1+1; ++i ) {
+      asprintf(&num, "%d", i);
+      strcat(strcpy(buf, "lamb"), num);
+      SCIP_VAR* var = NULL;
+      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY));
+      ptrLamb[i] = var;
+      SCIP_CALL(SCIPaddVar(scip,var));
+   } 
 
 
+   for( i = 0; i < nbrJobs; ++i ) {
+      asprintf(&num, "%d", i);
+      strcat(strcpy(buf, "start"), num);
+      SCIP_VAR* var = NULL;
+      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+      ptrStart[i] = var;
+      SCIP_CALL(SCIPaddVar(scip,var));
 
-   SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "testcon1", 0, NULL, NULL, 1.0, 1.0));
-   {
-      SCIP_CALL( SCIPaddCoefLinear(scip, cons, var, 1.0) );
+      strcat(strcpy(buf, "finish"), num);
+      SCIP_VAR* var2 = NULL;
+      SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+      ptrFinish[i] = var2;
+      SCIP_CALL(SCIPaddVar(scip,var2));
+   } 
+
+   SCIP_VAR* var3 = NULL;
+   SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 50.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
+   SCIP_CALL(SCIPaddVar(scip,var3));
+       
+       
+   SCIP_CONS* cons = NULL;  
+   SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "conv", 0, NULL, NULL, 1.0, 1.0));
+   for( i = 0; i < mp1.lastPatternIdx1+1; ++i ) {
+      
+      {
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[i], 1.0) );
+      }
+      SCIP_CALL(SCIPaddCons(scip,cons));
    }
 
 
+   
+   
 
 
    SCIPsolve(scip);
+
+   SCIPwriteOrigProblem(scip,"test.lp",NULL,FALSE);
+
+
+
    /**********************************
     * Process command line arguments *
     **********************************/
