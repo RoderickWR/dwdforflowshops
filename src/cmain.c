@@ -135,7 +135,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 50.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
    SCIP_CALL(SCIPaddVar(scip,var3));
        
-       
+   /* Convexity constraint */    
    SCIP_CONS* cons = NULL;  
    SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "conv", 0, NULL, NULL, 1.0, 1.0));
    for( i = 0; i < mp1.lastPatternIdx1+1; ++i ) {
@@ -146,9 +146,23 @@ SCIP_RETCODE runShell(
       SCIP_CALL(SCIPaddCons(scip,cons));
    }
 
+   /*Start time constraint*/
+   
+   int ii = 0;
+   for( i = 0; i < nbrJobs+1; ++i ) {
+      SCIP_CONS* cons = NULL;  
+      SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "conv", 0, NULL, NULL, 1.0, 1.0));
+      for( ii=0; ii< mp1.lastPatternIdx1+1; ii++) {
+         {
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[ii], mp1.patterOnMachine1[ii].start) );
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrStart[ii], -1));
+         }
 
-   
-   
+         
+      }
+      
+      SCIP_CALL(SCIPaddCons(scip,cons));
+   }
 
 
    SCIPsolve(scip);
