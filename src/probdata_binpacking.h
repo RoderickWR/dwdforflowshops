@@ -35,13 +35,22 @@ typedef struct singlePattern {
    double end;   
 } singlePattern;
 
-/* machinePatterns contains 5 singlePatterns for each machine*/
+/* one pattern contains start and end time pairs of up to 5 jobs*/
+typedef struct pat {
+   singlePattern patterns[5];
+} pat;
+
+/* one machine can have up to 5 patterns*/
 typedef struct machinePatterns {
-   singlePattern patterOnMachine1[5];
-   int lastPatternIdx1;
-   singlePattern patterOnMachine2[5];
-   int lastPatternIdx2;
+   pat mp[5];
+   int lastPatternIdx;
 } machinePatterns;
+
+typedef struct processingTimes{
+   double m1[5];
+   double m2[5];
+} processingTimes;
+
 
 
 /** sets up the problem data */

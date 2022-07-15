@@ -85,23 +85,27 @@ SCIP_RETCODE runShell(
    singlePattern sp1 = {0.0, 7.0};
    singlePattern sp2 = {7.0, 8.0};
    /* and machinePatterns*/
-   machinePatterns mp1 = {.patterOnMachine1[0] = sp1, .patterOnMachine1[1] = sp2, .lastPatternIdx1 = 1 , .patterOnMachine2[0] = sp1, .patterOnMachine2[1] = sp2, .lastPatternIdx2 = 1};
+   machinePatterns machPat = {.mp[0].patterns[0] = sp1, .mp[0].patterns[1] = sp2, .mp[1].patterns[0] = sp1, .mp[1].patterns[1] = sp2, .lastPatternIdx = 1};
  
+   /* and processing times*/
+   processingTimes pt1 = {.m1[0] = 7, .m1[1] = 1, .m1[2] = 1, .m1[3] = 1, .m1[4] = 1}; 
+
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
    /* create pointers to lambdas, start and End variables*/
    SCIP_VAR *ptrLamb[5];
    SCIP_VAR *ptrStart[5];
    SCIP_VAR *ptrEnd[5];
+   SCIP_VAR *ptrMakespan;
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
    char *num; 
    int i = 0;
-   for( i = 0; i < mp1.lastPatternIdx1+1; ++i ) {
+   for( i = 0; i < machPat.lastPatternIdx+1; ++i ) {
       sprintf(buf, "lamb%d", i);
       SCIP_VAR* var = NULL;
-      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY));
+      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY));
       ptrLamb[i] = var;
       SCIP_CALL(SCIPaddVar(scip,var));
    } 
@@ -123,17 +127,14 @@ SCIP_RETCODE runShell(
    /* create makespan variable*/
    SCIP_VAR* var3 = NULL;
    SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 50.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
+   ptrMakespan = var3;
    SCIP_CALL(SCIPaddVar(scip,var3));
        
    /* add Convexity constraint */    
    SCIP_CONS* cons = NULL;  
    SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "conv", 0, NULL, NULL, 1.0, 1.0));
-   for( i = 0; i < mp1.lastPatternIdx1+1; ++i ) {
-      
-      
+   for( i = 0; i < machPat.lastPatternIdx+1; ++i ) { 
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[i], 1.0) );
-      
-      
    }
    SCIP_CALL(SCIPaddCons(scip,cons));
 
@@ -143,9 +144,9 @@ SCIP_RETCODE runShell(
       sprintf(buf, "startTimeConstrJ%d", i);
       SCIP_CONS* cons = NULL;  
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-      for( ii=0; ii< mp1.lastPatternIdx1+1; ii++) {
+      for( ii=0; ii< machPat.lastPatternIdx+1; ii++) {
          
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[ii], mp1.patterOnMachine1[ii].start) );
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[ii], machPat.mp[ii].patterns[i].start) );
          
          
   
@@ -162,13 +163,10 @@ SCIP_RETCODE runShell(
       sprintf(buf, "endTimeConstrJ%d", i);
       SCIP_CONS* cons = NULL;  
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-      for( ii=0; ii< mp1.lastPatternIdx1+1; ii++) {
+      for( ii=0; ii< machPat.lastPatternIdx+1; ii++) {
          
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[ii], mp1.patterOnMachine1[ii].end) );
-         
-         
-  
-         
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[ii], machPat.mp[ii].patterns[i].end) );
+
       }
       
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrEnd[i], -1));
@@ -176,6 +174,30 @@ SCIP_RETCODE runShell(
       SCIP_CALL(SCIPaddCons(scip,cons));
    }
 
+   /*add processing constraint*/   
+ 
+   for( i = 0; i < nbrJobs; ++i ) {
+      sprintf(buf, "processing%d", i);
+      SCIP_CONS* cons = NULL;  
+      SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.m1[i], -pt1.m1[i]));
+     
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrEnd[i], -1));
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrStart[i], 1));
+      SCIP_CALL(SCIPaddCons(scip,cons));
+   }
+
+   /*add makespan constraint*/   
+ 
+   for( i = 0; i < nbrJobs; ++i ) {
+      sprintf(buf, "makespan%d", i);
+      SCIP_CONS* cons = NULL;  
+      SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0, 1e+20));
+
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrEnd[i], -1));
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrMakespan, 1));
+
+      SCIP_CALL(SCIPaddCons(scip,cons));
+   }
 
    SCIPsolve(scip);
 
