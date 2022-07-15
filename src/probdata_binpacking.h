@@ -28,6 +28,22 @@
 
 #include "scip/scip.h"
 
+/* typedefs for flowshop*/
+/* singlePattern struct contains start and end time of a job*/
+typedef struct singlePattern {
+   double start;
+   double end;   
+} singlePattern;
+
+/* machinePatterns contains 5 singlePatterns for each machine*/
+typedef struct machinePatterns {
+   singlePattern patterOnMachine1[5];
+   int lastPatternIdx1;
+   singlePattern patterOnMachine2[5];
+   int lastPatternIdx2;
+} machinePatterns;
+
+
 /** sets up the problem data */
 SCIP_RETCODE SCIPprobdataCreate(
    SCIP*                 scip,               /**< SCIP data structure */

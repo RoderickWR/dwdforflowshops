@@ -33,6 +33,7 @@
 #include "cons_samediff.h"
 #include "pricer_binpacking.h"
 #include "reader_bpa.h"
+#include "probdata_binpacking.h"
 
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
  *  and frees the SCIP instance
@@ -59,7 +60,7 @@ SCIP_RETCODE runShell(
    /* include binpacking reader */
    /*SCIP_CALL( SCIPincludeReaderBpa(scip) ); */
    /* create problem in SCIP and add non-NULL callbacks via setter functions */
-   SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") );
+   SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") ); 
 
    /* include binpacking branching and branching data */
    SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
@@ -77,90 +78,101 @@ SCIP_RETCODE runShell(
    /* turn off all separation algorithms */
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );
 
-
-   typedef struct singlePattern {
-      double start;
-      double end;   
-   } singlePattern;
    
-   typedef struct machinePatterns {
-      singlePattern patterOnMachine1[5];
-      int lastPatternIdx1;
-      singlePattern patterOnMachine2[5];
-      int lastPatternIdx2;
-   } machinePatterns;
 
-   
+   /* initialize singlePattern*/
    int nbrJobs = 2;
    singlePattern sp1 = {0.0, 7.0};
    singlePattern sp2 = {7.0, 8.0};
-
+   /* and machinePatterns*/
    machinePatterns mp1 = {.patterOnMachine1[0] = sp1, .patterOnMachine1[1] = sp2, .lastPatternIdx1 = 1 , .patterOnMachine2[0] = sp1, .patterOnMachine2[1] = sp2, .lastPatternIdx2 = 1};
  
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
+   /* create pointers to lambdas, start and End variables*/
    SCIP_VAR *ptrLamb[5];
    SCIP_VAR *ptrStart[5];
-   SCIP_VAR *ptrFinish[5];
+   SCIP_VAR *ptrEnd[5];
 
+   /* create lambda variables and set lambda pointers*/
    char buf[256];
    char *num; 
    int i = 0;
    for( i = 0; i < mp1.lastPatternIdx1+1; ++i ) {
-      asprintf(&num, "%d", i);
-      strcat(strcpy(buf, "lamb"), num);
+      sprintf(buf, "lamb%d", i);
       SCIP_VAR* var = NULL;
       SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 1.0, SCIP_VARTYPE_BINARY));
       ptrLamb[i] = var;
       SCIP_CALL(SCIPaddVar(scip,var));
    } 
 
-
+   /* create start variables and set start pointers*/
    for( i = 0; i < nbrJobs; ++i ) {
-      asprintf(&num, "%d", i);
-      strcat(strcpy(buf, "start"), num);
+      sprintf(buf, "start%d", i);
       SCIP_VAR* var = NULL;
       SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
       ptrStart[i] = var;
       SCIP_CALL(SCIPaddVar(scip,var));
-
-      strcat(strcpy(buf, "finish"), num);
+   /* create end variables and set end pointers*/
+      sprintf(buf, "end%d", i);
       SCIP_VAR* var2 = NULL;
       SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
-      ptrFinish[i] = var2;
+      ptrEnd[i] = var2;
       SCIP_CALL(SCIPaddVar(scip,var2));
    } 
-
+   /* create makespan variable*/
    SCIP_VAR* var3 = NULL;
    SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 50.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
    SCIP_CALL(SCIPaddVar(scip,var3));
        
-   /* Convexity constraint */    
+   /* add Convexity constraint */    
    SCIP_CONS* cons = NULL;  
    SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "conv", 0, NULL, NULL, 1.0, 1.0));
    for( i = 0; i < mp1.lastPatternIdx1+1; ++i ) {
       
-      {
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[i], 1.0) );
-      }
-      SCIP_CALL(SCIPaddCons(scip,cons));
+      
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[i], 1.0) );
+      
+      
    }
+   SCIP_CALL(SCIPaddCons(scip,cons));
 
-   /*Start time constraint*/
-   
+   /*add start time constraint*/   
    int ii = 0;
-   for( i = 0; i < nbrJobs+1; ++i ) {
+   for( i = 0; i < nbrJobs; ++i ) {
+      sprintf(buf, "startTimeConstrJ%d", i);
       SCIP_CONS* cons = NULL;  
-      SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, "conv", 0, NULL, NULL, 1.0, 1.0));
+      SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
       for( ii=0; ii< mp1.lastPatternIdx1+1; ii++) {
-         {
+         
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[ii], mp1.patterOnMachine1[ii].start) );
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrStart[ii], -1));
-         }
-
+         
+         
+  
          
       }
       
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrStart[i], -1));
+
+      SCIP_CALL(SCIPaddCons(scip,cons));
+   }
+   /*add end time constraint*/   
+ 
+   for( i = 0; i < nbrJobs; ++i ) {
+      sprintf(buf, "endTimeConstrJ%d", i);
+      SCIP_CONS* cons = NULL;  
+      SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
+      for( ii=0; ii< mp1.lastPatternIdx1+1; ii++) {
+         
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrLamb[ii], mp1.patterOnMachine1[ii].end) );
+         
+         
+  
+         
+      }
+      
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrEnd[i], -1));
+
       SCIP_CALL(SCIPaddCons(scip,cons));
    }
 

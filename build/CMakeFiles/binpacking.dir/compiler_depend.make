@@ -692,7 +692,8 @@ CMakeFiles/binpacking.dir/src/cmain.c.o: ../src/cmain.c \
   ../src/branch_ryanfoster.h \
   ../src/cons_samediff.h \
   ../src/pricer_binpacking.h \
-  ../src/reader_bpa.h
+  ../src/reader_bpa.h \
+  ../src/probdata_binpacking.h
 
 CMakeFiles/binpacking.dir/src/cons_samediff.c.o: ../src/cons_samediff.c \
   /home/roderich/Documents/BAP/src/cons_samediff.c \
