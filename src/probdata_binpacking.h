@@ -29,29 +29,61 @@
 #include "scip/scip.h"
 
 /* typedefs for flowshop*/
-/* singlePattern struct contains start and end time of a job*/
-typedef struct singlePattern {
+/* singlePattern (sPat) struct contains start and end time of one job*/
+typedef struct sPat {
    double start;
    double end;   
-} singlePattern;
+} sPat;
 
-/* one pattern contains start and end time pairs of up to 5 jobs*/
+/* one pattern (pat) contains start and end time pairs of up to 5 jobs*/
 typedef struct pat {
-   singlePattern patterns[5];
+   sPat job[5];
+   int lastIdx;
 } pat;
 
 /* one machine can have up to 5 patterns*/
-typedef struct machinePatterns {
+typedef struct mPats {
    pat mp[5];
-   int lastPatternIdx;
-} machinePatterns;
+   int lastIdx;
+} mPats;
+
+/* all patterns of all machines (here up to 5) are stored in allPats*/
+typedef struct schedule {
+   mPats sched[5];
+   int lastIdx;
+} schedule;
+
+typedef struct processingTimesOneMachine{
+   double m[5];
+} processingTimesOneMachine;
 
 typedef struct processingTimes{
-   double m1[5];
-   double m2[5];
+   processingTimesOneMachine machine[5];
 } processingTimes;
 
+typedef struct lambMi{
+   SCIP_VAR *ptrLamb[5];
+} lambMi;
 
+typedef struct lamb{
+   lambMi lambOnMachine[5];
+} lamb;
+
+typedef struct startMi{
+   SCIP_VAR *ptrStart[5];
+} startMi;
+
+typedef struct start{
+   startMi startOnMachine[5];
+} start;
+
+typedef struct endMi{
+   SCIP_VAR *ptrEnd[5];
+} endMi;
+
+typedef struct end{
+   endMi endOnMachine[5];
+} end;
 
 /** sets up the problem data */
 SCIP_RETCODE SCIPprobdataCreate(
