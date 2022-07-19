@@ -18,7 +18,8 @@ add_executable(binpacking
    src/pricer_binpacking.c
    src/probdata_binpacking.c
    src/reader_bpa.c
-   src/vardata_binpacking.c)
+   src/vardata_binpacking.c
+   src/gnuplot.c)
 
 # link to math library if it is available
 find_library(LIBM m)

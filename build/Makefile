@@ -575,6 +575,30 @@ src/cons_samediff.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/binpacking.dir/build.make CMakeFiles/binpacking.dir/src/cons_samediff.c.s
 .PHONY : src/cons_samediff.c.s
 
+src/gnuplot.o: src/gnuplot.c.o
+.PHONY : src/gnuplot.o
+
+# target to build an object file
+src/gnuplot.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/binpacking.dir/build.make CMakeFiles/binpacking.dir/src/gnuplot.c.o
+.PHONY : src/gnuplot.c.o
+
+src/gnuplot.i: src/gnuplot.c.i
+.PHONY : src/gnuplot.i
+
+# target to preprocess a source file
+src/gnuplot.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/binpacking.dir/build.make CMakeFiles/binpacking.dir/src/gnuplot.c.i
+.PHONY : src/gnuplot.c.i
+
+src/gnuplot.s: src/gnuplot.c.s
+.PHONY : src/gnuplot.s
+
+# target to generate assembly for a file
+src/gnuplot.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/binpacking.dir/build.make CMakeFiles/binpacking.dir/src/gnuplot.c.s
+.PHONY : src/gnuplot.c.s
+
 src/pricer_binpacking.o: src/pricer_binpacking.c.o
 .PHONY : src/pricer_binpacking.o
 
@@ -718,6 +742,9 @@ help:
 	@echo "... src/cons_samediff.o"
 	@echo "... src/cons_samediff.i"
 	@echo "... src/cons_samediff.s"
+	@echo "... src/gnuplot.o"
+	@echo "... src/gnuplot.i"
+	@echo "... src/gnuplot.s"
 	@echo "... src/pricer_binpacking.o"
 	@echo "... src/pricer_binpacking.i"
 	@echo "... src/pricer_binpacking.s"

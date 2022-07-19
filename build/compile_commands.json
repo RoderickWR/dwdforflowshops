@@ -33,5 +33,10 @@
   "directory": "/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build",
   "command": "/usr/bin/gcc  -isystem /home/roderich/Documents/scipoptsuite-8.0.0/scip/src -isystem /home/roderich/Documents/scipoptsuite-8.0.0/build-release/scip -g -o CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/vardata_binpacking.c",
   "file": "/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/vardata_binpacking.c"
+},
+{
+  "directory": "/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build",
+  "command": "/usr/bin/gcc  -isystem /home/roderich/Documents/scipoptsuite-8.0.0/scip/src -isystem /home/roderich/Documents/scipoptsuite-8.0.0/build-release/scip -g -o CMakeFiles/binpacking.dir/src/gnuplot.c.o -c /home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/gnuplot.c",
+  "file": "/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/src/gnuplot.c"
 }
 ]

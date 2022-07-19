@@ -35,6 +35,8 @@
 #include "reader_bpa.h"
 #include "probdata_binpacking.h"
 
+#include "gnuplot.h"
+
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
  *  and frees the SCIP instance
  */
@@ -78,7 +80,7 @@ SCIP_RETCODE runShell(
    /* turn off all separation algorithms */
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );
 
-   
+   /*execmain(scip);*/
 
    /* initialize singlePattern*/
    int nbrJobs = 2;
@@ -206,6 +208,19 @@ SCIP_RETCODE runShell(
          SCIP_CALL(SCIPaddCons(scip,cons));
       }
    }
+
+   /*add inter machine constraint*/   
+   for( iii = 0; iii < s1.lastIdx; ++iii ) { 
+      for( i = 0; i < nbrJobs; ++i ) {
+         sprintf(buf, "interMachineM%dJ%d", iii,i);
+         SCIP_CONS* cons = NULL;  
+         SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -1e+20, 0));  
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], 1));
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii+1].ptrStart[i], -1));
+         SCIP_CALL(SCIPaddCons(scip,cons));
+      }
+   }
+
    /*add makespan constraint*/   
  
    for( i = 0; i < nbrJobs; ++i ) {
@@ -222,7 +237,6 @@ SCIP_RETCODE runShell(
    SCIPsolve(scip);
 
    SCIPwriteOrigProblem(scip,"test.lp",NULL,FALSE);
-
 
 
    /**********************************

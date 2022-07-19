@@ -65,7 +65,8 @@ CMAINOBJ	=	branch_ryanfoster.o \
 			pricer_binpacking.o \
 			probdata_binpacking.o \
 			reader_bpa.o \
-			vardata_binpacking.o
+			vardata_binpacking.o 
+	
 
 CXXMAINOBJ	=
 

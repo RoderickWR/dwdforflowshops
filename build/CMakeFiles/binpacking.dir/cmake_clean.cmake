@@ -5,6 +5,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/binpacking.dir/src/cmain.c.o.d"
   "CMakeFiles/binpacking.dir/src/cons_samediff.c.o"
   "CMakeFiles/binpacking.dir/src/cons_samediff.c.o.d"
+  "CMakeFiles/binpacking.dir/src/gnuplot.c.o"
+  "CMakeFiles/binpacking.dir/src/gnuplot.c.o.d"
   "CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o"
   "CMakeFiles/binpacking.dir/src/pricer_binpacking.c.o.d"
   "CMakeFiles/binpacking.dir/src/probdata_binpacking.c.o"
