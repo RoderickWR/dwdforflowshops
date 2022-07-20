@@ -68,8 +68,13 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
    SCIP_CALL( SCIPincludeConshdlrSamediff(scip) );
    
-  /* include binpacking pricer  */
+   /* include binpacking pricer  */
+   SCIP_PRICER* pricer;
    SCIP_CALL( SCIPincludePricerBinpacking(scip) );
+   /* activate pricer */
+   pricer = SCIPfindPricer(scip, "binpacking");
+   assert(pricer != NULL);
+   SCIP_CALL( SCIPactivatePricer(scip, pricer));
 
    /* include default SCIP plugins */
    SCIP_CALL( SCIPincludeDefaultPlugins(scip) );
@@ -103,14 +108,12 @@ SCIP_RETCODE runShell(
 
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
-   /* create pointers to lambdas, start and End variables*/
-   SCIP_VAR *ptrLamb[5];
+   /* create structs for pointers to all variables*/
    lamb lambdas;
-   SCIP_VAR *ptrStart[5];
    start startTimes;
-   SCIP_VAR *ptrEnd[5];
    end endTimes;
    SCIP_VAR *ptrMakespan;
+   SCIP_VAR *offset[nbrMachines];
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
@@ -127,6 +130,17 @@ SCIP_RETCODE runShell(
          SCIP_CALL(SCIPaddVar(scip,var));
       } 
    }
+
+   /* create offset variables and set offset pointers*/
+   for( iii = 0; iii< s1.lastIdx+1; ++iii ) {
+      sprintf(buf, "offsetM%d", iii);
+      SCIP_VAR* var = NULL;
+      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+      offset[iii] = var;
+      SCIP_CALL(SCIPaddVar(scip,var));
+      
+   }
+
    /* create start variables and set start pointers*/
    for( iii = 0; iii < s1.lastIdx+1; ++iii ) {
       for( i = 0; i < nbrJobs; ++i ) {
@@ -165,17 +179,11 @@ SCIP_RETCODE runShell(
          sprintf(buf, "startTimeConstrM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-         for( ii=0; ii< mp1.lastIdx+1; ii++) {
-         
+         for( ii=0; ii< mp1.lastIdx+1; ii++) {        
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambdas.lambOnMachine[iii].ptrLamb[ii], s1.sched[iii].mp[ii].job[i].start) );
-         
-         
-  
-         
          }
-      
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], -1));
-
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
       }
    }
@@ -185,14 +193,11 @@ SCIP_RETCODE runShell(
          sprintf(buf, "endTimeConstrM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-         for( ii=0; ii< mp1.lastIdx+1; ii++) {
-         
+         for( ii=0; ii< mp1.lastIdx+1; ii++) {   
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambdas.lambOnMachine[iii].ptrLamb[ii], s1.sched[iii].mp[ii].job[i].end) );
-
          }
-      
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
-
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
       }
    }
@@ -202,7 +207,6 @@ SCIP_RETCODE runShell(
          sprintf(buf, "processingM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
-     
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
@@ -227,10 +231,8 @@ SCIP_RETCODE runShell(
       sprintf(buf, "makespan%d", i);
       SCIP_CONS* cons = NULL;  
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0, 1e+20));
-
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[nbrMachines-1].ptrEnd[i], -1));
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrMakespan, 1));
-
       SCIP_CALL(SCIPaddCons(scip,cons));
    }
 
