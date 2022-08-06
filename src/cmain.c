@@ -74,7 +74,8 @@ SCIP_RETCODE runShell(
    /* activate pricer */
    pricer = SCIPfindPricer(scip, "binpacking");
    assert(pricer != NULL);
-   SCIP_CALL( SCIPactivatePricer(scip, pricer));
+   SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
+   /* SCIP_CALL( SCIPpricerBinpackingActivate(scip, pricer)); */
 
    /* include default SCIP plugins */
    SCIP_CALL( SCIPincludeDefaultPlugins(scip) );
