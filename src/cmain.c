@@ -74,9 +74,7 @@ SCIP_RETCODE runShell(
    /* activate pricer */
    pricer = SCIPfindPricer(scip, "binpacking");
    assert(pricer != NULL);
-   SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   /* SCIP_CALL( SCIPpricerBinpackingActivate(scip, pricer)); */
-
+   
    /* include default SCIP plugins */
    SCIP_CALL( SCIPincludeDefaultPlugins(scip) );
  
@@ -115,6 +113,11 @@ SCIP_RETCODE runShell(
    end endTimes;
    SCIP_VAR *ptrMakespan;
    SCIP_VAR *offset[nbrMachines];
+
+   /* create structs for pointers to all constraints*/
+   SCIP_CONS *convexityCons[nbrMachines];
+   SCIP_CONS *startCons[nbrMachines][nbrJobs];
+   SCIP_CONS *endCons[nbrMachines][nbrJobs];
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
@@ -173,6 +176,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambdas.lambOnMachine[iii].ptrLamb[i], 1.0) );
       }
       SCIP_CALL(SCIPaddCons(scip,cons));
+      convexityCons[iii] = cons;
    }
    /*add start time constraint*/   
    for( iii = 0; iii < s1.lastIdx+1; ++iii ) { 
@@ -186,6 +190,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
+         startCons[iii][i] = cons;
       }
    }
    /*add end time constraint*/   
@@ -200,6 +205,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
+         endCons[iii][i] = cons;
       }
    }
    /*add processing constraint*/   
@@ -236,6 +242,9 @@ SCIP_RETCODE runShell(
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrMakespan, 1));
       SCIP_CALL(SCIPaddCons(scip,cons));
    }
+
+   /*SCIP_CALL( SCIPactivatePricer(scip, pricer)); */
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons )); 
 
    SCIPsolve(scip);
 

@@ -107,6 +107,13 @@ struct SCIP_PricerData
    int*                  ids;                /**< array of item ids */
    int                   nitems;             /**< number of items to be packed */
    SCIP_Longint          capacity;           /**< capacity of the bins */
+   processingTimes       pt1;                /**< struct of processing times */
+   int                   nbrMachines;
+   int                   nbrJobs;
+   SCIP_CONS*            convexityCons[nbrMachines];
+   SCIP_CONS*            startCons[nbrMachines][nbrJobs];
+   SCIP_CONS*            endCons[nbrMachines][nbrJobs];
+ 
 };
 
 
@@ -750,21 +757,21 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
 /** added problem specific data to pricer and activates pricer */
 SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP*                 scip,               /**< SCIP data structure */
-   SCIP_CONS**           conss,              /**< set covering constraints for the items */
-   SCIP_Longint*         weights,            /**< weight of the items */
-   int*                  ids,                /**< array of item ids */
-   int                   nitems,             /**< number of items to be packed */
-   SCIP_Longint          capacity            /**< capacity of the bins */
+   processingTimes       pt1,                /**< struct of processing times */
+   int                   nbrMachines,
+   int                   nbrJobs,
+   SCIP_CONS*            convexityCons[nbrMachines],
+   SCIP_CONS*            startCons[nbrMachines][nbrJobs],
+   SCIP_CONS*            endCons[nbrMachines][nbrJobs]
+   
    )
 {
    SCIP_PRICER* pricer;
    SCIP_PRICERDATA* pricerdata;
    int c;
+   int c2;
 
    assert(scip != NULL);
-   assert(conss != NULL);
-   assert(weights != NULL);
-   assert(nitems > 0);
 
    pricer = SCIPfindPricer(scip, PRICER_NAME);
    assert(pricer != NULL);
@@ -772,22 +779,25 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata = SCIPpricerGetData(pricer);
    assert(pricerdata != NULL);
 
-   /* copy arrays */
-   SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &pricerdata->conss, conss, nitems) );
-   SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &pricerdata->weights, weights, nitems) );
-   SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &pricerdata->ids, ids, nitems) );
-
-   pricerdata->nitems = nitems;
-   pricerdata->capacity = capacity;
-
-   SCIPdebugMsg(scip, "   nitems: %d capacity: %"SCIP_LONGINT_FORMAT"  \n", nitems, capacity);
-   SCIPdebugMsg(scip, "      # profits    weights   x  \n");   /* capture constraints */
+   pricerdata->pt1 = pt1;
+   pricerdata->convexityCons = convexityCons;
+   pricerdata->startCons = startCons;
+   pricerdata->endCons = endCons;
 
    /* capture all constraints */
-   for( c = 0; c < nitems; ++c )
+   for( c = 0; c < nbrMachines; ++c )
    {
-      SCIP_CALL( SCIPcaptureCons(scip, conss[c]) );
-      SCIPdebugMsgPrint(scip, "%4d %3"SCIP_LONGINT_FORMAT"\n", c, weights[c]);
+      SCIP_CALL( SCIPcaptureCons(scip, convexityCons[c]) );
+     
+   }
+
+   for( c = 0; c < nbrJobs; ++c )
+   {
+      for( c2 = 0; c < nbrMachines; ++c2 )
+      {
+         SCIP_CALL( SCIPcaptureCons(scip, startCons[c2][c]) );
+         SCIP_CALL( SCIPcaptureCons(scip, endCons[c2][c]) );
+      }
    }
 
    /* activate pricer */

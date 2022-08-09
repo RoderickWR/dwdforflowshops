@@ -418,7 +418,7 @@ SCIP_RETCODE SCIPprobdataCreate(
    /* set user problem data */
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip, conss, weights, ids, nitems, capacity) );
+   /* SCIP_CALL( SCIPpricerBinpackingActivate(scip, conss, weights, ids, nitems, capacity) ); */
 
    /* free local buffer arrays */
    SCIPfreeBufferArray(scip, &conss);

@@ -28,6 +28,7 @@
 #define __BIN_PRICER_BINPACKING__
 
 #include "scip/scip.h"
+#include "probdata_binpacking.h"
 
 
 /** creates the binpacking variable pricer and includes it in SCIP */
@@ -38,11 +39,13 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
 /** added problem specific data to pricer and activates pricer */
 SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP*                 scip,               /**< SCIP data structure */
-   SCIP_CONS**           conss,              /**< set covering constraints for the items */
-   SCIP_Longint*         weights,            /**< weight of the items */
-   int*                  ids,                /**< array of item ids */                
-   int                   nitems,             /**< number of items to be packed */
-   SCIP_Longint          capacity            /**< capacity of the bins */
+   processingTimes       pt1,                /**< struct of processing times */
+   int                   nbrMachines,
+   int                   nbrJobs,
+   SCIP_CONS*            convexityCons[nbrMachines],
+   SCIP_CONS*            startCons[nbrMachines][nbrJobs],
+   SCIP_CONS*            endCons[nbrMachines][nbrJobs]
+
    );
 
 #endif
