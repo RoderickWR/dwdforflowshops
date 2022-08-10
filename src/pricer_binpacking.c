@@ -101,6 +101,7 @@
 /** @brief Variable pricer data used in the \ref pricer_binpacking.c "pricer" */
 struct SCIP_PricerData
 {
+   
    SCIP_CONSHDLR*        conshdlr;           /**< comstraint handler for "same" and "diff" constraints */
    SCIP_CONS**           conss;              /**< set covering constraints for the items */
    SCIP_Longint*         weights;            /**< weight of the items */
@@ -110,9 +111,10 @@ struct SCIP_PricerData
    processingTimes       pt1;                /**< struct of processing times */
    int                   nbrMachines;
    int                   nbrJobs;
-   SCIP_CONS*            convexityCons[nbrMachines];
-   SCIP_CONS*            startCons[nbrMachines][nbrJobs];
-   SCIP_CONS*            endCons[nbrMachines][nbrJobs];
+   SCIP_CONS**           convexityCons;
+   SCIP_CONS**           startCons;
+   SCIP_CONS**           endCons;
+   
  
 };
 
@@ -738,6 +740,12 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->ids = NULL;
    pricerdata->nitems = 0;
    pricerdata->capacity = 0;
+   pricerdata->convexityCons = NULL;
+   pricerdata->startCons = NULL;
+   pricerdata->endCons = NULL;
+   pricerdata->nbrMachines = 0;
+   pricerdata->nbrJobs = 0;
+
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
@@ -760,9 +768,9 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    processingTimes       pt1,                /**< struct of processing times */
    int                   nbrMachines,
    int                   nbrJobs,
-   SCIP_CONS*            convexityCons[nbrMachines],
-   SCIP_CONS*            startCons[nbrMachines][nbrJobs],
-   SCIP_CONS*            endCons[nbrMachines][nbrJobs]
+   SCIP_CONS**           convexityCons,
+   SCIP_CONS**           startCons,
+   SCIP_CONS**           endCons
    
    )
 {
@@ -795,8 +803,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    {
       for( c2 = 0; c < nbrMachines; ++c2 )
       {
-         SCIP_CALL( SCIPcaptureCons(scip, startCons[c2][c]) );
-         SCIP_CALL( SCIPcaptureCons(scip, endCons[c2][c]) );
+         SCIP_CALL( SCIPcaptureCons(scip, startCons[c2*nbrMachines + c]) );
+         SCIP_CALL( SCIPcaptureCons(scip, endCons[c2*nbrMachines + c]) );
       }
    }
 

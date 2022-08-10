@@ -42,9 +42,9 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    processingTimes       pt1,                /**< struct of processing times */
    int                   nbrMachines,
    int                   nbrJobs,
-   SCIP_CONS*            convexityCons[nbrMachines],
-   SCIP_CONS*            startCons[nbrMachines][nbrJobs],
-   SCIP_CONS*            endCons[nbrMachines][nbrJobs]
+   SCIP_CONS**           convexityCons,
+   SCIP_CONS**           startCons,
+   SCIP_CONS**           endCons
 
    );
 

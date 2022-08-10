@@ -111,17 +111,20 @@ SCIP_RETCODE runShell(
    lamb lambdas;
    start startTimes;
    end endTimes;
-   SCIP_VAR *ptrMakespan;
-   SCIP_VAR *offset[nbrMachines];
+   SCIP_VAR* ptrMakespan;
+   SCIP_VAR* offset[nbrMachines];
 
-   /* create structs for pointers to all constraints*/
-   SCIP_CONS *convexityCons[nbrMachines];
-   SCIP_CONS *startCons[nbrMachines][nbrJobs];
-   SCIP_CONS *endCons[nbrMachines][nbrJobs];
+   /* allocate constraint arrays*/
+   SCIP_CONS** convexityCons;
+   SCIP_CALL( SCIPallocBufferArray(scip, &convexityCons, nbrMachines) );
+   SCIP_CONS** startCons;
+   SCIP_CALL( SCIPallocBufferArray(scip, &startCons, nbrMachines*nbrJobs) );
+   SCIP_CONS** endCons;
+   SCIP_CALL( SCIPallocBufferArray(scip, &endCons, nbrMachines*nbrJobs) );
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
-   char *num; 
+   char* num; 
    int i = 0;
    int ii = 0;
    int iii = 0;
@@ -190,7 +193,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
-         startCons[iii][i] = cons;
+         startCons[iii*nbrMachines + i] = cons;
       }
    }
    /*add end time constraint*/   
@@ -205,7 +208,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
-         endCons[iii][i] = cons;
+         endCons[iii*nbrMachines + i] = cons;
       }
    }
    /*add processing constraint*/   
