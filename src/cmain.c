@@ -193,7 +193,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
-         startCons[iii*nbrMachines + i] = cons;
+         startCons[iii*nbrJobs + i] = cons;
       }
    }
    /*add end time constraint*/   
@@ -208,7 +208,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL(SCIPaddCons(scip,cons));
-         endCons[iii*nbrMachines + i] = cons;
+         endCons[iii*nbrJobs + i] = cons;
       }
    }
    /*add processing constraint*/   

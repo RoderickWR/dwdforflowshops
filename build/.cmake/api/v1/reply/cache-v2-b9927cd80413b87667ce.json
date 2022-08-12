@@ -1371,7 +1371,7 @@
 				}
 			],
 			"type" : "FILEPATH",
-			"value" : "MEMORYCHECK_COMMAND-NOTFOUND"
+			"value" : "/usr/bin/valgrind"
 		},
 		{
 			"name" : "MEMORYCHECK_SUPPRESSIONS_FILE",
