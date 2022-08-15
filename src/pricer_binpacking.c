@@ -363,7 +363,7 @@ SCIP_RETCODE initPricing(
    int nbrMachines;
    int nbrJobs;
    SCIP_Bool* pBoundconstr;
-   SCIP_Real* pDual;
+   SCIP_Real* pDual = &dual;
 
    assert( SCIPgetStage(subscip) == SCIP_STAGE_PROBLEM );
    assert(pricerdata != NULL);
@@ -382,6 +382,7 @@ SCIP_RETCODE initPricing(
    SCIP_CALL( SCIPallocBufferArray(subscip, &vals, nitems) );
    /* create start and end time variables */
    int i;
+   int ii;
    char buf[256];
    char* num; 
    for( i = 0; i < nbrJobs; ++i ) {
@@ -397,6 +398,12 @@ SCIP_RETCODE initPricing(
          SCIP_VAR* var2 = NULL;
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var2, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var2));
+         for( ii = 0; ii < nbrJobs; ++ii ) {
+            sprintf(buf, "orderM%dJ%dJ%d", mIdx,i,ii);
+            SCIP_VAR* var3 = NULL;
+            SCIP_CALL(SCIPcreateVarBasic(subscip, &var3, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY));
+            SCIP_CALL(SCIPaddVar(subscip,var3));
+         }
       }
 
    /* create for each order, which is not assigned yet, a variable with objective coefficient */
