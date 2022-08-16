@@ -364,6 +364,7 @@ SCIP_RETCODE initPricing(
    int nbrJobs;
    SCIP_Bool* pBoundconstr;
    SCIP_Real* pDual = &dual;
+   processingTimes pt1;
 
    assert( SCIPgetStage(subscip) == SCIP_STAGE_PROBLEM );
    assert(pricerdata != NULL);
@@ -372,12 +373,16 @@ SCIP_RETCODE initPricing(
    conss = pricerdata->conss;
    weights = pricerdata->weights;
    capacity = pricerdata->capacity;
+   pt1 = pricerdata->pt1;
    nvars = 0;
    convexityConss = pricerdata->convexityCons;
    startConss = pricerdata->startCons;
    endConss = pricerdata->endCons;
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
+   SCIP_VAR* startVars[nbrJobs];
+   SCIP_VAR* endVars[nbrJobs];
+   SCIP_VAR* orderVars[nbrJobs][nbrJobs];
 
    SCIP_CALL( SCIPallocBufferArray(subscip, &vals, nitems) );
    /* create start and end time variables */
@@ -392,69 +397,107 @@ SCIP_RETCODE initPricing(
          SCIP_VAR* var = NULL;
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var));
+         startVars[i] = var;
       /* create end variables and set end pointers*/
          SCIPgetDualSolVal(scip, endConss[mIdx*nbrMachines + i], pDual, pBoundconstr);
          sprintf(buf, "endM%dJ%d", mIdx,i);
          SCIP_VAR* var2 = NULL;
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var2, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var2));
+         endVars[i] = var2;
          for( ii = 0; ii < nbrJobs; ++ii ) {
             sprintf(buf, "orderM%dJ%dJ%d", mIdx,i,ii);
             SCIP_VAR* var3 = NULL;
             SCIP_CALL(SCIPcreateVarBasic(subscip, &var3, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY));
             SCIP_CALL(SCIPaddVar(subscip,var3));
+            orderVars[i][ii] = var3;
          }
       }
 
-   /* create for each order, which is not assigned yet, a variable with objective coefficient */
-   for( c = 0; c < nitems; ++c )
-   {
-      cons = conss[c];
+   /* create costraints */
+   SCIP_CONS* startFinish[nbrJobs];
+   SCIP_CONS* precedence[nbrJobs][nbrJobs];
+   SCIP_CONS* finishStart[nbrJobs];
 
-      /* check if each constraint is setppc constraint */
-      assert( !strncmp( SCIPconshdlrGetName( SCIPconsGetHdlr(cons) ), "setppc", 6) );
+   for( i = 0; i < nbrJobs; ++i ) {
+      SCIP_CONS* cons = NULL;  
+      sprintf(buf, "startFinish%d", i);
+      SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -1e+20, pt1.machine[mIdx].m[i]));
+      SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], 1.0) );
+      SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
+      SCIP_CALL(SCIPaddCons(subscip,cons));
 
-      /* constraints which are (locally) disabled/redundant are not of
-       * interest since the corresponding job is assigned to a packing
-       */
-      if( !SCIPconsIsEnabled(cons) )
-         continue;
-
-      if( SCIPgetNFixedonesSetppc(scip, cons) == 1 )
-      {
-         /* disable constraint locally */
-         SCIP_CALL( SCIPdelConsLocal(scip, cons) );
-         continue;
+      for( ii = 0; ii < nbrJobs; ++ii ) {
+         sprintf(buf, "finishStart%d", i);
+         SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -50.0, 1e+20));
+         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[ii], 1.0) );
+         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
+         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i][ii], -50.0) );
+         SCIP_CALL(SCIPaddCons(subscip,cons));
       }
-      
-      /* dual value in original SCIP */
-      dual = SCIPgetDualsolSetppc(scip, cons);
-      
-      SCIP_CALL( SCIPcreateVarBasic(subscip, &var, SCIPconsGetName(cons), 0.0, 1.0, dual, SCIP_VARTYPE_BINARY) );
-      SCIP_CALL( SCIPaddVar(subscip, var) );
-
-      vals[nvars] = weights[c];
-      vars[nvars] = var;
-      nvars++;
-
-      /* release variable */
-      SCIP_CALL( SCIPreleaseVar(subscip, &var) );
    }
 
-   /* create capacity constraint */
-   SCIP_CALL( SCIPcreateConsBasicKnapsack(subscip, &cons, "capacity", nvars, vars, vals, capacity) );
+   for( i = 0; i < nbrJobs; ++i ) {
+      for( ii = 0; ii < nbrJobs; ++ii ) {
+         if (i != ii) {
+            sprintf(buf, "precedence%d", i);
+            SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i][ii], 1.0) );
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[ii][i], 1.0) );
+            SCIP_CALL(SCIPaddCons(subscip,cons));
+         }
+      }
+   }
+   
 
-   SCIP_CALL( SCIPaddCons(subscip, cons) );
-   SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
+   // for( c = 0; c < nitems; ++c )
+   // {
+   //    cons = conss[c];
 
-   /* add constraint of the branching decisions */
-   SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr) );
+   //    /* check if each constraint is setppc constraint */
+   //    assert( !strncmp( SCIPconshdlrGetName( SCIPconsGetHdlr(cons) ), "setppc", 6) );
 
-   /* avoid to generate columns which are fixed to zero */
-   SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems) );
+   //    /* constraints which are (locally) disabled/redundant are not of
+   //     * interest since the corresponding job is assigned to a packing
+   //     */
+   //    if( !SCIPconsIsEnabled(cons) ) 
+   //       continue;
 
-   SCIPfreeBufferArray(subscip, &vals);
+   //    if( SCIPgetNFixedonesSetppc(scip, cons) == 1 )
+   //    {
+   //       /* disable constraint locally */
+   //       SCIP_CALL( SCIPdelConsLocal(scip, cons) );
+   //       continue;
+   //    }
+      
+   //    /* dual value in original SCIP */
+   //    dual = SCIPgetDualsolSetppc(scip, cons);
+      
+   //    SCIP_CALL( SCIPcreateVarBasic(subscip, &var, SCIPconsGetName(cons), 0.0, 1.0, dual, SCIP_VARTYPE_BINARY) );
+   //    SCIP_CALL( SCIPaddVar(subscip, var) );
 
+   //    vals[nvars] = weights[c];
+   //    vars[nvars] = var;
+   //    nvars++;
+
+   //    /* release variable */
+   //    SCIP_CALL( SCIPreleaseVar(subscip, &var) );
+   // }
+
+   // /* create capacity constraint */
+   // SCIP_CALL( SCIPcreateConsBasicKnapsack(subscip, &cons, "capacity", nvars, vars, vals, capacity) );
+
+   // SCIP_CALL( SCIPaddCons(subscip, cons) );
+   // SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
+
+   // /* add constraint of the branching decisions */
+   // SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr) );
+
+   // /* avoid to generate columns which are fixed to zero */
+   // SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems) );
+
+   // SCIPfreeBufferArray(subscip, &vals);
+   
    return SCIP_OKAY;
 }
 
