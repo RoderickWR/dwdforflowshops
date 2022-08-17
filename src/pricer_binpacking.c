@@ -388,6 +388,7 @@ SCIP_RETCODE initPricing(
    /* create start and end time variables */
    int i;
    int ii;
+   int iii;
    char buf[256];
    char* num; 
    for( i = 0; i < nbrJobs; ++i ) {
@@ -446,6 +447,15 @@ SCIP_RETCODE initPricing(
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[ii][i], 1.0) );
             SCIP_CALL(SCIPaddCons(subscip,cons));
          }
+         sprintf(buf, "fixAtZero%d", i);
+         SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -(nbrJobs-1)*50, 1e+20));
+         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], -1.0) );
+         for (iii=0; iii < nbrJobs; ++iii) {
+            if (iii != i) {
+               SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i][iii], -50.0) );
+            }
+         }
+         SCIP_CALL(SCIPaddCons(subscip,cons));
       }
    }
    
