@@ -624,6 +624,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    int nbrMachines;
    int nbrJobs;
    processingTimes pt1;
+   SCIP_Real dual;
+   SCIP_Real* pDual = &dual;
+   SCIP_Bool* pBoundconstr;
+   
 
    SCIP_VAR** SFvars;
    SCIP_VAR** Ovars;
@@ -693,104 +697,112 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       /* solve sub SCIP */
       SCIP_CALL( SCIPsolve(subscip) );
 
+      /* free pricer MIP */
+      SCIPfreeBufferArray(scip, &SFvars);
+      SCIPfreeBufferArray(scip, &Ovars);
+
       sols = SCIPgetSols(subscip);
       nsols = SCIPgetNSols(subscip);
       addvar = FALSE;
-   }
-   /* loop over all solutions and create the corresponding column to master if the reduced cost are negative for master,
-    * that is the objective value i greater than 1.0
-    */
-   for( s = 0; s < nsols; ++s )
-   {
-      SCIP_Bool feasible;
-      SCIP_SOL* sol;
-
-      /* the soultion should be sorted w.r.t. the objective function value */
-      assert(s == 0 || SCIPisFeasGE(subscip, SCIPgetSolOrigObj(subscip, sols[s-1]), SCIPgetSolOrigObj(subscip, sols[s])));
-
-      sol = sols[s];
-      assert(sol != NULL);
-
-      /* check if solution is feasible in original sub SCIP */
-      SCIP_CALL( SCIPcheckSolOrig(subscip, sol, &feasible, FALSE, FALSE ) );
-
-      if( !feasible )
+   
+      /* loop over all solutions and create the corresponding column to master if the reduced cost are negative for master,
+      * that is the objective value i greater than 1.0
+      */
+      for( s = 0; s < nsols; ++s )
       {
-         SCIPwarningMessage(scip, "solution in pricing problem (capacity <%" SCIP_LONGINT_FORMAT ">) is infeasible\n", capacity);
-         continue;
-      }
+         SCIP_Bool feasible;
+         SCIP_SOL* sol;
 
-      /* check if the solution has a value greater than 1.0 */
-      if( SCIPisFeasGT(subscip, SCIPgetSolOrigObj(subscip, sol), 1.0) )
-      {
-         SCIP_VAR* var;
-         SCIP_VARDATA* vardata;
-         int* consids;
-         char strtmp[SCIP_MAXSTRLEN];
-         char name[SCIP_MAXSTRLEN];
-         int nconss;
-         int o;
-         int v;
+         /* the soultion should be sorted w.r.t. the objective function value */
+         assert(s == 0 || SCIPisFeasGE(subscip, SCIPgetSolOrigObj(subscip, sols[s-1]), SCIPgetSolOrigObj(subscip, sols[s])));
 
-         SCIPdebug( SCIP_CALL( SCIPprintSol(subscip, sol, NULL, FALSE) ) );
+         sol = sols[s];
+         assert(sol != NULL);
 
-         nconss = 0;
-         (void) SCIPsnprintf(name, SCIP_MAXSTRLEN, "items");
+         /* check if solution is feasible in original sub SCIP */
+         SCIP_CALL( SCIPcheckSolOrig(subscip, sol, &feasible, FALSE, FALSE ) );
 
-         SCIP_CALL( SCIPallocBufferArray(scip, &consids, nitems) );
-
-         /* check which variables are fixed -> which item belongs to this packing */
-         for( o = 0, v = 0; o < nitems; ++o )
+         if( !feasible )
          {
-            if( !SCIPconsIsEnabled(conss[o]) )
-               continue;
+            SCIPwarningMessage(scip, "solution in pricing problem (capacity <%" SCIP_LONGINT_FORMAT ">) is infeasible\n", capacity);
+            continue;
+         }
 
-            assert(SCIPgetNFixedonesSetppc(scip, conss[o]) == 0);
+         /* check if the solution has a value greater than 1.0 */
+         
+         SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
 
-            if( SCIPgetSolVal(subscip, sol, vars[v]) > 0.5 )
+         if( SCIPisFeasGT(subscip, dual , SCIPgetSolOrigObj(subscip, sol)) )
+         {
+            SCIP_VAR* var;
+            SCIP_VARDATA* vardata;
+            int* consids;
+            char strtmp[SCIP_MAXSTRLEN];
+            char name[SCIP_MAXSTRLEN];
+            int nconss;
+            int o;
+            int v;
+
+            SCIPdebug( SCIP_CALL( SCIPprintSol(subscip, sol, NULL, FALSE) ) );
+
+            nconss = 0;
+            (void) SCIPsnprintf(name, SCIP_MAXSTRLEN, "items");
+
+            SCIP_CALL( SCIPallocBufferArray(scip, &consids, nitems) );
+
+            /* check which variables are fixed -> which item belongs to this packing */
+            for( o = 0, v = 0; o < nitems; ++o )
             {
-               (void) SCIPsnprintf(strtmp, SCIP_MAXSTRLEN, "_%d", ids[o]);
-               strcat(name, strtmp);
+               if( !SCIPconsIsEnabled(conss[o]) )
+                  continue;
 
-               consids[nconss] = o;
-               nconss++;
+               assert(SCIPgetNFixedonesSetppc(scip, conss[o]) == 0);
+
+               if( SCIPgetSolVal(subscip, sol, vars[v]) > 0.5 )
+               {
+                  (void) SCIPsnprintf(strtmp, SCIP_MAXSTRLEN, "_%d", ids[o]);
+                  strcat(name, strtmp);
+
+                  consids[nconss] = o;
+                  nconss++;
+               }
+               else
+                  assert( SCIPisFeasEQ(subscip, SCIPgetSolVal(subscip, sol, vars[v]), 0.0) );
+
+               v++;
             }
-            else
-               assert( SCIPisFeasEQ(subscip, SCIPgetSolVal(subscip, sol, vars[v]), 0.0) );
 
-            v++;
+            SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, consids, nconss) );
+
+            /* create variable for a new column with objective function coefficient 0.0 */
+            SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) );
+
+            /* add the new variable to the pricer store */
+            SCIP_CALL( SCIPaddPricedVar(scip, var, 1.0) );
+            addvar = TRUE;
+
+            /* change the upper bound of the binary variable to lazy since the upper bound is already enforced due to
+            * the objective function the set covering constraint; The reason for doing is that, is to avoid the bound
+            * of x <= 1 in the LP relaxation since this bound constraint would produce a dual variable which might have
+            * a positive reduced cost
+            */
+            SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) );
+
+            /* check which variable are fixed -> which orders belong to this packing */
+            for( v = 0; v < nconss; ++v )
+            {
+               assert(SCIPconsIsEnabled(conss[consids[v]]));
+               SCIP_CALL( SCIPaddCoefSetppc(scip, conss[consids[v]], var) );
+            }
+
+            SCIPdebug(SCIPprintVar(scip, var, NULL) );
+            SCIP_CALL( SCIPreleaseVar(scip, &var) );
+
+            SCIPfreeBufferArray(scip, &consids);
          }
-
-         SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, consids, nconss) );
-
-         /* create variable for a new column with objective function coefficient 0.0 */
-         SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) );
-
-         /* add the new variable to the pricer store */
-         SCIP_CALL( SCIPaddPricedVar(scip, var, 1.0) );
-         addvar = TRUE;
-
-         /* change the upper bound of the binary variable to lazy since the upper bound is already enforced due to
-          * the objective function the set covering constraint; The reason for doing is that, is to avoid the bound
-          * of x <= 1 in the LP relaxation since this bound constraint would produce a dual variable which might have
-          * a positive reduced cost
-          */
-         SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) );
-
-         /* check which variable are fixed -> which orders belong to this packing */
-         for( v = 0; v < nconss; ++v )
-         {
-            assert(SCIPconsIsEnabled(conss[consids[v]]));
-            SCIP_CALL( SCIPaddCoefSetppc(scip, conss[consids[v]], var) );
-         }
-
-         SCIPdebug(SCIPprintVar(scip, var, NULL) );
-         SCIP_CALL( SCIPreleaseVar(scip, &var) );
-
-         SCIPfreeBufferArray(scip, &consids);
+         else
+            break;
       }
-      else
-         break;
    }
 
    /* free pricer MIP */
