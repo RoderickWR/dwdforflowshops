@@ -352,6 +352,7 @@ SCIP_RETCODE initPricing(
    SCIP_Longint* weights;
    SCIP_Longint capacity;
    SCIP_Real dual;
+   SCIP_Bool boundconstr;
 
    int nitems;
    int nvars;
@@ -362,8 +363,9 @@ SCIP_RETCODE initPricing(
    SCIP_CONS** endConss;
    int nbrMachines;
    int nbrJobs;
-   SCIP_Bool* pBoundconstr;
+   SCIP_Bool* pBoundconstr = &boundconstr;
    SCIP_Real* pDual = &dual;
+
    processingTimes pt1;
 
    assert( SCIPgetStage(subscip) == SCIP_STAGE_PROBLEM );
@@ -384,7 +386,7 @@ SCIP_RETCODE initPricing(
    SCIP_VAR* endVars[nbrJobs];
    SCIP_VAR* orderVars[nbrJobs][nbrJobs];
 
-   SCIP_CALL( SCIPallocBufferArray(subscip, &vals, nitems) );
+   // SCIP_CALL( SCIPallocBufferArray(subscip, &vals, nitems) );
    /* create start and end time variables */
    int i;
    int ii;
@@ -393,6 +395,7 @@ SCIP_RETCODE initPricing(
    char* num; 
    for( i = 0; i < nbrJobs; ++i ) {
          /* dual value in original SCIP */
+         
          SCIPgetDualSolVal(scip, startConss[mIdx*nbrMachines + i], pDual, pBoundconstr);
          sprintf(buf, "startM%dJ%d", mIdx,i);
          SCIP_VAR* var = NULL;
@@ -423,7 +426,7 @@ SCIP_RETCODE initPricing(
    for( i = 0; i < nbrJobs; ++i ) {
       SCIP_CONS* cons = NULL;  
       sprintf(buf, "startFinish%d", i);
-      SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -1e+20, pt1.machine[mIdx].m[i]));
+      SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -1e+20, -pt1.machine[mIdx].m[i]));
       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], 1.0) );
       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
       SCIP_CALL(SCIPaddCons(subscip,cons));
@@ -604,7 +607,7 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
 static
 SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 {  /*lint --e{715}*/
-   SCIP* subscip;
+   
    SCIP_PRICERDATA* pricerdata;
    SCIP_CONS** conss;
    SCIP_VAR** vars;
@@ -655,6 +658,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
    pt1 = pricerdata->pt1;
+   SCIP* subscip[nbrMachines];
 
 
    /* get the remaining time and memory limit */
@@ -665,44 +669,47 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    if( !SCIPisInfinity(scip, memorylimit) )
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
-   /* initialize SCIP */
-   SCIP_CALL( SCIPcreate(&subscip) );
-   SCIP_CALL( SCIPincludeDefaultPlugins(subscip) );
-
-   /* create problem in sub SCIP */
-   SCIP_CALL( SCIPcreateProbBasic(subscip, "pricing") );
-   SCIP_CALL( SCIPsetObjsense(subscip, SCIP_OBJSENSE_MAXIMIZE) );
-
-   /* do not abort subproblem on CTRL-C */
-   SCIP_CALL( SCIPsetBoolParam(subscip, "misc/catchctrlc", FALSE) );
-
-   /* disable output to console */
-   SCIP_CALL( SCIPsetIntParam(subscip, "display/verblevel", 0) );
-
-   /* set time and memory limit */
-   SCIP_CALL( SCIPsetRealParam(subscip, "limits/time", timelimit) );
-   SCIP_CALL( SCIPsetRealParam(subscip, "limits/memory", memorylimit) );
+   
    int i;
    for( i = 0; i < nbrMachines; i++ )
    {
-      /* allocate in orginal scip, since otherwise the buffer counts in subscip are not correct */
-      SCIP_CALL( SCIPallocBufferArray(scip, &SFvars, 2*nbrJobs) ); /*allocate for start and finish vars */
-      SCIP_CALL( SCIPallocBufferArray(scip, &Ovars, nbrJobs) ); /*allocate for order vars */
+      /* initialize SCIP */
+      SCIP_CALL( SCIPcreate(&subscip[i]) );
+      SCIP_CALL( SCIPincludeDefaultPlugins(subscip[i]) );
+
+      /* create problem in sub SCIP */
+      SCIP_CALL( SCIPcreateProbBasic(subscip[i], "pricing") );
+      SCIP_CALL( SCIPsetObjsense(subscip[i], SCIP_OBJSENSE_MINIMIZE) );
+
+      /* do not abort subproblem on CTRL-C */
+      SCIP_CALL( SCIPsetBoolParam(subscip[i], "misc/catchctrlc", FALSE) );
+
+      /* disable output to console */
+      SCIP_CALL( SCIPsetIntParam(subscip[i], "display/verblevel", 0) );
+
+      /* set time and memory limit */
+      SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/time", timelimit) );
+      SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/memory", memorylimit) );
+      
+      // /* allocate in orginal scip, since otherwise the buffer counts in subscip are not correct */
+      // SCIP_CALL( SCIPallocBufferArray(scip, &SFvars, 2*nbrJobs) ); /*allocate for start and finish vars */
+      // SCIP_CALL( SCIPallocBufferArray(scip, &Ovars, nbrJobs) ); /*allocate for order vars */
+      
 
       /* initialization local pricing problem */
-      SCIP_CALL( initPricing(scip, pricerdata, subscip, vars, SFvars, Ovars, i) );
+      SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, SFvars, Ovars, i) );
 
       SCIPdebugMsg(scip, "solve pricer problem\n");
 
       /* solve sub SCIP */
-      SCIP_CALL( SCIPsolve(subscip) );
+      SCIP_CALL( SCIPsolve(subscip[i]) );
 
-      /* free pricer MIP */
-      SCIPfreeBufferArray(scip, &SFvars);
-      SCIPfreeBufferArray(scip, &Ovars);
+      // /* free pricer MIP */
+      // SCIPfreeBufferArray(scip, &SFvars);
+      // SCIPfreeBufferArray(scip, &Ovars);
 
-      sols = SCIPgetSols(subscip);
-      nsols = SCIPgetNSols(subscip);
+      sols = SCIPgetSols(subscip[i]);
+      nsols = SCIPgetNSols(subscip[i]);
       addvar = FALSE;
    
       /* loop over all solutions and create the corresponding column to master if the reduced cost are negative for master,
@@ -714,13 +721,13 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_SOL* sol;
 
          /* the soultion should be sorted w.r.t. the objective function value */
-         assert(s == 0 || SCIPisFeasGE(subscip, SCIPgetSolOrigObj(subscip, sols[s-1]), SCIPgetSolOrigObj(subscip, sols[s])));
+         assert(s == 0 || SCIPisFeasGE(subscip, SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
 
          sol = sols[s];
          assert(sol != NULL);
 
          /* check if solution is feasible in original sub SCIP */
-         SCIP_CALL( SCIPcheckSolOrig(subscip, sol, &feasible, FALSE, FALSE ) );
+         SCIP_CALL( SCIPcheckSolOrig(subscip[i], sol, &feasible, FALSE, FALSE ) );
 
          if( !feasible )
          {
@@ -731,8 +738,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          /* check if the solution has a value greater than 1.0 */
          
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-
-         if( SCIPisFeasGT(subscip, dual , SCIPgetSolOrigObj(subscip, sol)) )
+         SCIPwriteOrigProblem(subscip[i],"test.lp",NULL,FALSE);
+         if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
          {
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;
@@ -805,8 +812,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       }
    }
 
-   /* free pricer MIP */
-   SCIPfreeBufferArray(scip, &vars);
+   // /* free pricer MIP */
+   // SCIPfreeBufferArray(scip, &vars);
 
    if( addvar || SCIPgetStatus(subscip) == SCIP_STATUS_OPTIMAL )
       (*result) = SCIP_SUCCESS;
