@@ -121,6 +121,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPallocBufferArray(scip, &startCons, nbrMachines*nbrJobs) );
    SCIP_CONS** endCons;
    SCIP_CALL( SCIPallocBufferArray(scip, &endCons, nbrMachines*nbrJobs) );
+   SCIP_CONS* makespanCons[nbrJobs];
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
@@ -244,12 +245,27 @@ SCIP_RETCODE runShell(
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[nbrMachines-1].ptrEnd[i], -1));
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrMakespan, 1));
       SCIP_CALL(SCIPaddCons(scip,cons));
+      makespanCons[i] = cons;
    }
 
    /*SCIP_CALL( SCIPactivatePricer(scip, pricer)); */
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons )); 
+   // SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons )); 
 
    SCIPsolve(scip);
+
+   // why do we get 0 as the obj, that is 11.0 ?
+   SCIP_SOL* s = SCIPgetSols(scip);
+   float p = SCIPgetSolOrigObj(scip, s);
+
+   SCIP_Real dual;
+   SCIP_Bool boundconstr;
+   SCIP_Bool* pBoundconstr = &boundconstr;
+   SCIP_Real* pDual = &dual;
+
+   // why do we get 0 for all duals ?
+   SCIPgetDualSolVal(scip, makespanCons[0], pDual, pBoundconstr);
+
+   SCIPgetDualSolVal(scip, makespanCons[1], pDual, pBoundconstr);
 
    SCIPwriteOrigProblem(scip,"test.lp",NULL,FALSE);
 
