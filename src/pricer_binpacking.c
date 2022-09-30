@@ -546,19 +546,26 @@ SCIP_DECL_PRICERFREE(pricerFreeBinpacking)
 }
 
 
-/** initialization method of variable pricer (called after problem was transformed) */
+/** initialization method of variable pricer (called after problem was transformed, after master scip_solve is triggered) */
 static
 SCIP_DECL_PRICERINIT(pricerInitBinpacking)
 {  /*lint --e{715}*/
    SCIP_PRICERDATA* pricerdata;
    SCIP_CONS* cons;
    int c;
+   int c2;
+   int nbrMachines;
+   int nbrJobs;
 
    assert(scip != NULL);
    assert(pricer != NULL);
 
    pricerdata = SCIPpricerGetData(pricer);
    assert(pricerdata != NULL);
+   /* get all master constraints*/
+   nbrMachines = pricerdata->nbrMachines;
+   nbrJobs = pricerdata->nbrJobs;
+  
 
    /* get transformed constraints */
    for( c = 0; c < pricerdata->nitems; ++c )
@@ -568,18 +575,49 @@ SCIP_DECL_PRICERINIT(pricerInitBinpacking)
       /* release original constraint */
       SCIP_CALL( SCIPreleaseCons(scip, &pricerdata->conss[c]) );
 
-      /* get transformed constraint */
+      /* get transformed constraint  beim Initialisieren des Pricers muss man auf transformierte Cons umswitchen*/
       SCIP_CALL( SCIPgetTransformedCons(scip, cons, &pricerdata->conss[c]) );
 
       /* capture transformed constraint */
       SCIP_CALL( SCIPcaptureCons(scip, pricerdata->conss[c]) );
    }
 
+   
+   for( c = 0; c < nbrMachines; ++c) {
+      cons = pricerdata->convexityCons[c];
+      /* release original constraint */
+      SCIP_CALL( SCIPreleaseCons(scip, &pricerdata->convexityCons[c]) );
+      /* get transformed constraint  beim Initialisieren des Pricers muss man auf transformierte Cons umswitchen*/
+      SCIP_CALL( SCIPgetTransformedCons(scip, cons, &pricerdata->convexityCons[c]) );
+      /* capture transformed constraint */
+      SCIP_CALL( SCIPcaptureCons(scip, pricerdata->convexityCons[c]) );
+
+      for( c2 = 0; c2 < nbrJobs; ++c2) {
+         cons = pricerdata->startCons[c*nbrJobs + c2];
+         /* release original constraint */
+         SCIP_CALL( SCIPreleaseCons(scip, &pricerdata->startCons[c*nbrJobs + c2]) );
+         /* get transformed constraint  beim Initialisieren des Pricers muss man auf transformierte Cons umswitchen*/
+         SCIP_CALL( SCIPgetTransformedCons(scip, cons, &pricerdata->startCons[c*nbrJobs + c2]) );
+         /* capture transformed constraint */
+         SCIP_CALL( SCIPcaptureCons(scip, pricerdata->startCons[c*nbrJobs + c2]) );
+
+         cons = pricerdata->endCons[c*nbrJobs + c2];
+         /* release original constraint */
+         SCIP_CALL( SCIPreleaseCons(scip, &pricerdata->endCons[c*nbrJobs + c2]) );
+         /* get transformed constraint  beim Initialisieren des Pricers muss man auf transformierte Cons umswitchen*/
+         SCIP_CALL( SCIPgetTransformedCons(scip, cons, &pricerdata->endCons[c*nbrJobs + c2]) );
+         /* capture transformed constraint */
+         SCIP_CALL( SCIPcaptureCons(scip, pricerdata->endCons[c*nbrJobs + c2]) );
+      }
+   }
+   
+  
    return SCIP_OKAY;
 }
 
 
 /** solving process deinitialization method of variable pricer (called before branch and bound process data is freed) */
+/* releast alle transf constraints aus pricer data*/
 static
 SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
 {
@@ -604,6 +642,7 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
 
 
 /** reduced cost pricing method of variable pricer for feasible LPs */
+/* mehremals in jedem Knoten aufgerufen bis alle Pricer zufrieden sind (keine neg kosten mehr liefern)*/
 static
 SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 {  /*lint --e{715}*/
@@ -618,6 +657,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    int nsols;
    int s;
 
+   int i = 0;
+
    int nitems;
    SCIP_Longint capacity;
 
@@ -629,9 +670,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    processingTimes pt1;
    SCIP_Real dual;
    SCIP_Real* pDual = &dual;
-   SCIP_Bool* pBoundconstr;
+   SCIP_Bool boundconstr;
+   SCIP_Bool* pBoundconstr = &boundconstr;
    
-
    SCIP_VAR** SFvars;
    SCIP_VAR** Ovars;
 
@@ -660,6 +701,14 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    pt1 = pricerdata->pt1;
    SCIP* subscip[nbrMachines];
 
+   SCIPwriteTransProblem(scip,"tMasterproblem.lp",NULL,FALSE);
+   i =1; // is there a dual != 0 in the convexity constraint of machine 2?
+   SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
+   SCIPgetDualSolVal(scip, endCons[i*2 + 0], pDual, pBoundconstr);
+   SCIPgetDualSolVal(scip, endCons[i*2 + 1], pDual, pBoundconstr);
+   SCIPgetDualSolVal(scip, startCons[i*2 + 0], pDual, pBoundconstr);
+   SCIPgetDualSolVal(scip, startCons[i*2 + 1], pDual, pBoundconstr);
+
 
    /* get the remaining time and memory limit */
    SCIP_CALL( SCIPgetRealParam(scip, "limits/time", &timelimit) );
@@ -670,7 +719,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
    
-   int i;
+   
    for( i = 0; i < nbrMachines; i++ )
    {
       /* initialize SCIP */
@@ -735,10 +784,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             continue;
          }
 
-         /* check if the solution has a value greater than 1.0 */
-         
-         SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-         SCIPwriteOrigProblem(subscip[i],"test.lp",NULL,FALSE);
+         /* check if the solution has a value greater than 1.0 */         
+         SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE);
          if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
          {
             SCIP_VAR* var;
@@ -782,7 +829,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, consids, nconss) );
 
             /* create variable for a new column with objective function coefficient 0.0 */
-            SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) );
+            SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) ); /* für neue Patternvarriablen als BIN [0,1] und zusätzliche changVarLazyUB sondern  inf und hier mitteilen */
 
             /* add the new variable to the pricer store */
             SCIP_CALL( SCIPaddPricedVar(scip, var, 1.0) );
@@ -793,7 +840,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             * of x <= 1 in the LP relaxation since this bound constraint would produce a dual variable which might have
             * a positive reduced cost
             */
-            SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) );
+            SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); /* für neue Patternvarriablen  sondern  inf und hier mitteilen */
 
             /* check which variable are fixed -> which orders belong to this packing */
             for( v = 0; v < nconss; ++v )
@@ -824,8 +871,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    return SCIP_OKAY;
 }
 
-/** farkas pricing method of variable pricer for infeasible LPs */
-static
+/** farkas pricing method of variable pricer for infeasible LPs */ 
+static /* schneidet einen Strahl im dualen Problem ab*/
 SCIP_DECL_PRICERFARKAS(pricerFarkasBinpacking)
 {  /*lint --e{715}*/
    /** @note In case of this binpacking example, the master LP should not get infeasible after branching, because of the

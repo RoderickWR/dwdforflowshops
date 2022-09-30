@@ -35,7 +35,7 @@
 #include "reader_bpa.h"
 #include "probdata_binpacking.h"
 
-#include "gnuplot.h"
+#include "gnuplot.h" //* stattdessen csv datei schreiben und in python plotten*/
 
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
  *  and frees the SCIP instance
@@ -133,9 +133,11 @@ SCIP_RETCODE runShell(
       for( i = 0; i < mp1.lastIdx+1; ++i ) {
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
+         SCIP_CALL( SCIPaddVar(scip, var) );
+         SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
          lambdas.lambOnMachine[iii].ptrLamb[i] = var;
-         SCIP_CALL(SCIPaddVar(scip,var));
+         SCIP_CALL( SCIPreleaseVar(scip, &var) );
       } 
    }
 
@@ -146,6 +148,8 @@ SCIP_RETCODE runShell(
       SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
       offset[iii] = var;
       SCIP_CALL(SCIPaddVar(scip,var));
+      SCIP_CALL( SCIPreleaseVar(scip, &var) );
+      
       
    }
 
@@ -157,12 +161,14 @@ SCIP_RETCODE runShell(
          SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
          startTimes.startOnMachine[iii].ptrStart[i] = var;
          SCIP_CALL(SCIPaddVar(scip,var));
+         SCIP_CALL( SCIPreleaseVar(scip, &var) );
       /* create end variables and set end pointers*/
          sprintf(buf, "endM%dJ%d", iii,i);
          SCIP_VAR* var2 = NULL;
          SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
          endTimes.endOnMachine[iii].ptrEnd[i] = var2;
          SCIP_CALL(SCIPaddVar(scip,var2));
+         SCIP_CALL( SCIPreleaseVar(scip, &var2) );
       } 
    }
    /* create makespan variable*/
@@ -248,14 +254,15 @@ SCIP_RETCODE runShell(
       makespanCons[i] = cons;
    }
 
-   /*SCIP_CALL( SCIPactivatePricer(scip, pricer)); */
-   // SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons )); 
+   SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons )); 
+
 
    SCIPsolve(scip);
 
-   // why do we get 0 as the obj, that is 11.0 ?
+  
    SCIP_SOL* s = SCIPgetSols(scip);
-   float p = SCIPgetSolOrigObj(scip, s);
+   SCIP_Real p = SCIPgetSolTransObj(scip, s);
 
    SCIP_Real dual;
    SCIP_Bool boundconstr;
