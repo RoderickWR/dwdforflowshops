@@ -185,6 +185,7 @@ SCIP_RETCODE runShell(
       for( i = 0; i < mp1.lastIdx+1; ++i ) { 
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambdas.lambOnMachine[iii].ptrLamb[i], 1.0) );
       }
+      SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
       SCIP_CALL(SCIPaddCons(scip,cons));
       convexityCons[iii] = cons;
    }
@@ -199,6 +200,7 @@ SCIP_RETCODE runShell(
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
+         SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
          startCons[iii*nbrJobs + i] = cons;
       }
@@ -214,6 +216,7 @@ SCIP_RETCODE runShell(
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
+         SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
          endCons[iii*nbrJobs + i] = cons;
       }
@@ -226,6 +229,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
+         SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
       }
    }
@@ -238,6 +242,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -1e+20, 0));  
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], 1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii+1].ptrStart[i], -1));
+         SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
       }
    }
@@ -250,6 +255,7 @@ SCIP_RETCODE runShell(
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0, 1e+20));
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[nbrMachines-1].ptrEnd[i], -1));
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrMakespan, 1));
+      SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
       SCIP_CALL(SCIPaddCons(scip,cons));
       makespanCons[i] = cons;
    }

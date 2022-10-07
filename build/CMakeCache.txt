@@ -249,7 +249,7 @@ MEMORYCHECK_COMMAND:FILEPATH=/usr/bin/valgrind
 MEMORYCHECK_SUPPRESSIONS_FILE:FILEPATH=
 
 //The directory containing a CMake configuration file for SCIP.
-SCIP_DIR:PATH=/home/roderich/Documents/scipoptsuite-8.0.0/build-release/scip
+SCIP_DIR:PATH=/home/roderich/Documents/scipoptsuite-8.0.0/build-debug/scip
 
 //Name of the computer/site where compile is being run
 SITE:STRING=roderich-VirtualBox

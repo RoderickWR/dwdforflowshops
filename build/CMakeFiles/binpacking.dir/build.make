@@ -204,7 +204,7 @@ binpacking: CMakeFiles/binpacking.dir/src/reader_bpa.c.o
 binpacking: CMakeFiles/binpacking.dir/src/vardata_binpacking.c.o
 binpacking: CMakeFiles/binpacking.dir/src/gnuplot.c.o
 binpacking: CMakeFiles/binpacking.dir/build.make
-binpacking: /home/roderich/Documents/scipoptsuite-8.0.0/build-release/lib/libscip.so.8.0.0.0
+binpacking: /home/roderich/Documents/scipoptsuite-8.0.0/build-debug/lib/libscip.so.8.0.0.0
 binpacking: /usr/lib/x86_64-linux-gnu/libm.so
 binpacking: CMakeFiles/binpacking.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/roderich/Documents/BAP/gitdir01/dwdforflowshops/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking C executable binpacking"

@@ -703,6 +703,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    SCIPwriteTransProblem(scip,"tMasterproblem.lp",NULL,FALSE);
    i =1; // is there a dual != 0 in the convexity constraint of machine 2?
+   double dualtest = SCIPgetDualsolLinear(scip, convexityCons[i]);
+   dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 0]);
+   dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 1]);
    SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
    SCIPgetDualSolVal(scip, endCons[i*2 + 0], pDual, pBoundconstr);
    SCIPgetDualSolVal(scip, endCons[i*2 + 1], pDual, pBoundconstr);

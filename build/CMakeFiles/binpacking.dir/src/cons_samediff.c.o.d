@@ -49,8 +49,8 @@ CMakeFiles/binpacking.dir/src/cons_samediff.c.o: \
  /usr/include/x86_64-linux-gnu/bits/pthread_stack_min.h \
  /usr/include/x86_64-linux-gnu/bits/posix2_lim.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/float.h \
- /home/roderich/Documents/scipoptsuite-8.0.0/build-release/scip/scip/config.h \
- /home/roderich/Documents/scipoptsuite-8.0.0/build-release/scip/scip/scip_export.h \
+ /home/roderich/Documents/scipoptsuite-8.0.0/build-debug/scip/scip/config.h \
+ /home/roderich/Documents/scipoptsuite-8.0.0/build-debug/scip/scip/scip_export.h \
  /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/type_retcode.h \
  /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/type_message.h \
  /home/roderich/Documents/scipoptsuite-8.0.0/scip/src/scip/pub_message.h \

@@ -2,5 +2,6 @@
     "files.associations": {
         "vector": "c",
         "random": "c"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
