@@ -773,7 +773,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_SOL* sol;
 
          /* the soultion should be sorted w.r.t. the objective function value */
-         assert(s == 0 || SCIPisFeasGE(subscip, SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
+         assert(s == 0 || SCIPisFeasGE(subscip[i], SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
 
          sol = sols[s];
          assert(sol != NULL);
@@ -800,7 +800,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             int o;
             int v;
 
-            SCIPdebug( SCIP_CALL( SCIPprintSol(subscip, sol, NULL, FALSE) ) );
+            SCIPdebug( SCIP_CALL( SCIPprintSol(subscip[i], sol, NULL, FALSE) ) );
 
             nconss = 0;
             (void) SCIPsnprintf(name, SCIP_MAXSTRLEN, "items");
@@ -815,7 +815,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
                assert(SCIPgetNFixedonesSetppc(scip, conss[o]) == 0);
 
-               if( SCIPgetSolVal(subscip, sol, vars[v]) > 0.5 )
+               if( SCIPgetSolVal(subscip[i], sol, vars[v]) > 0.5 )
                {
                   (void) SCIPsnprintf(strtmp, SCIP_MAXSTRLEN, "_%d", ids[o]);
                   strcat(name, strtmp);
@@ -824,7 +824,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
                   nconss++;
                }
                else
-                  assert( SCIPisFeasEQ(subscip, SCIPgetSolVal(subscip, sol, vars[v]), 0.0) );
+                  assert( SCIPisFeasEQ(subscip[i], SCIPgetSolVal(subscip[i], sol, vars[v]), 0.0) );
 
                v++;
             }
@@ -865,11 +865,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    // /* free pricer MIP */
    // SCIPfreeBufferArray(scip, &vars);
 
-   if( addvar || SCIPgetStatus(subscip) == SCIP_STATUS_OPTIMAL )
+   if( addvar || SCIPgetStatus(subscip[i]) == SCIP_STATUS_OPTIMAL )
       (*result) = SCIP_SUCCESS;
 
    /* free sub SCIP */
-   SCIP_CALL( SCIPfree(&subscip) );
+   SCIP_CALL( SCIPfree(&subscip[i]) );
 
    return SCIP_OKAY;
 }

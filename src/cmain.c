@@ -282,12 +282,6 @@ SCIP_RETCODE runShell(
 
    SCIPwriteOrigProblem(scip,"test.lp",NULL,FALSE);
 
-
-   /**********************************
-    * Process command line arguments *
-    **********************************/
-   SCIP_CALL( SCIPprocessShellArguments(scip, argc, argv, defaultsetname) );
-
    /********************
     * Deinitialization *
     ********************/
