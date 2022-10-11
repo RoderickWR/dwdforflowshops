@@ -114,6 +114,7 @@ struct SCIP_PricerData
    SCIP_CONS**           convexityCons;
    SCIP_CONS**           startCons;
    SCIP_CONS**           endCons;
+   SCIP_CONS**           makespanCons;
    
  
 };
@@ -361,6 +362,7 @@ SCIP_RETCODE initPricing(
    SCIP_CONS** convexityConss;
    SCIP_CONS** startConss;
    SCIP_CONS** endConss;
+   SCIP_CONS** makespanConss;
    int nbrMachines;
    int nbrJobs;
    SCIP_Bool* pBoundconstr = &boundconstr;
@@ -380,6 +382,7 @@ SCIP_RETCODE initPricing(
    convexityConss = pricerdata->convexityCons;
    startConss = pricerdata->startCons;
    endConss = pricerdata->endCons;
+   makespanConss = pricerdata->makespanCons;
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
    SCIP_VAR* startVars[nbrJobs];
@@ -610,7 +613,15 @@ SCIP_DECL_PRICERINIT(pricerInitBinpacking)
          SCIP_CALL( SCIPcaptureCons(scip, pricerdata->endCons[c*nbrJobs + c2]) );
       }
    }
-   
+   for( c2 = 0; c2 < nbrJobs; ++c2) {
+      cons = pricerdata->makespanCons[c2];
+      /* release original constraint */
+      SCIP_CALL( SCIPreleaseCons(scip, &pricerdata->makespanCons[c2]) );
+      /* get transformed constraint  beim Initialisieren des Pricers muss man auf transformierte Cons umswitchen*/
+      SCIP_CALL( SCIPgetTransformedCons(scip, cons, &pricerdata->makespanCons[c2]) );
+      /* capture transformed constraint */
+      SCIP_CALL( SCIPcaptureCons(scip, pricerdata->makespanCons[c2]) );
+   }
   
    return SCIP_OKAY;
 }
@@ -665,6 +676,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_CONS** convexityCons;
    SCIP_CONS** startCons;
    SCIP_CONS** endCons;
+   SCIP_CONS** makespanCons;
    int nbrMachines;
    int nbrJobs;
    processingTimes pt1;
@@ -696,6 +708,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    convexityCons = pricerdata->convexityCons;
    startCons = pricerdata->startCons;
    endCons = pricerdata->endCons;
+   makespanCons = pricerdata->makespanCons;
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
    pt1 = pricerdata->pt1;
@@ -706,6 +719,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    double dualtest = SCIPgetDualsolLinear(scip, convexityCons[i]);
    dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 0]);
    dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 1]);
+   SCIPgetDualSolVal(scip, makespanCons[0], pDual, pBoundconstr);
+   SCIPgetDualSolVal(scip, makespanCons[1], pDual, pBoundconstr);
    SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
    SCIPgetDualSolVal(scip, endCons[i*2 + 0], pDual, pBoundconstr);
    SCIPgetDualSolVal(scip, endCons[i*2 + 1], pDual, pBoundconstr);
@@ -927,6 +942,7 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->convexityCons = NULL;
    pricerdata->startCons = NULL;
    pricerdata->endCons = NULL;
+   pricerdata->makespanCons = NULL;
    pricerdata->nbrMachines = 0;
    pricerdata->nbrJobs = 0;
 
@@ -954,7 +970,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    int                   nbrJobs,
    SCIP_CONS**           convexityCons,
    SCIP_CONS**           startCons,
-   SCIP_CONS**           endCons
+   SCIP_CONS**           endCons,
+   SCIP_CONS**           makespanCons
    
    )
 {
@@ -975,6 +992,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->convexityCons = convexityCons;
    pricerdata->startCons = startCons;
    pricerdata->endCons = endCons;
+   pricerdata->makespanCons = makespanCons;
    pricerdata->nbrMachines  = nbrMachines;
    pricerdata->nbrJobs  = nbrJobs;
 

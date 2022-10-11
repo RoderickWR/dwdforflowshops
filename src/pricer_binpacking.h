@@ -44,7 +44,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    int                   nbrJobs,
    SCIP_CONS**           convexityCons,
    SCIP_CONS**           startCons,
-   SCIP_CONS**           endCons
+   SCIP_CONS**           endCons,
+   SCIP_CONS**           makespanCons
 
    );
 

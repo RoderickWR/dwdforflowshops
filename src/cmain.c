@@ -116,12 +116,13 @@ SCIP_RETCODE runShell(
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
-   SCIP_CALL( SCIPallocBufferArray(scip, &convexityCons, nbrMachines) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &convexityCons, nbrMachines) );
    SCIP_CONS** startCons;
-   SCIP_CALL( SCIPallocBufferArray(scip, &startCons, nbrMachines*nbrJobs) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs) );
    SCIP_CONS** endCons;
-   SCIP_CALL( SCIPallocBufferArray(scip, &endCons, nbrMachines*nbrJobs) );
-   SCIP_CONS* makespanCons[nbrJobs];
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs) );
+   SCIP_CONS** makespanCons;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &makespanCons, nbrJobs) );
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
@@ -261,26 +262,10 @@ SCIP_RETCODE runShell(
    }
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons )); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons)); 
 
 
    SCIPsolve(scip);
-
-  
-   SCIP_SOL* s = SCIPgetSols(scip);
-   SCIP_Real p = SCIPgetSolTransObj(scip, s);
-
-   SCIP_Real dual;
-   SCIP_Bool boundconstr;
-   SCIP_Bool* pBoundconstr = &boundconstr;
-   SCIP_Real* pDual = &dual;
-
-   // why do we get 0 for all duals ?
-   SCIPgetDualSolVal(scip, makespanCons[0], pDual, pBoundconstr);
-
-   SCIPgetDualSolVal(scip, makespanCons[1], pDual, pBoundconstr);
-
-   SCIPwriteOrigProblem(scip,"test.lp",NULL,FALSE);
 
    /********************
     * Deinitialization *
