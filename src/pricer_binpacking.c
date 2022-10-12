@@ -714,18 +714,18 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    pt1 = pricerdata->pt1;
    SCIP* subscip[nbrMachines];
 
-   SCIPwriteTransProblem(scip,"tMasterproblem.lp",NULL,FALSE);
-   i =1; // is there a dual != 0 in the convexity constraint of machine 2?
-   double dualtest = SCIPgetDualsolLinear(scip, convexityCons[i]);
-   dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 0]);
-   dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 1]);
-   SCIPgetDualSolVal(scip, makespanCons[0], pDual, pBoundconstr);
-   SCIPgetDualSolVal(scip, makespanCons[1], pDual, pBoundconstr);
-   SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-   SCIPgetDualSolVal(scip, endCons[i*2 + 0], pDual, pBoundconstr);
-   SCIPgetDualSolVal(scip, endCons[i*2 + 1], pDual, pBoundconstr);
-   SCIPgetDualSolVal(scip, startCons[i*2 + 0], pDual, pBoundconstr);
-   SCIPgetDualSolVal(scip, startCons[i*2 + 1], pDual, pBoundconstr);
+   // SCIPwriteTransProblem(scip,"tMasterproblem.lp",NULL,FALSE);
+   // i =0; // is there a dual != 0 in the convexity constraint of machine 2?
+   // double dualtest = SCIPgetDualsolLinear(scip, convexityCons[i]);
+   // dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 0]);
+   // dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 1]);
+   // SCIPgetDualSolVal(scip, makespanCons[0], pDual, pBoundconstr);
+   // SCIPgetDualSolVal(scip, makespanCons[1], pDual, pBoundconstr);
+   // SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
+   // SCIPgetDualSolVal(scip, endCons[i*2 + 0], pDual, pBoundconstr);
+   // SCIPgetDualSolVal(scip, endCons[i*2 + 1], pDual, pBoundconstr);
+   // SCIPgetDualSolVal(scip, startCons[i*2 + 0], pDual, pBoundconstr);
+   // SCIPgetDualSolVal(scip, startCons[i*2 + 1], pDual, pBoundconstr);
 
 
    /* get the remaining time and memory limit */
@@ -763,7 +763,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       // SCIP_CALL( SCIPallocBufferArray(scip, &Ovars, nbrJobs) ); /*allocate for order vars */
       
 
-      /* initialization local pricing problem */
+      /* creating and initializing local pricing problem */
       SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, SFvars, Ovars, i) );
 
       SCIPdebugMsg(scip, "solve pricer problem\n");
@@ -804,6 +804,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
          /* check if the solution has a value greater than 1.0 */         
          SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE);
+         SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
          if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
          {
             SCIP_VAR* var;
