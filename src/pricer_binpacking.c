@@ -334,6 +334,28 @@ SCIP_RETCODE addFixedVarsConss(
    return SCIP_OKAY;
 }
 
+void getPattern(
+   SCIP* subscip,
+   SCIP_SOL* sol,
+   SCIP_Real** startingTimes,
+   SCIP_Real** completionTimes,
+   SCIP_VAR**            startVars,
+   SCIP_VAR**            endVars,
+   int nbrJobs
+   )
+{
+   int i;
+   for( i = 0; i < nbrJobs; ++i ) {
+      SCIP_Real r1;
+      r1 = SCIPgetSolVal(subscip, sol, startVars[i]);
+      startingTimes[i] = &r1;
+      SCIP_Real r2;
+      r2 = SCIPgetSolVal(subscip, sol, endVars[i]);
+      completionTimes[i] = &r2;
+   }
+   
+}
+
 /** initializes the pricing problem for the given capacity */
 static
 SCIP_RETCODE initPricing(
@@ -341,8 +363,9 @@ SCIP_RETCODE initPricing(
    SCIP_PRICERDATA*      pricerdata,         /**< pricer data */
    SCIP*                 subscip,            /**< pricing SCIP data structure */
    SCIP_VAR**            vars,               /**< variable array for the items */
-   SCIP_VAR**            SFvars,
-   SCIP_VAR**            Ovars,
+   SCIP_VAR**            startVars,
+   SCIP_VAR**            endVars,
+   SCIP_VAR**            orderVars,
    int                   mIdx
    )
 {
@@ -385,9 +408,7 @@ SCIP_RETCODE initPricing(
    makespanConss = pricerdata->makespanCons;
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
-   SCIP_VAR* startVars[nbrJobs];
-   SCIP_VAR* endVars[nbrJobs];
-   SCIP_VAR* orderVars[nbrJobs][nbrJobs];
+
 
    // SCIP_CALL( SCIPallocBufferArray(subscip, &vals, nitems) );
    /* create start and end time variables */
@@ -417,7 +438,7 @@ SCIP_RETCODE initPricing(
             SCIP_VAR* var3 = NULL;
             SCIP_CALL(SCIPcreateVarBasic(subscip, &var3, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY));
             SCIP_CALL(SCIPaddVar(subscip,var3));
-            orderVars[i][ii] = var3;
+            orderVars[i*nbrJobs + ii] = var3;
          }
       }
 
@@ -439,7 +460,7 @@ SCIP_RETCODE initPricing(
          SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -50.0, 1e+20));
          SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[ii], 1.0) );
          SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
-         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i][ii], -50.0) );
+         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], -50.0) );
          SCIP_CALL(SCIPaddCons(subscip,cons));
       }
    }
@@ -449,8 +470,8 @@ SCIP_RETCODE initPricing(
          if (i != ii) {
             sprintf(buf, "precedence%d", i);
             SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
-            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i][ii], 1.0) );
-            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[ii][i], 1.0) );
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], 1.0) );
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[ii*nbrJobs + i], 1.0) );
             SCIP_CALL(SCIPaddCons(subscip,cons));
          }
          sprintf(buf, "fixAtZero%d", i);
@@ -458,7 +479,7 @@ SCIP_RETCODE initPricing(
          SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], -1.0) );
          for (iii=0; iii < nbrJobs; ++iii) {
             if (iii != i) {
-               SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i][iii], -50.0) );
+               SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + iii], -50.0) );
             }
          }
          SCIP_CALL(SCIPaddCons(subscip,cons));
@@ -661,6 +682,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_PRICERDATA* pricerdata;
    SCIP_CONS** conss;
    SCIP_VAR** vars;
+   SCIP_VAR** startVars;
+   SCIP_VAR** endVars;
+   SCIP_VAR** orderVars;
    int* ids;
    SCIP_Bool addvar;
 
@@ -714,20 +738,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    pt1 = pricerdata->pt1;
    SCIP* subscip[nbrMachines];
 
-   // SCIPwriteTransProblem(scip,"tMasterproblem.lp",NULL,FALSE);
-   // i =0; // is there a dual != 0 in the convexity constraint of machine 2?
-   // double dualtest = SCIPgetDualsolLinear(scip, convexityCons[i]);
-   // dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 0]);
-   // dualtest = SCIPgetDualsolLinear(scip, endCons[i*2 + 1]);
-   // SCIPgetDualSolVal(scip, makespanCons[0], pDual, pBoundconstr);
-   // SCIPgetDualSolVal(scip, makespanCons[1], pDual, pBoundconstr);
-   // SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-   // SCIPgetDualSolVal(scip, endCons[i*2 + 0], pDual, pBoundconstr);
-   // SCIPgetDualSolVal(scip, endCons[i*2 + 1], pDual, pBoundconstr);
-   // SCIPgetDualSolVal(scip, startCons[i*2 + 0], pDual, pBoundconstr);
-   // SCIPgetDualSolVal(scip, startCons[i*2 + 1], pDual, pBoundconstr);
-
-
    /* get the remaining time and memory limit */
    SCIP_CALL( SCIPgetRealParam(scip, "limits/time", &timelimit) );
    if( !SCIPisInfinity(scip, timelimit) )
@@ -736,8 +746,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    if( !SCIPisInfinity(scip, memorylimit) )
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
-   
-   
    for( i = 0; i < nbrMachines; i++ )
    {
       /* initialize SCIP */
@@ -758,13 +766,14 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/time", timelimit) );
       SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/memory", memorylimit) );
       
-      // /* allocate in orginal scip, since otherwise the buffer counts in subscip are not correct */
-      // SCIP_CALL( SCIPallocBufferArray(scip, &SFvars, 2*nbrJobs) ); /*allocate for start and finish vars */
-      // SCIP_CALL( SCIPallocBufferArray(scip, &Ovars, nbrJobs) ); /*allocate for order vars */
+      /* allocate in orginal scip, since otherwise the buffer counts in subscip are not correct */
+      SCIP_CALL( SCIPallocBufferArray(scip, &startVars, nbrJobs) ); /*allocate for start and finish vars */
+      SCIP_CALL( SCIPallocBufferArray(scip, &endVars, nbrJobs) );
+      SCIP_CALL( SCIPallocBufferArray(scip, &orderVars, nbrJobs*nbrJobs) ); /*allocate for order vars */
       
 
       /* creating and initializing local pricing problem */
-      SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, SFvars, Ovars, i) );
+      SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
 
       SCIPdebugMsg(scip, "solve pricer problem\n");
 
@@ -772,8 +781,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       SCIP_CALL( SCIPsolve(subscip[i]) );
 
       // /* free pricer MIP */
-      // SCIPfreeBufferArray(scip, &SFvars);
-      // SCIPfreeBufferArray(scip, &Ovars);
+      // SCIPfreeBufferArray(scip, &startVars);
+      // SCIPfreeBufferArray(scip, &endVars);
+      // SCIPfreeBufferArray(scip, &orderVars);
 
       sols = SCIPgetSols(subscip[i]);
       nsols = SCIPgetNSols(subscip[i]);
@@ -810,6 +820,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;
             int* consids;
+            SCIP_Real** startingTimes;
+            SCIP_Real** completionTimes;
             char strtmp[SCIP_MAXSTRLEN];
             char name[SCIP_MAXSTRLEN];
             int nconss;
@@ -821,37 +833,47 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             nconss = 0;
             (void) SCIPsnprintf(name, SCIP_MAXSTRLEN, "items");
 
-            SCIP_CALL( SCIPallocBufferArray(scip, &consids, nitems) );
+            SCIP_CALL( SCIPallocBufferArray(scip, &startingTimes, nbrJobs) ); // allocates memory to store starting times of the patterns
+            SCIP_CALL( SCIPallocBufferArray(scip, &completionTimes, nbrJobs) ); // for completion times
 
-            /* check which variables are fixed -> which item belongs to this packing */
-            for( o = 0, v = 0; o < nitems; ++o )
-            {
-               if( !SCIPconsIsEnabled(conss[o]) )
-                  continue;
+            // get pattern
+            getPattern(subscip[i], sol, startingTimes, completionTimes,startVars, endVars, nbrJobs);
 
-               assert(SCIPgetNFixedonesSetppc(scip, conss[o]) == 0);
+            // /* check which variables are fixed -> which item belongs to this packing */
+            // for( o = 0, v = 0; o < nitems; ++o )
+            // {
+            //    if( !SCIPconsIsEnabled(conss[o]) )
+            //       continue;
+  
+            //    assert(SCIPgetNFixedonesSetppc(scip, conss[o]) == 0);
 
-               if( SCIPgetSolVal(subscip[i], sol, vars[v]) > 0.5 )
-               {
-                  (void) SCIPsnprintf(strtmp, SCIP_MAXSTRLEN, "_%d", ids[o]);
-                  strcat(name, strtmp);
+            //    if( SCIPgetSolVal(subscip[i], sol, vars[v]) > 0.5 )
+            //    {
+            //       (void) SCIPsnprintf(strtmp, SCIP_MAXSTRLEN, "_%d", ids[o]);
+            //       strcat(name, strtmp);
 
-                  consids[nconss] = o;
-                  nconss++;
-               }
-               else
-                  assert( SCIPisFeasEQ(subscip[i], SCIPgetSolVal(subscip[i], sol, vars[v]), 0.0) );
+            //       consids[nconss] = o;
+            //       nconss++;
+            //    }
+            //    else
+            //       assert( SCIPisFeasEQ(subscip[i], SCIPgetSolVal(subscip[i], sol, vars[v]), 0.0) );
 
-               v++;
-            }
+            //    v++;
+            // }
 
-            SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, consids, nconss) );
+            // SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, consids, nconss) );
 
             /* create variable for a new column with objective function coefficient 0.0 */
-            SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) ); /* für neue Patternvarriablen als BIN [0,1] und zusätzliche changVarLazyUB sondern  inf und hier mitteilen */
-
+            // SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) ); /* für neue Patternvarriablen als BIN [0,1] und zusätzliche changVarLazyUB sondern  inf und hier mitteilen */
+            // create new variable and adjust params
+            SCIP_VAR* newVar = NULL;
+            SCIP_CALL(SCIPcreateVarBasic(scip, &newVar, "newVar", 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
+            /* set initial and removable flag */
+            SCIP_CALL( SCIPvarSetInitial(newVar, FALSE) );
+            SCIP_CALL( SCIPvarSetRemovable(newVar, TRUE) );
+            SCIPvarMarkDeletable(newVar);
             /* add the new variable to the pricer store */
-            SCIP_CALL( SCIPaddPricedVar(scip, var, 1.0) );
+            SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) );
             addvar = TRUE;
 
             /* change the upper bound of the binary variable to lazy since the upper bound is already enforced due to
@@ -859,33 +881,38 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             * of x <= 1 in the LP relaxation since this bound constraint would produce a dual variable which might have
             * a positive reduced cost
             */
-            SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); /* für neue Patternvarriablen  sondern  inf und hier mitteilen */
+            SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) ); /* für neue Patternvarriablen  sondern  inf und hier mitteilen */
 
-            /* check which variable are fixed -> which orders belong to this packing */
-            for( v = 0; v < nconss; ++v )
-            {
-               assert(SCIPconsIsEnabled(conss[consids[v]]));
-               SCIP_CALL( SCIPaddCoefSetppc(scip, conss[consids[v]], var) );
-            }
+            // /* check which variable are fixed -> which orders belong to this packing */
+            // for( v = 0; v < nconss; ++v )
+            // {
+            //    assert(SCIPconsIsEnabled(conss[consids[v]]));
+            //    SCIP_CALL( SCIPaddCoefSetppc(scip, conss[consids[v]], var) );
+            // }
 
-            SCIPdebug(SCIPprintVar(scip, var, NULL) );
-            SCIP_CALL( SCIPreleaseVar(scip, &var) );
+            // SCIPdebug(SCIPprintVar(scip, var, NULL) );
+            SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
 
-            SCIPfreeBufferArray(scip, &consids);
+            SCIPfreeBufferArray(scip, &startingTimes);
+            SCIPfreeBufferArray(scip, &completionTimes);
          }
          else
             break;
       }
+      // free buffers
+      SCIPfreeBufferArray(scip, &startVars ); /*allocate for start and finish vars */
+      SCIPfreeBufferArray(scip, &endVars );
+      SCIPfreeBufferArray(scip, &orderVars); /*allocate for order vars */
+
+      if( addvar || SCIPgetStatus(subscip[i]) == SCIP_STATUS_OPTIMAL )
+         (*result) = SCIP_SUCCESS;
+
+      /* free sub SCIP */
+      SCIP_CALL( SCIPfree(&subscip[i]) );
    }
 
    // /* free pricer MIP */
    // SCIPfreeBufferArray(scip, &vars);
-
-   if( addvar || SCIPgetStatus(subscip[i]) == SCIP_STATUS_OPTIMAL )
-      (*result) = SCIP_SUCCESS;
-
-   /* free sub SCIP */
-   SCIP_CALL( SCIPfree(&subscip[i]) );
 
    return SCIP_OKAY;
 }
