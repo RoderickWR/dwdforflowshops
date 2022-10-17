@@ -356,6 +356,23 @@ void getPattern(
    
 }
 
+void releaseVars(SCIP* subscip,
+               SCIP_VAR**            startVars,
+               SCIP_VAR**            endVars,
+               SCIP_VAR**            orderVars,
+               int nbrJobs)
+{         
+   int i;
+   int ii;
+   for( i = 0; i < nbrJobs; i++ ) {
+      SCIPreleaseVar(subscip, &startVars[i]);
+      SCIPreleaseVar(subscip, &endVars[i]);
+      for( ii = 0; ii < nbrJobs; ii++ ) {
+         SCIPreleaseVar(subscip, &orderVars[i*nbrJobs + ii]);
+      }
+   }
+}
+
 /** initializes the pricing problem for the given capacity */
 static
 SCIP_RETCODE initPricing(
@@ -736,7 +753,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
    pt1 = pricerdata->pt1;
-   SCIP* subscip[nbrMachines];
+   SCIP* subscip[nbrJobs];
+   
+
+
 
    /* get the remaining time and memory limit */
    SCIP_CALL( SCIPgetRealParam(scip, "limits/time", &timelimit) );
@@ -780,10 +800,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       /* solve sub SCIP */
       SCIP_CALL( SCIPsolve(subscip[i]) );
 
-      // /* free pricer MIP */
-      // SCIPfreeBufferArray(scip, &startVars);
-      // SCIPfreeBufferArray(scip, &endVars);
-      // SCIPfreeBufferArray(scip, &orderVars);
 
       sols = SCIPgetSols(subscip[i]);
       nsols = SCIPgetNSols(subscip[i]);
@@ -891,7 +907,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // }
 
             // SCIPdebug(SCIPprintVar(scip, var, NULL) );
-            SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
+            
 
             SCIPfreeBufferArray(scip, &startingTimes);
             SCIPfreeBufferArray(scip, &completionTimes);
@@ -899,6 +915,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          else
             break;
       }
+      releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs);
       // free buffers
       SCIPfreeBufferArray(scip, &startVars ); /*allocate for start and finish vars */
       SCIPfreeBufferArray(scip, &endVars );
