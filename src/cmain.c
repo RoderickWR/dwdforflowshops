@@ -65,7 +65,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") ); 
 
    /* include binpacking branching and branching data */
-   SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
+   // SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
    SCIP_CALL( SCIPincludeConshdlrSamediff(scip) );
    
    /* include binpacking pricer  */

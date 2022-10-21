@@ -833,7 +833,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_SOL* sol;
 
          /* the soultion should be sorted w.r.t. the objective function value */
-         assert(s == 0 || SCIPisFeasGE(subscip[i], SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
+         //assert(s == 0 || SCIPisFeasGE(subscip[i], SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
 
          sol = sols[s];
          assert(sol != NULL);
