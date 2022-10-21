@@ -115,6 +115,8 @@ struct SCIP_PricerData
    SCIP_CONS**           startCons;
    SCIP_CONS**           endCons;
    SCIP_CONS**           makespanCons;
+   SCIP_VAR**            altLambdas0;
+   SCIP_VAR**            altLambdas1;
    
  
 };
@@ -334,26 +336,28 @@ SCIP_RETCODE addFixedVarsConss(
    return SCIP_OKAY;
 }
 
-void getPattern(
+SCIP_Real getPattern(
    SCIP* subscip,
    SCIP_SOL* sol,
-   SCIP_Real** startingTimes,
-   SCIP_Real** completionTimes,
+   SCIP_Real** sTimes,
+   SCIP_Real** cTimes,
    SCIP_VAR**            startVars,
    SCIP_VAR**            endVars,
    int nbrJobs
    )
 {
    int i;
+   SCIP_Real altStartingTimes;
    for( i = 0; i < nbrJobs; ++i ) {
       SCIP_Real r1;
       r1 = SCIPgetSolVal(subscip, sol, startVars[i]);
-      startingTimes[i] = &r1;
+      sTimes[i] = &r1;
+      altStartingTimes = r1;
       SCIP_Real r2;
       r2 = SCIPgetSolVal(subscip, sol, endVars[i]);
-      completionTimes[i] = &r2;
+      cTimes[i] = &r2;
    }
-   
+   return altStartingTimes;
 }
 
 void releaseVars(SCIP* subscip,
@@ -443,7 +447,7 @@ SCIP_RETCODE initPricing(
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var));
          startVars[i] = var;
-         SCIP_CALL( SCIPreleaseVar(subscip, &var) );
+         //SCIP_CALL( SCIPreleaseVar(subscip, &var) );
       /* create end variables and set end pointers*/
          SCIPgetDualSolVal(scip, endConss[mIdx*nbrMachines + i], pDual, pBoundconstr);
          sprintf(buf, "endM%dJ%d", mIdx,i);
@@ -451,14 +455,14 @@ SCIP_RETCODE initPricing(
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var2, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var2));
          endVars[i] = var2;
-         SCIP_CALL( SCIPreleaseVar(subscip, &var2) );
+         //SCIP_CALL( SCIPreleaseVar(subscip, &var2) );
          for( ii = 0; ii < nbrJobs; ++ii ) {
             sprintf(buf, "orderM%dJ%dJ%d", mIdx,i,ii);
             SCIP_VAR* var3 = NULL;
             SCIP_CALL(SCIPcreateVarBasic(subscip, &var3, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY));
             SCIP_CALL(SCIPaddVar(subscip,var3));
             orderVars[i*nbrJobs + ii] = var3;
-            SCIP_CALL( SCIPreleaseVar(subscip, &var3) );
+            //SCIP_CALL( SCIPreleaseVar(subscip, &var3) );
          }
       }
 
@@ -709,8 +713,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_VAR** startVars;
    SCIP_VAR** endVars;
    SCIP_VAR** orderVars;
+   SCIP_VAR** altLambdas[2];
    int* ids;
    SCIP_Bool addvar;
+   SCIP_Bool allSubsOptimal = TRUE;
 
    SCIP_SOL** sols;
    int nsols;
@@ -760,6 +766,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
    pt1 = pricerdata->pt1;
+   altLambdas[0] = pricerdata->altLambdas0;
+   altLambdas[1] = pricerdata->altLambdas1;
+
+
    SCIP* subscip[nbrJobs];
    
 
@@ -803,10 +813,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
 
       SCIPdebugMsg(scip, "solve pricer problem\n");
-
+      
       /* solve sub SCIP */
       SCIP_CALL( SCIPsolve(subscip[i]) );
-
+      if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
+         allSubsOptimal = FALSE; // flag if a subproblem is not optimal
+      }
 
       sols = SCIPgetSols(subscip[i]);
       nsols = SCIPgetNSols(subscip[i]);
@@ -836,7 +848,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          }
 
          /* check if the solution has a value greater than 1.0 */         
-         SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE);
+         // SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE);
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
          if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
          {
@@ -845,6 +857,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             int* consids;
             SCIP_Real** startingTimes;
             SCIP_Real** completionTimes;
+            SCIP_Real altStartingTimes;
             char strtmp[SCIP_MAXSTRLEN];
             char name[SCIP_MAXSTRLEN];
             int nconss;
@@ -859,8 +872,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPallocBufferArray(scip, &startingTimes, nbrJobs) ); // allocates memory to store starting times of the patterns
             SCIP_CALL( SCIPallocBufferArray(scip, &completionTimes, nbrJobs) ); // for completion times
 
-            // get pattern
-            getPattern(subscip[i], sol, startingTimes, completionTimes,startVars, endVars, nbrJobs);
+            // get pattern // TODO wrap in SCIP_CALL return SCIP_OKAY if good 
+            altStartingTimes = getPattern(subscip[i], sol, startingTimes, completionTimes,startVars, endVars, nbrJobs);
 
             // /* check which variables are fixed -> which item belongs to this packing */
             // for( o = 0, v = 0; o < nitems; ++o )
@@ -897,6 +910,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIPvarMarkDeletable(newVar);
             /* add the new variable to the pricer store */
             SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) );
+            size_t n = sizeof(altLambdas[i])/sizeof(altLambdas[i][0]); // get the index of last lambda in array
+            altLambdas[i][n] = newVar; // add the new var to the lambdas array
             addvar = TRUE;
 
             /* change the upper bound of the binary variable to lazy since the upper bound is already enforced due to
@@ -912,23 +927,34 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             //    assert(SCIPconsIsEnabled(conss[consids[v]]));
             //    SCIP_CALL( SCIPaddCoefSetppc(scip, conss[consids[v]], var) );
             // }
-
+            // use add coeffLinear() 
             // SCIPdebug(SCIPprintVar(scip, var, NULL) );
-            
 
-            SCIPfreeBufferArray(scip, &startingTimes);
+            // modify convexity constr on machine i in master problem
+            SCIPaddCoefLinear(scip, convexityCons[i], altLambdas[i][n], 1.0);
+            // modify start and end time constr in master problem
+            int j;
+            for( j = 0; j < nbrJobs; ++j ) {
+               SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], altLambdas[i][n], SCIPgetSolVal(subscip[i], sol, startVars[j]));
+               SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], altLambdas[i][n], SCIPgetSolVal(subscip[i], sol, endVars[j]));
+               
+            }
+
             SCIPfreeBufferArray(scip, &completionTimes);
+            SCIPfreeBufferArray(scip, &startingTimes);
          }
          else
             break;
       }
-      // releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs);
-      // free buffers
-      SCIPfreeBufferArray(scip, &startVars ); /*free for start and finish vars */
-      SCIPfreeBufferArray(scip, &endVars );
+      // release vars of sub and release their buffers
+      releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs);
       SCIPfreeBufferArray(scip, &orderVars); /*free for order vars */
+      SCIPfreeBufferArray(scip, &endVars );
+      SCIPfreeBufferArray(scip, &startVars ); /*free for start and finish vars */
+      
+      
 
-      if( addvar || SCIPgetStatus(subscip[i]) == SCIP_STATUS_OPTIMAL )
+      if( addvar || allSubsOptimal ) // a variable was added by a sub problem or all sub problems are optimal and not variable was added
          (*result) = SCIP_SUCCESS;
 
       /* free sub SCIP */
@@ -997,7 +1023,8 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->makespanCons = NULL;
    pricerdata->nbrMachines = 0;
    pricerdata->nbrJobs = 0;
-
+   pricerdata->altLambdas0 = NULL;
+   pricerdata->altLambdas1 = NULL;
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
@@ -1023,7 +1050,9 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           convexityCons,
    SCIP_CONS**           startCons,
    SCIP_CONS**           endCons,
-   SCIP_CONS**           makespanCons
+   SCIP_CONS**           makespanCons,
+   SCIP_VAR**            altLambdas0,
+   SCIP_VAR**            altLambdas1
    
    )
 {
@@ -1047,7 +1076,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->makespanCons = makespanCons;
    pricerdata->nbrMachines  = nbrMachines;
    pricerdata->nbrJobs  = nbrJobs;
-
+   pricerdata->altLambdas0  = altLambdas0;
+   pricerdata->altLambdas1  = altLambdas1;
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {
