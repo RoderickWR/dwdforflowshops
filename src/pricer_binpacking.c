@@ -443,6 +443,7 @@ SCIP_RETCODE initPricing(
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var));
          startVars[i] = var;
+         SCIP_CALL( SCIPreleaseVar(subscip, &var) );
       /* create end variables and set end pointers*/
          SCIPgetDualSolVal(scip, endConss[mIdx*nbrMachines + i], pDual, pBoundconstr);
          sprintf(buf, "endM%dJ%d", mIdx,i);
@@ -450,12 +451,14 @@ SCIP_RETCODE initPricing(
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var2, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var2));
          endVars[i] = var2;
+         SCIP_CALL( SCIPreleaseVar(subscip, &var2) );
          for( ii = 0; ii < nbrJobs; ++ii ) {
             sprintf(buf, "orderM%dJ%dJ%d", mIdx,i,ii);
             SCIP_VAR* var3 = NULL;
             SCIP_CALL(SCIPcreateVarBasic(subscip, &var3, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY));
             SCIP_CALL(SCIPaddVar(subscip,var3));
             orderVars[i*nbrJobs + ii] = var3;
+            SCIP_CALL( SCIPreleaseVar(subscip, &var3) );
          }
       }
 
@@ -471,6 +474,7 @@ SCIP_RETCODE initPricing(
       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], 1.0) );
       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
       SCIP_CALL(SCIPaddCons(subscip,cons));
+      SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
 
       for( ii = 0; ii < nbrJobs; ++ii ) {
          sprintf(buf, "finishStart%d", i);
@@ -479,6 +483,7 @@ SCIP_RETCODE initPricing(
          SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
          SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], -50.0) );
          SCIP_CALL(SCIPaddCons(subscip,cons));
+         SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
       }
    }
 
@@ -490,6 +495,7 @@ SCIP_RETCODE initPricing(
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], 1.0) );
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[ii*nbrJobs + i], 1.0) );
             SCIP_CALL(SCIPaddCons(subscip,cons));
+            SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
          }
          sprintf(buf, "fixAtZero%d", i);
          SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -(nbrJobs-1)*50, 1e+20));
@@ -500,6 +506,7 @@ SCIP_RETCODE initPricing(
             }
          }
          SCIP_CALL(SCIPaddCons(subscip,cons));
+         SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
       }
    }
    
@@ -915,11 +922,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          else
             break;
       }
-      releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs);
+      // releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs);
       // free buffers
-      SCIPfreeBufferArray(scip, &startVars ); /*allocate for start and finish vars */
+      SCIPfreeBufferArray(scip, &startVars ); /*free for start and finish vars */
       SCIPfreeBufferArray(scip, &endVars );
-      SCIPfreeBufferArray(scip, &orderVars); /*allocate for order vars */
+      SCIPfreeBufferArray(scip, &orderVars); /*free for order vars */
 
       if( addvar || SCIPgetStatus(subscip[i]) == SCIP_STATUS_OPTIMAL )
          (*result) = SCIP_SUCCESS;

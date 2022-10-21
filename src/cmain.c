@@ -177,6 +177,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 50.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
    ptrMakespan = var3;
    SCIP_CALL(SCIPaddVar(scip,var3));
+   SCIP_CALL( SCIPreleaseVar(scip, &var3) );
        
    /* add Convexity constraint */ 
    for( iii = 0; iii < s1.lastIdx+1; ++iii ) {   
