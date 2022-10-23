@@ -250,7 +250,7 @@ SCIP_RETCODE createInitialColumns(
       /* create the variable data for the variable; the variable data contains the information in which constraints the
        * variable appears */
       a = i;
-      SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, &a, 1) );
+      // SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, &a, 1) );
 
       /* add the variable data to the variable */
       SCIPvarSetData(var, vardata);

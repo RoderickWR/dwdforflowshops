@@ -96,6 +96,8 @@ static
 SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
 {  /*lint --e{715}*/
    SCIP_PROBDATA* probdata;
+   int nbrJobs = 2;
+   schedule s1;
    SCIP_Real** pairweights;
    SCIP_VAR** lpcands;
    SCIP_Real* lpcandsfrac;
@@ -111,6 +113,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    SCIP_VARDATA* vardata;
    int* consids;
    int nconsids;
+   int nconsids_main;
    int nitems;
 
    int id1;
@@ -134,16 +137,40 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
 
    // nitems = SCIPprobdataGetNItems(probdata);
 
-   /* allocate memory for triangle matrix */
-   SCIP_CALL( SCIPallocBufferArray(scip, &pairweights, nitems) );
-   for( i = 0; i < nitems; ++i )
-   {
-      SCIP_CALL( SCIPallocClearBufferArray(scip, &pairweights[i], i+1) ); /*lint !e866 */
-   }
+   // /* allocate memory for triangle matrix */
+   // SCIP_CALL( SCIPallocBufferArray(scip, &pairweights, nitems) );
+   // for( i = 0; i < nitems; ++i )
+   // {
+   //    SCIP_CALL( SCIPallocClearBufferArray(scip, &pairweights[i], i+1) ); /*lint !e866 */
+   // }
 
    /* get fractional LP candidates */
    SCIP_CALL( SCIPgetLPBranchCands(scip, &lpcands, NULL, &lpcandsfrac, NULL, &nlpcands, NULL) );
    assert(nlpcands > 0);
+   vardata = SCIPvarGetData(lpcands[0]);
+   nconsids_main = SCIPvardataGetNConsids(vardata); // finds out  to which machine candidate[0] belongs to => branch on that machine
+
+   for( i = 0; i < nbrJobs; ++i ) {
+      for( j = 0; j < nbrJobs; ++j ) {
+         if( i != j ) {
+            float sumrequired = 0;
+            float sumforbidden = 0;
+            for( v = 0; v < nlpcands; ++v ) {
+               assert(lpcands[v] != NULL);
+               vardata = SCIPvarGetData(lpcands[v]);
+               nconsids = SCIPvardataGetNConsids(vardata);
+               s1 = SCIPvardataGetSchedule(vardata);
+               if( nconsids == nconsids_main ) {
+                  SCIP_Real solval;
+                  solval = lpcandsfrac[v];
+               }
+            }
+
+         }
+
+      }
+   }
+
 
    /* compute weights for each order pair */
    for( v = 0; v < nlpcands; ++v )
@@ -157,9 +184,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
       /* get variable data which contains the information to which constraints/items the variable belongs */
       vardata = SCIPvarGetData(lpcands[v]);
 
-      consids = SCIPvardataGetConsids(vardata);
       nconsids = SCIPvardataGetNConsids(vardata);
-      assert(nconsids > 0);
 
       /* loop over all constraints/items the variable belongs to */
       for( i = 0; i < nconsids; ++i )

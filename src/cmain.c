@@ -114,6 +114,7 @@ SCIP_RETCODE runShell(
    end endTimes;
    SCIP_VAR* ptrMakespan;
    SCIP_VAR* offset[nbrMachines];
+   SCIP_VARDATA**        vardata;
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
@@ -139,7 +140,9 @@ SCIP_RETCODE runShell(
       for( i = 0; i < mp1.lastIdx+1; ++i ) {
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
+         // SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
+         SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, iii, s1) );
+         SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, buf, 0.0, FALSE, TRUE, vardata) );
          SCIP_CALL( SCIPaddVar(scip, var) );
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
          // lambdas.lambOnMachine[iii].ptrLamb[i] = var; // NOT USED

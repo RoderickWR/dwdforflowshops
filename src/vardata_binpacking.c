@@ -35,6 +35,7 @@ struct SCIP_VarData
 {
    int*                  consids;
    int                   nconsids;
+   schedule s1;
 };
 
 /**@name Local methods
@@ -47,16 +48,18 @@ static
 SCIP_RETCODE vardataCreate(
    SCIP*                 scip,               /**< SCIP data structure */
    SCIP_VARDATA**        vardata,            /**< pointer to vardata */
-   int*                  consids,            /**< array of constraints ids */
-   int                   nconsids            /**< number of constraints */
+   // int*                  consids,            /**< array of constraints ids */
+   int                   nconsids,            /**< number of constraints */
+   schedule s1
    )
 {
    SCIP_CALL( SCIPallocBlockMemory(scip, vardata) );
 
-   SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*vardata)->consids, consids, nconsids) );
-   SCIPsortInt((*vardata)->consids, nconsids);
+   // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*vardata)->consids, consids, nconsids) );
+   // SCIPsortInt((*vardata)->consids, nconsids);
 
    (*vardata)->nconsids = nconsids;
+   (*vardata)->s1 = s1;
 
    return SCIP_OKAY;
 }
@@ -68,7 +71,7 @@ SCIP_RETCODE vardataDelete(
    SCIP_VARDATA**        vardata             /**< vardata to delete */
    )
 {
-   SCIPfreeBlockMemoryArray(scip, &(*vardata)->consids, (*vardata)->nconsids);
+   //SCIPfreeBlockMemoryArray(scip, &(*vardata)->consids, (*vardata)->nconsids);
    SCIPfreeBlockMemory(scip, vardata);
 
    return SCIP_OKAY;
@@ -103,11 +106,14 @@ SCIP_DECL_VARDELTRANS(vardataDelTrans)
 SCIP_RETCODE SCIPvardataCreateBinpacking(
    SCIP*                 scip,               /**< SCIP data structure */
    SCIP_VARDATA**        vardata,            /**< pointer to vardata */
-   int*                  consids,            /**< array of constraints ids */
-   int                   nconsids            /**< number of constraints */
+   // int*                  consids,            /**< array of constraints ids */
+   int                   nconsids,            /**< number of constraints */
+   schedule s1
    )
 {
-   SCIP_CALL( vardataCreate(scip, vardata, consids, nconsids) );
+   // SCIP_CALL( vardataCreate(scip, vardata, consids, nconsids) );
+   SCIP_CALL( vardataCreate(scip, vardata, nconsids, s1) );
+
 
    return SCIP_OKAY;
 }
@@ -118,6 +124,14 @@ int SCIPvardataGetNConsids(
    )
 {
    return vardata->nconsids;
+}
+
+/** get schedule */
+schedule SCIPvardataGetSchedule(
+   SCIP_VARDATA*         vardata             /**< variable data */
+   )
+{
+   return vardata->s1;
 }
 
 /** returns sorted constraint id array */
