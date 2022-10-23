@@ -65,7 +65,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") ); 
 
    /* include binpacking branching and branching data */
-   // SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
+   SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
    SCIP_CALL( SCIPincludeConshdlrSamediff(scip) );
    
    /* include binpacking pricer  */
@@ -108,7 +108,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
    /* create structs for pointers to all variables*/
-   lamb lambdas;
+   // lamb lambdas;
    SCIP_VAR** altLambdas[nbrMachines];
    start startTimes;
    end endTimes;
@@ -142,11 +142,12 @@ SCIP_RETCODE runShell(
          SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
          SCIP_CALL( SCIPaddVar(scip, var) );
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
-         lambdas.lambOnMachine[iii].ptrLamb[i] = var; // NOT USED
+         // lambdas.lambOnMachine[iii].ptrLamb[i] = var; // NOT USED
          altLambdas[iii][i] = var; // for now we store the lambda vars in altLambda
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
       } 
    }
+   
 
    /* create offset variables and set offset pointers*/
    for( iii = 0; iii< s1.lastIdx+1; ++iii ) {
@@ -191,7 +192,7 @@ SCIP_RETCODE runShell(
       sprintf(buf, "convM%d", iii);
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
       for( i = 0; i < mp1.lastIdx+1; ++i ) { 
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambdas.lambOnMachine[iii].ptrLamb[i], 1.0) );
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, altLambdas[iii][i], 1.0) );
       }
       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
       SCIP_CALL(SCIPaddCons(scip,cons));

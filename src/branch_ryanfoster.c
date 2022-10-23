@@ -130,9 +130,9 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    *result = SCIP_DIDNOTRUN;
 
    probdata = SCIPgetProbData(scip);
-   assert(probdata != NULL);
+   // assert(probdata != NULL);
 
-   nitems = SCIPprobdataGetNItems(probdata);
+   // nitems = SCIPprobdataGetNItems(probdata);
 
    /* allocate memory for triangle matrix */
    SCIP_CALL( SCIPallocBufferArray(scip, &pairweights, nitems) );
