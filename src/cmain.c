@@ -141,7 +141,7 @@ SCIP_RETCODE runShell(
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
          // SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
-         SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, iii, s1) );
+         SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, iii, s1, i) );
          SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, buf, 0.0, FALSE, TRUE, vardata) );
          SCIP_CALL( SCIPaddVar(scip, var) );
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example

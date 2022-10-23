@@ -1,7 +1,14 @@
 {
     "files.associations": {
         "vector": "c",
-        "random": "c"
+        "random": "c",
+        "*.tcc": "c",
+        "chrono": "c",
+        "string_view": "c",
+        "algorithm": "c",
+        "istream": "c",
+        "limits": "c",
+        "numeric": "c"
     },
     "cmake.configureOnOpen": false
 }

@@ -98,6 +98,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    SCIP_PROBDATA* probdata;
    int nbrJobs = 2;
    schedule s1;
+   int patternid;
    SCIP_Real** pairweights;
    SCIP_VAR** lpcands;
    SCIP_Real* lpcandsfrac;
@@ -120,6 +121,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    int id2;
 
    int i;
+   int ii;
    int j;
    int v;
 
@@ -149,6 +151,10 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    assert(nlpcands > 0);
    vardata = SCIPvarGetData(lpcands[0]);
    nconsids_main = SCIPvardataGetNConsids(vardata); // finds out  to which machine candidate[0] belongs to => branch on that machine
+   float ratio_branches_new = 0;
+   float ratio_branches = 0;
+   int i_found = -1;
+   int j_found = -1;
 
    for( i = 0; i < nbrJobs; ++i ) {
       for( j = 0; j < nbrJobs; ++j ) {
@@ -160,12 +166,27 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
                vardata = SCIPvarGetData(lpcands[v]);
                nconsids = SCIPvardataGetNConsids(vardata);
                s1 = SCIPvardataGetSchedule(vardata);
+               patternid = SCIPvardataGetPatternid(vardata);
                if( nconsids == nconsids_main ) {
                   SCIP_Real solval;
                   solval = lpcandsfrac[v];
+                  if( s1.sched[nconsids_main].mp[patternid].job[i].start < s1.sched[nconsids_main].mp[patternid].job[j].start ) {
+                     sumrequired += solval;
+                  }
+                  else {
+                     sumforbidden += solval;
+                  }
+                  
+                  
                }
             }
-
+            // after lp cands were checked compute ratio
+            ratio_branches_new = fmin(sumrequired,sumforbidden)/fmax(sumrequired,sumforbidden);
+            if( ratio_branches_new > ratio_branches ) {
+               ratio_branches = ratio_branches_new;
+               i_found = i;
+               j_found = j;
+            }
          }
 
       }
