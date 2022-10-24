@@ -97,7 +97,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
 {  /*lint --e{715}*/
    SCIP_PROBDATA* probdata;
    int nbrJobs = 2;
-   schedule s1;
+   schedule* s1;
    int patternid;
    SCIP_Real** pairweights;
    SCIP_VAR** lpcands;
@@ -170,7 +170,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
                if( nconsids == nconsids_main ) {
                   SCIP_Real solval;
                   solval = lpcandsfrac[v];
-                  if( s1.sched[nconsids_main].mp[patternid].job[i].start < s1.sched[nconsids_main].mp[patternid].job[j].start ) {
+                  if( s1->sched[nconsids_main].mp[patternid].job[i].start < s1->sched[nconsids_main].mp[patternid].job[j].start ) {
                      sumrequired += solval;
                   }
                   else {
@@ -182,7 +182,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
             }
             // after lp cands were checked compute ratio
             ratio_branches_new = fmin(sumrequired,sumforbidden)/fmax(sumrequired,sumforbidden);
-            if( ratio_branches_new > ratio_branches ) {
+            if( ratio_branches_new >= ratio_branches ) {
                ratio_branches = ratio_branches_new;
                i_found = i;
                j_found = j;

@@ -117,7 +117,7 @@ struct SCIP_PricerData
    SCIP_CONS**           makespanCons;
    SCIP_VAR**            altLambdas0;
    SCIP_VAR**            altLambdas1;
-   
+   schedule* s1;
  
 };
 
@@ -714,9 +714,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_VAR** endVars;
    SCIP_VAR** orderVars;
    SCIP_VAR** altLambdas[2];
+   schedule* s1;
    int* ids;
    SCIP_Bool addvar;
    SCIP_Bool allSubsOptimal = TRUE;
+   char buf[256];
 
    SCIP_SOL** sols;
    int nsols;
@@ -863,6 +865,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             int nconss;
             int o;
             int v;
+            s1 = pricerdata->s1;
 
             SCIPdebug( SCIP_CALL( SCIPprintSol(subscip[i], sol, NULL, FALSE) ) );
 
@@ -903,23 +906,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) ); /* für neue Patternvarriablen als BIN [0,1] und zusätzliche changVarLazyUB sondern  inf und hier mitteilen */
             // create new variable and adjust params
             SCIP_VAR* newVar = NULL;
-            SCIP_CALL(SCIPcreateVarBasic(scip, &newVar, "newVar", 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
-            /* set initial and removable flag */
-            SCIP_CALL( SCIPvarSetInitial(newVar, FALSE) );
-            SCIP_CALL( SCIPvarSetRemovable(newVar, TRUE) );
-            SCIPvarMarkDeletable(newVar);
-            /* add the new variable to the pricer store */
-            SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) );
+            sprintf(buf, "lambM%dP%d", i,s1->sched[i].lastIdx); // create name of new pattern var
+            SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx) );
+            s1->sched[i].lastIdx = s1->sched[i].lastIdx + 1;
+            SCIP_CALL( SCIPcreateVarBinpacking(scip, &newVar, buf, 0.0, FALSE, TRUE, vardata) );
+            SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
+            SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
+
             size_t n = sizeof(altLambdas[i])/sizeof(altLambdas[i][0]); // get the index of last lambda in array
             altLambdas[i][n] = newVar; // add the new var to the lambdas array
             addvar = TRUE;
-
-            /* change the upper bound of the binary variable to lazy since the upper bound is already enforced due to
-            * the objective function the set covering constraint; The reason for doing is that, is to avoid the bound
-            * of x <= 1 in the LP relaxation since this bound constraint would produce a dual variable which might have
-            * a positive reduced cost
-            */
-            SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) ); /* für neue Patternvarriablen  sondern  inf und hier mitteilen */
 
             // /* check which variable are fixed -> which orders belong to this packing */
             // for( v = 0; v < nconss; ++v )
@@ -940,6 +936,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
                
             }
 
+            SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
             SCIPfreeBufferArray(scip, &completionTimes);
             SCIPfreeBufferArray(scip, &startingTimes);
          }
@@ -1052,7 +1049,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           endCons,
    SCIP_CONS**           makespanCons,
    SCIP_VAR**            altLambdas0,
-   SCIP_VAR**            altLambdas1
+   SCIP_VAR**            altLambdas1,
+   schedule* s1
    
    )
 {
@@ -1078,6 +1076,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->nbrJobs  = nbrJobs;
    pricerdata->altLambdas0  = altLambdas0;
    pricerdata->altLambdas1  = altLambdas1;
+   pricerdata->s1  = s1;
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {

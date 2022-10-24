@@ -47,7 +47,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           endCons,
    SCIP_CONS**           makespanCons,
    SCIP_VAR**            altLambdas0,
-   SCIP_VAR**            altLambdas1
+   SCIP_VAR**            altLambdas1,
+   schedule* s1
 
    );
 

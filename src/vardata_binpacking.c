@@ -35,7 +35,7 @@ struct SCIP_VarData
 {
    int*                  consids;
    int                   nconsids;
-   schedule s1;
+   schedule* s1;
    int patternid;
 };
 
@@ -51,7 +51,7 @@ SCIP_RETCODE vardataCreate(
    SCIP_VARDATA**        vardata,            /**< pointer to vardata */
    // int*                  consids,            /**< array of constraints ids */
    int                   nconsids,            /**< number of constraints */
-   schedule s1,
+   schedule* s1,
    int patternid
    )
 {
@@ -111,7 +111,7 @@ SCIP_RETCODE SCIPvardataCreateBinpacking(
    SCIP_VARDATA**        vardata,            /**< pointer to vardata */
    // int*                  consids,            /**< array of constraints ids */
    int                   nconsids,            /**< number of constraints */
-   schedule s1,
+   schedule* s1,
    int patternid
    )
 {
@@ -131,7 +131,7 @@ int SCIPvardataGetNConsids(
 }
 
 /** get schedule */
-schedule SCIPvardataGetSchedule(
+schedule* SCIPvardataGetSchedule(
    SCIP_VARDATA*         vardata             /**< variable data */
    )
 {
