@@ -28,6 +28,18 @@
 
 #include "scip/scip.h"
 
+struct SCIP_ProbData
+{
+   SCIP_VAR**            vars;         /**< all exiting variables in the problem */
+   SCIP_CONS**           conss;        /**< set partitioning constraints for each item exactly one */
+   SCIP_Longint*         weights;      /**< array of item weights */
+   int*                  ids;          /**< array of item ids */
+   int                   nvars;        /**< number of generated variables */
+   int                   varssize;     /**< size of the variable array */
+   int                   nitems;       /**< number of items */
+   SCIP_Longint          capacity;     /**< bin capacity */
+};
+
 /* typedefs for flowshop*/
 /* singlePattern (sPat) struct contains start and end time of one job*/
 typedef struct sPat {
@@ -95,6 +107,18 @@ SCIP_RETCODE SCIPprobdataCreate(
    SCIP_Longint          capacity            /**< bin capacity */
    );
 
+SCIP_RETCODE probdataCreate(
+   SCIP*                 scip,               /**< SCIP data structure */
+   SCIP_PROBDATA**       probdata,           /**< pointer to problem data */
+   // SCIP_VAR**            vars,               /**< all exist variables */
+   // SCIP_CONS**           conss,              /**< set partitioning constraints for each job exactly one */
+   // SCIP_Longint*         weights,            /**< array containing the item weights */
+   // int*                  ids,                /**< array of item ids */
+   int                   nvars              /**< number of variables */
+   // int                   nitems,             /**< number of items */
+   // SCIP_Longint          capacity            /**< bin capacity */
+   );
+   
 /** returns array of item ids */
 int* SCIPprobdataGetIds(
    SCIP_PROBDATA*        probdata            /**< problem data */

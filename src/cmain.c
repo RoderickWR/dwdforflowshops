@@ -34,6 +34,7 @@
 #include "pricer_binpacking.h"
 #include "reader_bpa.h"
 #include "probdata_binpacking.h"
+#include "vardata_binpacking.h"
 
 #include "gnuplot.h" //* stattdessen csv datei schreiben und in python plotten*/
 
@@ -64,6 +65,10 @@ SCIP_RETCODE runShell(
    /* create problem in SCIP and add non-NULL callbacks via setter functions */
    SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") ); 
 
+   SCIP_PROBDATA* probdata;
+   SCIP_CALL( probdataCreate(scip, &probdata, 0) );
+   SCIP_CALL( SCIPsetProbData(scip, probdata) );
+
    /* include binpacking branching and branching data */
    SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
    SCIP_CALL( SCIPincludeConshdlrSamediff(scip) );
@@ -89,6 +94,7 @@ SCIP_RETCODE runShell(
    /* initialize singlePattern*/
    int nbrJobs = 2;
    int nbrMachines = 2;
+   int nvars = 0;
    sPat sp1 = {0.0, 7.0};
    sPat sp2 = {7.0, 8.0};
    sPat sp3 = {7.0, 9.0};
@@ -114,7 +120,7 @@ SCIP_RETCODE runShell(
    end endTimes;
    SCIP_VAR* ptrMakespan;
    SCIP_VAR* offset[nbrMachines];
-   SCIP_VARDATA**        vardata;
+   SCIP_VARDATA*        vardata;
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
@@ -148,9 +154,10 @@ SCIP_RETCODE runShell(
          // lambdas.lambOnMachine[iii].ptrLamb[i] = var; // NOT USED
          altLambdas[iii][i] = var; // for now we store the lambda vars in altLambda
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
+         nvars++;
       } 
    }
-   
+   probdata->nvars = nvars;
 
    /* create offset variables and set offset pointers*/
    for( iii = 0; iii< s1.lastIdx+1; ++iii ) {

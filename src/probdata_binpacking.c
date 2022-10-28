@@ -73,18 +73,6 @@
  * This problem data is used to store the input of the binpacking, all variables which are created, and all
  * constrsaints.
  */
-struct SCIP_ProbData
-{
-   SCIP_VAR**            vars;         /**< all exiting variables in the problem */
-   SCIP_CONS**           conss;        /**< set partitioning constraints for each item exactly one */
-   SCIP_Longint*         weights;      /**< array of item weights */
-   int*                  ids;          /**< array of item ids */
-   int                   nvars;        /**< number of generated variables */
-   int                   varssize;     /**< size of the variable array */
-   int                   nitems;       /**< number of items */
-   SCIP_Longint          capacity;     /**< bin capacity */
-};
-
 
 /**@name Event handler properties
  *
@@ -127,17 +115,17 @@ SCIP_DECL_EVENTEXEC(eventExecAddedVar)
  */
 
 /** creates problem data */
-static
+// static
 SCIP_RETCODE probdataCreate(
    SCIP*                 scip,               /**< SCIP data structure */
    SCIP_PROBDATA**       probdata,           /**< pointer to problem data */
-   SCIP_VAR**            vars,               /**< all exist variables */
-   SCIP_CONS**           conss,              /**< set partitioning constraints for each job exactly one */
-   SCIP_Longint*         weights,            /**< array containing the item weights */
-   int*                  ids,                /**< array of item ids */
-   int                   nvars,              /**< number of variables */
-   int                   nitems,             /**< number of items */
-   SCIP_Longint          capacity            /**< bin capacity */
+   // SCIP_VAR**            vars,               /**< all exist variables */
+   // SCIP_CONS**           conss,              /**< set partitioning constraints for each job exactly one */
+   // SCIP_Longint*         weights,            /**< array containing the item weights */
+   // int*                  ids,                /**< array of item ids */
+   int                   nvars              /**< number of variables */
+   // int                   nitems,             /**< number of items */
+   // SCIP_Longint          capacity            /**< bin capacity */
    )
 {
    assert(scip != NULL);
@@ -146,23 +134,23 @@ SCIP_RETCODE probdataCreate(
    /* allocate memory */
    SCIP_CALL( SCIPallocBlockMemory(scip, probdata) );
 
-   if( nvars > 0 )
-   {
-      /* copy variable array */
-      SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->vars, vars, nvars) );
-   }
-   else
-      (*probdata)->vars = NULL;
+   // if( nvars > 0 )
+   // {
+   //    /* copy variable array */
+   //    SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->vars, vars, nvars) );
+   // }
+   // else
+   //    (*probdata)->vars = NULL;
 
-   /* duplicate arrays */
-   SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->conss, conss, nitems) );
-   SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->weights, weights, nitems) );
-   SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->ids, ids, nitems) );
+   // /* duplicate arrays */
+   // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->conss, conss, nitems) );
+   // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->weights, weights, nitems) );
+   // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->ids, ids, nitems) );
 
    (*probdata)->nvars = nvars;
-   (*probdata)->varssize = nvars;
-   (*probdata)->nitems = nitems;
-   (*probdata)->capacity = capacity;
+   // (*probdata)->varssize = nvars;
+   // (*probdata)->nitems = nitems;
+   // (*probdata)->capacity = capacity;
 
    return SCIP_OKAY;
 }
@@ -293,8 +281,7 @@ static
 SCIP_DECL_PROBTRANS(probtransBinpacking)
 {
    /* create transform probdata */
-   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->vars, sourcedata->conss, sourcedata->weights, sourcedata->ids,
-         sourcedata->nvars, sourcedata->nitems, sourcedata->capacity) );
+   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->nvars) );
 
    /* transform all constraints */
    SCIP_CALL( SCIPtransformConss(scip, (*targetdata)->nitems, (*targetdata)->conss, (*targetdata)->conss) );
@@ -411,7 +398,7 @@ SCIP_RETCODE SCIPprobdataCreate(
    }   
    
    /* create problem data */
-   SCIP_CALL( probdataCreate(scip, &probdata, NULL, conss, weights, ids, 0, nitems, capacity) );
+   SCIP_CALL( probdataCreate(scip, &probdata, nitems) );
 
    SCIP_CALL( createInitialColumns(scip, probdata) );
 

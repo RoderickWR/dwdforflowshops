@@ -33,7 +33,7 @@ SCIP_RETCODE SCIPvardataCreateBinpacking(
    SCIP*                 scip,               /**< SCIP data structure */
    SCIP_VARDATA**        vardata,            /**< pointer to vardata */
    // int*                  consids,            /**< array of constraints ids */
-   int                   nconss,              /**< number of constraints */
+   int                   nconsids,            /**< number of constraints */
    schedule* s1,
    int patternid
    );
