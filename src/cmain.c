@@ -114,8 +114,6 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
    /* create structs for pointers to all variables*/
-   // lamb lambdas;
-   SCIP_VAR** altLambdas[nbrMachines];
    start startTimes;
    end endTimes;
    SCIP_VAR* ptrMakespan;
@@ -123,10 +121,10 @@ SCIP_RETCODE runShell(
    SCIP_VARDATA*        vardata;
    // NEW
    int iv;
-   SCIP_VAR*** arr2;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &arr2, nbrMachines*sizeof(SCIP_VAR**)) );
+   SCIP_VAR*** lambArr;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr, nbrMachines*sizeof(SCIP_VAR**)) );
    for( iv = 0; iv< nbrMachines; ++iv ) {
-      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &arr2[iv], 100*sizeof(SCIP_VAR*)) );
+      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], 100*sizeof(SCIP_VAR*)) );
    }
    // NEW END
 
@@ -139,10 +137,6 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs) );
    SCIP_CONS** makespanCons;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &makespanCons, nbrJobs) );
-
-   // allocate for lambdas 100 slots per machine
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &altLambdas[0], 100) );
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &altLambdas[1], 100) );
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
@@ -159,9 +153,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, buf, 0.0, FALSE, TRUE, vardata) );
          SCIP_CALL( SCIPaddVar(scip, var) );
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
-         // lambdas.lambOnMachine[iii].ptrLamb[i] = var; // NOT USED
-         altLambdas[iii][i] = var; // for now we store the lambda vars in altLambda
-         arr2[iii][i] = var;
+         lambArr[iii][i] = var;
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
          nvars++;
       } 
@@ -212,7 +204,7 @@ SCIP_RETCODE runShell(
       sprintf(buf, "convM%d", iii);
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
       for( i = 0; i < mp1.lastIdx+1; ++i ) { 
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, altLambdas[iii][i], 1.0) );
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][i], 1.0) );
       }
       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
       SCIP_CALL(SCIPaddCons(scip,cons));
@@ -225,8 +217,7 @@ SCIP_RETCODE runShell(
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
          for( ii=0; ii< mp1.lastIdx+1; ii++) {        
-            // SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambdas.lambOnMachine[iii].ptrLamb[ii], s1.sched[iii].mp[ii].job[i].start) );
-            SCIP_CALL( SCIPaddCoefLinear(scip, cons, altLambdas[iii][ii], s1.sched[iii].mp[ii].job[i].start) );
+            SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1.sched[iii].mp[ii].job[i].start) );
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
@@ -242,8 +233,7 @@ SCIP_RETCODE runShell(
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
          for( ii=0; ii< mp1.lastIdx+1; ii++) {   
-            // SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambdas.lambOnMachine[iii].ptrLamb[ii], s1.sched[iii].mp[ii].job[i].end) );
-            SCIP_CALL( SCIPaddCoefLinear(scip, cons, altLambdas[iii][ii], s1.sched[iii].mp[ii].job[i].end) );
+            SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1.sched[iii].mp[ii].job[i].end) );
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
@@ -292,7 +282,7 @@ SCIP_RETCODE runShell(
    }
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, altLambdas[0], altLambdas[1], &s1, arr2)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, &s1, lambArr)); 
 
 
    SCIPsolve(scip);

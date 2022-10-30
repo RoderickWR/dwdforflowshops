@@ -115,10 +115,8 @@ struct SCIP_PricerData
    SCIP_CONS**           startCons;
    SCIP_CONS**           endCons;
    SCIP_CONS**           makespanCons;
-   SCIP_VAR**            altLambdas0;
-   SCIP_VAR**            altLambdas1;
    schedule* s1;
-   SCIP_VAR*** arr2;
+   SCIP_VAR*** lambArr;
  
 };
 
@@ -714,9 +712,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_VAR** startVars;
    SCIP_VAR** endVars;
    SCIP_VAR** orderVars;
-   SCIP_VAR** altLambdas[2];
    schedule* s1;
-   SCIP_VAR*** arr2;
+   SCIP_VAR*** lambArr;
    int* ids;
    SCIP_Bool addvar;
    SCIP_Bool allSubsOptimal = TRUE;
@@ -770,9 +767,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
    pt1 = pricerdata->pt1;
-   altLambdas[0] = pricerdata->altLambdas0;
-   altLambdas[1] = pricerdata->altLambdas1;
-   arr2 = pricerdata->arr2;
+   lambArr = pricerdata->lambArr;
 
    SCIP* subscip[nbrJobs];
    
@@ -915,10 +910,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
             SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
 
-            size_t n = sizeof(altLambdas[i])/sizeof(altLambdas[i][0]); // get the index of last lambda in array
-            size_t n2 = sizeof(arr2[i])/sizeof(arr2[i][0]); // get the index of last lambda in array
-            altLambdas[i][n] = newVar; // add the new var to the lambdas array
-            arr2[i][n2] = newVar; // add the new var to the lambdas array
+            size_t n = sizeof(lambArr[i])/sizeof(lambArr[i][0]); // get the index of last lambda in array
+            lambArr[i][n] = newVar; // add the new var to the lambdas array
             addvar = TRUE;
 
             // /* check which variable are fixed -> which orders belong to this packing */
@@ -931,12 +924,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // SCIPdebug(SCIPprintVar(scip, var, NULL) );
 
             // modify convexity constr on machine i in master problem
-            SCIPaddCoefLinear(scip, convexityCons[i], altLambdas[i][n], 1.0);
+            SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][n], 1.0);
             // modify start and end time constr in master problem
             int j;
             for( j = 0; j < nbrJobs; ++j ) {
-               SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], altLambdas[i][n], SCIPgetSolVal(subscip[i], sol, startVars[j]));
-               SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], altLambdas[i][n], SCIPgetSolVal(subscip[i], sol, endVars[j]));
+               SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][n], SCIPgetSolVal(subscip[i], sol, startVars[j]));
+               SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][n], SCIPgetSolVal(subscip[i], sol, endVars[j]));
                
             }
 
@@ -1024,8 +1017,7 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->makespanCons = NULL;
    pricerdata->nbrMachines = 0;
    pricerdata->nbrJobs = 0;
-   pricerdata->altLambdas0 = NULL;
-   pricerdata->altLambdas1 = NULL;
+   pricerdata->lambArr = NULL;
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
@@ -1052,10 +1044,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           startCons,
    SCIP_CONS**           endCons,
    SCIP_CONS**           makespanCons,
-   SCIP_VAR**            altLambdas0,
-   SCIP_VAR**            altLambdas1,
    schedule* s1,
-   SCIP_VAR*** arr2
+   SCIP_VAR*** lambArr
    
    )
 {
@@ -1079,10 +1069,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->makespanCons = makespanCons;
    pricerdata->nbrMachines  = nbrMachines;
    pricerdata->nbrJobs  = nbrJobs;
-   pricerdata->altLambdas0  = altLambdas0;
-   pricerdata->altLambdas1  = altLambdas1;
    pricerdata->s1  = s1;
-   pricerdata->arr2  = arr2;
+   pricerdata->lambArr  = lambArr;
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {
