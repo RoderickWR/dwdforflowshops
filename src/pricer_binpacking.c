@@ -118,6 +118,7 @@ struct SCIP_PricerData
    SCIP_VAR**            altLambdas0;
    SCIP_VAR**            altLambdas1;
    schedule* s1;
+   SCIP_VAR*** arr2;
  
 };
 
@@ -715,6 +716,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_VAR** orderVars;
    SCIP_VAR** altLambdas[2];
    schedule* s1;
+   SCIP_VAR*** arr2;
    int* ids;
    SCIP_Bool addvar;
    SCIP_Bool allSubsOptimal = TRUE;
@@ -770,7 +772,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    pt1 = pricerdata->pt1;
    altLambdas[0] = pricerdata->altLambdas0;
    altLambdas[1] = pricerdata->altLambdas1;
-
+   arr2 = pricerdata->arr2;
 
    SCIP* subscip[nbrJobs];
    
@@ -914,7 +916,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
 
             size_t n = sizeof(altLambdas[i])/sizeof(altLambdas[i][0]); // get the index of last lambda in array
+            size_t n2 = sizeof(arr2[i])/sizeof(arr2[i][0]); // get the index of last lambda in array
             altLambdas[i][n] = newVar; // add the new var to the lambdas array
+            arr2[i][n2] = newVar; // add the new var to the lambdas array
             addvar = TRUE;
 
             // /* check which variable are fixed -> which orders belong to this packing */
@@ -1050,7 +1054,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           makespanCons,
    SCIP_VAR**            altLambdas0,
    SCIP_VAR**            altLambdas1,
-   schedule* s1
+   schedule* s1,
+   SCIP_VAR*** arr2
    
    )
 {
@@ -1077,6 +1082,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->altLambdas0  = altLambdas0;
    pricerdata->altLambdas1  = altLambdas1;
    pricerdata->s1  = s1;
+   pricerdata->arr2  = arr2;
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {

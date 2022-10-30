@@ -40,6 +40,11 @@ struct SCIP_ProbData
    SCIP_Longint          capacity;     /**< bin capacity */
 };
 
+typedef struct aLambdas {
+   SCIP_VAR***           vars; 
+   int*                  lastIdxs[2]; 
+} aLambdas;
+
 /* typedefs for flowshop*/
 /* singlePattern (sPat) struct contains start and end time of one job*/
 typedef struct sPat {

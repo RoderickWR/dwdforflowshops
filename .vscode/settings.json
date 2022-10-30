@@ -9,7 +9,8 @@
         "istream": "c",
         "limits": "c",
         "numeric": "c",
-        "probdata_binpacking.h": "c"
+        "probdata_binpacking.h": "c",
+        "scip.h": "c"
     },
     "cmake.configureOnOpen": false
 }

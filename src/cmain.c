@@ -121,6 +121,14 @@ SCIP_RETCODE runShell(
    SCIP_VAR* ptrMakespan;
    SCIP_VAR* offset[nbrMachines];
    SCIP_VARDATA*        vardata;
+   // NEW
+   int iv;
+   SCIP_VAR*** arr2;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &arr2, nbrMachines*sizeof(SCIP_VAR**)) );
+   for( iv = 0; iv< nbrMachines; ++iv ) {
+      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &arr2[iv], 100*sizeof(SCIP_VAR*)) );
+   }
+   // NEW END
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
@@ -153,10 +161,12 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
          // lambdas.lambOnMachine[iii].ptrLamb[i] = var; // NOT USED
          altLambdas[iii][i] = var; // for now we store the lambda vars in altLambda
+         arr2[iii][i] = var;
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
          nvars++;
       } 
    }
+   
    probdata->nvars = nvars;
 
    /* create offset variables and set offset pointers*/
@@ -282,7 +292,7 @@ SCIP_RETCODE runShell(
    }
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, altLambdas[0], altLambdas[1], &s1)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, altLambdas[0], altLambdas[1], &s1, arr2)); 
 
 
    SCIPsolve(scip);
