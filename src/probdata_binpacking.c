@@ -123,7 +123,7 @@ SCIP_RETCODE probdataCreate(
    // SCIP_CONS**           conss,              /**< set partitioning constraints for each job exactly one */
    // SCIP_Longint*         weights,            /**< array containing the item weights */
    // int*                  ids,                /**< array of item ids */
-   int                   nvars              /**< number of variables */
+   int**                   nvars              /**< number of variables */
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
    )
@@ -168,7 +168,7 @@ SCIP_RETCODE probdataFree(
    assert(probdata != NULL);
 
    /* release all variables */
-   for( i = 0; i < (*probdata)->nvars; ++i )
+   for( i = 0; i < *((*probdata)->nvars[0]); ++i ) //FIXME
    {
       SCIP_CALL( SCIPreleaseVar(scip, &(*probdata)->vars[i]) );
    }
@@ -287,7 +287,7 @@ SCIP_DECL_PROBTRANS(probtransBinpacking)
    SCIP_CALL( SCIPtransformConss(scip, (*targetdata)->nitems, (*targetdata)->conss, (*targetdata)->conss) );
 
    /* transform all variables */
-   SCIP_CALL( SCIPtransformVars(scip, (*targetdata)->nvars, (*targetdata)->vars, (*targetdata)->vars) );
+   SCIP_CALL( SCIPtransformVars(scip, *((*targetdata)->nvars[0]), (*targetdata)->vars, (*targetdata)->vars) );
 
    return SCIP_OKAY;
 }
@@ -398,7 +398,7 @@ SCIP_RETCODE SCIPprobdataCreate(
    }   
    
    /* create problem data */
-   SCIP_CALL( probdataCreate(scip, &probdata, nitems) );
+   //SCIP_CALL( probdataCreate(scip, &probdata, nitems) );
 
    SCIP_CALL( createInitialColumns(scip, probdata) );
 
@@ -412,6 +412,15 @@ SCIP_RETCODE SCIPprobdataCreate(
 
    return SCIP_OKAY;
 }
+
+/** returns array of lambda variables */
+SCIP_VAR***  SCIPprobdataGetLambArr(
+   SCIP_PROBDATA*        probdata            /**< problem data */
+   )
+{
+   return probdata->lambArr;
+}
+
 
 /** returns array of item ids */
 int* SCIPprobdataGetIds(
@@ -454,7 +463,7 @@ SCIP_VAR** SCIPprobdataGetVars(
 }
 
 /** returns number of variables */
-int SCIPprobdataGetNVars(
+int** SCIPprobdataGetNVars(
    SCIP_PROBDATA*        probdata            /**< problem data */
    )
 {
@@ -477,7 +486,7 @@ SCIP_RETCODE SCIPprobdataAddVar(
    )
 {
    /* check if enough memory is left */
-   if( probdata->varssize == probdata->nvars )
+   if( probdata->varssize == *(probdata->nvars[0]) ) //FIXME
    {
       int newsize;
       newsize = MAX(100, probdata->varssize * 2);
@@ -488,10 +497,10 @@ SCIP_RETCODE SCIPprobdataAddVar(
    /* caputure variables */
    SCIP_CALL( SCIPcaptureVar(scip, var) );
 
-   probdata->vars[probdata->nvars] = var;
-   probdata->nvars++;
+   probdata->vars[*(probdata->nvars[0])] = var; //FIXME
+   *(probdata->nvars[0])++;
 
-   SCIPdebugMsg(scip, "added variable to probdata; nvars = %d\n", probdata->nvars);
+   SCIPdebugMsg(scip, "added variable to probdata; nvars = %d\n", *(probdata->nvars[0]));
 
    return SCIP_OKAY;
 }

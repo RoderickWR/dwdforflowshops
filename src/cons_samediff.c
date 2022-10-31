@@ -195,7 +195,7 @@ SCIP_RETCODE consdataFixVariables(
    SCIP*                 scip,               /**< SCIP data structure */
    SCIP_CONSDATA*        consdata,           /**< constraint data */
    SCIP_VAR**            vars,               /**< generated variables */
-   int                   nvars,              /**< number of generated variables */
+   int**                   nvars,              /**< number of generated variables */
    SCIP_RESULT*          result              /**< pointer to store the result of the fixing */
    )
 {
@@ -206,9 +206,9 @@ SCIP_RETCODE consdataFixVariables(
    nfixedvars = 0;
    cutoff = FALSE;
 
-   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, nvars);
+   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, nvars[0]); //FIXME
 
-   for( v = consdata->npropagatedvars; v < nvars && !cutoff; ++v )
+   for( v = consdata->npropagatedvars; v < nvars[0] && !cutoff; ++v ) //FIXME
    {
       SCIP_CALL( checkVariable(scip, consdata, vars[v], &nfixedvars, &cutoff) );
    }
@@ -235,7 +235,8 @@ SCIP_Bool consdataCheck(
    )
 {
    SCIP_VAR** vars;
-   int nvars;
+   SCIP_VAR*** lambArr;
+   int** nvars;
 
    SCIP_VARDATA* vardata;
    SCIP_VAR* var;
@@ -248,38 +249,40 @@ SCIP_Bool consdataCheck(
 
    int pos;
    int v;
+   int i;
 
    vars = SCIPprobdataGetVars(probdata);
+   lambArr = SCIPprobdataGetLambArr(probdata);
    nvars = (beforeprop ? consdata->npropagatedvars : SCIPprobdataGetNVars(probdata));
    assert(nvars <= SCIPprobdataGetNVars(probdata));
-
-   for( v = 0; v < nvars; ++v )
-   {
-      var = vars[v];
-
-      /* if variables is locally fixed to zero continue */
-      if( SCIPvarGetUbLocal(var) < 0.5 )
-         continue;
-
-      /* check if the packing which corresponds to the variable is feasible for this constraint */
-      vardata = SCIPvarGetData(var);
-
-      nconsids = SCIPvardataGetNConsids(vardata);
-      consids = SCIPvardataGetConsids(vardata);
-
-      existid1 = SCIPsortedvecFindInt(consids, consdata->itemid1, nconsids, &pos);
-      existid2 = SCIPsortedvecFindInt(consids, consdata->itemid2, nconsids, &pos);
-      type = consdata->type;
-
-      if( (type == SAME && existid1 != existid2) || (type == DIFFER && existid1 && existid2) )
+   for( i = 0; i < 2; ++i ) { // TODO replace with nbrMachines
+      for( v = 0; v < nvars; ++v )
       {
-         SCIPdebug( SCIPvardataPrint(scip, vardata, NULL) );
-         SCIPdebug( consdataPrint(scip, consdata, NULL) );
-         SCIPdebug( SCIPprintVar(scip, var, NULL) );
-         return FALSE;
+         var = lambArr[i][v];
+
+         /* if variables is locally fixed to zero continue */
+         if( SCIPvarGetUbLocal(var) < 0.5 )
+            continue;
+
+         /* check if the packing which corresponds to the variable is feasible for this constraint */
+         vardata = SCIPvarGetData(var);
+
+         nconsids = SCIPvardataGetNConsids(vardata);
+         consids = SCIPvardataGetConsids(vardata);
+
+         existid1 = SCIPsortedvecFindInt(consids, consdata->itemid1, nconsids, &pos);
+         existid2 = SCIPsortedvecFindInt(consids, consdata->itemid2, nconsids, &pos);
+         type = consdata->type;
+
+         if( (type == SAME && existid1 != existid2) || (type == DIFFER && existid1 && existid2) )
+         {
+            SCIPdebug( SCIPvardataPrint(scip, vardata, NULL) );
+            SCIPdebug( consdataPrint(scip, consdata, NULL) );
+            SCIPdebug( SCIPprintVar(scip, var, NULL) );
+            return FALSE;
+         }
       }
    }
-
    return TRUE;
 }
 #endif
@@ -369,8 +372,9 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    SCIP_CONSDATA* consdata;
 
    SCIP_VAR** vars;
-   int nvars;
+   int** nvars;
    int c;
+   SCIP_VAR*** lambArr;
 
    assert(scip != NULL);
    assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
@@ -383,6 +387,7 @@ SCIP_DECL_CONSPROP(consPropSamediff)
 
    vars = SCIPprobdataGetVars(probdata);
    nvars = SCIPprobdataGetNVars(probdata);
+   lambArr = SCIPprobdataGetLambArr(probdata);
 
    *result = SCIP_DIDNOTFIND;
 
