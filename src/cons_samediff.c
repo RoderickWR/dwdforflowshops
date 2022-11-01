@@ -67,6 +67,7 @@ struct SCIP_ConsData
    int                   npropagations;      /**< stores the number propagations runs of this constraint */
    unsigned int          propagated:1;       /**< is constraint already propagated? */
    SCIP_NODE*            node;               /**< the node in the B&B-tree at which the cons is sticking */
+   int                   machineIdx;
 };
 
 /**@name Local methods
@@ -82,7 +83,8 @@ SCIP_RETCODE consdataCreate(
    int                   itemid1,            /**< item id one */
    int                   itemid2,            /**< item id two */
    CONSTYPE              type,               /**< stores whether the items have to be in the SAME or DIFFER packing */
-   SCIP_NODE*            node                /**< the node in the B&B-tree at which the cons is sticking */
+   SCIP_NODE*            node,                /**< the node in the B&B-tree at which the cons is sticking */
+   int                   machineIdx
    )
 {
    assert( scip != NULL );
@@ -100,6 +102,7 @@ SCIP_RETCODE consdataCreate(
    (*consdata)->npropagations = 0;
    (*consdata)->propagated = FALSE;
    (*consdata)->node = node;
+   (*consdata)->machineIdx = machineIdx;
 
    return SCIP_OKAY;
 }
@@ -206,9 +209,9 @@ SCIP_RETCODE consdataFixVariables(
    nfixedvars = 0;
    cutoff = FALSE;
 
-   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, nvars[0]); //FIXME
+   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, *(nvars[0])); //FIXME
 
-   for( v = consdata->npropagatedvars; v < nvars[0] && !cutoff; ++v ) //FIXME
+   for( v = consdata->npropagatedvars; v < *(nvars[0]) && !cutoff; ++v ) //FIXME
    {
       SCIP_CALL( checkVariable(scip, consdata, vars[v], &nfixedvars, &cutoff) );
    }
@@ -253,10 +256,12 @@ SCIP_Bool consdataCheck(
 
    vars = SCIPprobdataGetVars(probdata);
    lambArr = SCIPprobdataGetLambArr(probdata);
-   nvars = (beforeprop ? consdata->npropagatedvars : SCIPprobdataGetNVars(probdata));
-   assert(nvars <= SCIPprobdataGetNVars(probdata));
+
    for( i = 0; i < 2; ++i ) { // TODO replace with nbrMachines
-      for( v = 0; v < nvars; ++v )
+      *(nvars[i]) = (beforeprop ? consdata->npropagatedvars : *(SCIPprobdataGetNVars(probdata))[i]);
+      assert(nvars <= SCIPprobdataGetNVars(probdata));
+
+      for( v = 0; v < *(nvars[i]); ++v )
       {
          var = lambArr[i][v];
 
@@ -343,7 +348,7 @@ SCIP_DECL_CONSTRANS(consTransSamediff)
 
    /* create constraint data for target constraint */
    SCIP_CALL( consdataCreate(scip, &targetdata,
-         sourcedata->itemid1, sourcedata->itemid2, sourcedata->type, sourcedata->node) );
+         sourcedata->itemid1, sourcedata->itemid2, sourcedata->type, sourcedata->node, sourcedata->machineIdx) );
 
    /* create target constraint */
    SCIP_CALL( SCIPcreateCons(scip, targetcons, SCIPconsGetName(sourcecons), conshdlr, targetdata,
@@ -428,7 +433,7 @@ SCIP_DECL_CONSPROP(consPropSamediff)
          if( *result != SCIP_CUTOFF )
          {
             consdata->propagated = TRUE;
-            consdata->npropagatedvars = nvars;
+            consdata->npropagatedvars = *(nvars[0]); //FIXME
          }
          else
             break;
@@ -460,13 +465,13 @@ SCIP_DECL_CONSACTIVE(consActiveSamediff)
 
    consdata = SCIPconsGetData(cons);
    assert(consdata != NULL);
-   assert(consdata->npropagatedvars <= SCIPprobdataGetNVars(probdata));
+   assert(consdata->npropagatedvars <= *(SCIPprobdataGetNVars(probdata)[0])); //FIXME
 
    SCIPdebugMsg(scip, "activate constraint <%s> at node <%"SCIP_LONGINT_FORMAT"> in depth <%d>: ",
       SCIPconsGetName(cons), SCIPnodeGetNumber(consdata->node), SCIPnodeGetDepth(consdata->node));
    SCIPdebug( consdataPrint(scip, consdata, NULL) );
 
-   if( consdata->npropagatedvars != SCIPprobdataGetNVars(probdata) )
+   if( consdata->npropagatedvars != *(SCIPprobdataGetNVars(probdata)[0]) ) //FIXME
    {
       SCIPdebugMsg(scip, "-> mark constraint to be repropagated\n");
       consdata->propagated = FALSE;
@@ -499,7 +504,7 @@ SCIP_DECL_CONSDEACTIVE(consDeactiveSamediff)
    SCIPdebug( consdataPrint(scip, consdata, NULL) );
 
    /* set the number of propagated variables to current number of variables is SCIP */
-   consdata->npropagatedvars = SCIPprobdataGetNVars(probdata);
+   consdata->npropagatedvars = *(SCIPprobdataGetNVars(probdata)[0]); //FIXME
 
    return SCIP_OKAY;
 }
@@ -560,7 +565,8 @@ SCIP_RETCODE SCIPcreateConsSamediff(
    int                   itemid2,            /**< item id two */
    CONSTYPE              type,               /**< stores whether the items have to be in the SAME or DIFFER packing */
    SCIP_NODE*            node,               /**< the node in the B&B-tree at which the cons is sticking */
-   SCIP_Bool             local               /**< is constraint only valid locally? */
+   SCIP_Bool             local,               /**< is constraint only valid locally? */
+   int                   machineIdx
    )
 {
    SCIP_CONSHDLR* conshdlr;
@@ -575,7 +581,7 @@ SCIP_RETCODE SCIPcreateConsSamediff(
    }
 
    /* create the constraint specific data */
-   SCIP_CALL( consdataCreate(scip, &consdata, itemid1, itemid2, type, node) );
+   SCIP_CALL( consdataCreate(scip, &consdata, itemid1, itemid2, type, node, machineIdx) );
 
    /* create constraint */
    SCIP_CALL( SCIPcreateCons(scip, cons, name, conshdlr, consdata, FALSE, FALSE, FALSE, FALSE, TRUE,

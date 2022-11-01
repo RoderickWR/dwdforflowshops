@@ -52,8 +52,7 @@ SCIP_RETCODE runShell(
    int nbrJobs = 2;
    int nbrMachines = 2;
    int** nvars;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int*)) );
-
+   
    /*********
     * Setup *
     *********/
@@ -126,7 +125,9 @@ SCIP_RETCODE runShell(
    for( iv = 0; iv< nbrMachines; ++iv ) {
       SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], 100*sizeof(SCIP_VAR*)) );
    }
- 
+
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int*)) );
+
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &convexityCons, nbrMachines) );

@@ -201,8 +201,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    SCIP_CALL( SCIPcreateChild(scip, &childdiffer, 0.0, SCIPgetLocalTransEstimate(scip)) );
 
    /* create corresponding constraints */
-   SCIP_CALL( SCIPcreateConsSamediff(scip, &conssame, "same", i_found, j_found, SAME, childsame, TRUE) );
-   SCIP_CALL( SCIPcreateConsSamediff(scip, &consdiffer, "differ", i_found, j_found, DIFFER, childdiffer, TRUE) );
+   SCIP_CALL( SCIPcreateConsSamediff(scip, &conssame, "same", i_found, j_found, SAME, childsame, TRUE, nconsids_main) );
+   SCIP_CALL( SCIPcreateConsSamediff(scip, &consdiffer, "differ", i_found, j_found, DIFFER, childdiffer, TRUE, nconsids_main) );
 
   /* add constraints to nodes */
    SCIP_CALL( SCIPaddConsNode(scip, childsame, conssame, NULL) );

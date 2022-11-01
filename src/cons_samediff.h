@@ -53,7 +53,8 @@ SCIP_RETCODE SCIPcreateConsSamediff(
    int                   itemid2,            /**< item id two */
    CONSTYPE              type,               /**< stores whether the items have to be in the SAME or DIFFER packing */
    SCIP_NODE*            node,               /**< the node in the B&B-tree at which the cons is sticking */
-   SCIP_Bool             local               /**< is constraint only valid locally? */
+   SCIP_Bool             local,               /**< is constraint only valid locally? */
+   int                   machineIdx
    );
 
 /** returns item id one */
