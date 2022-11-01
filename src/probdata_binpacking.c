@@ -123,7 +123,9 @@ SCIP_RETCODE probdataCreate(
    // SCIP_CONS**           conss,              /**< set partitioning constraints for each job exactly one */
    // SCIP_Longint*         weights,            /**< array containing the item weights */
    // int*                  ids,                /**< array of item ids */
-   int**                   nvars              /**< number of variables */
+   SCIP_VAR***              lambArr,
+   int**                   nvars,              /**< number of variables */
+   int                     nbrMachines
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
    )
@@ -146,8 +148,9 @@ SCIP_RETCODE probdataCreate(
    // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->conss, conss, nitems) );
    // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->weights, weights, nitems) );
    // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->ids, ids, nitems) );
-
+   (*probdata)->lambArr = lambArr;
    (*probdata)->nvars = nvars;
+   (*probdata)->nbrMachines = nbrMachines;
    // (*probdata)->varssize = nvars;
    // (*probdata)->nitems = nitems;
    // (*probdata)->capacity = capacity;
@@ -281,7 +284,7 @@ static
 SCIP_DECL_PROBTRANS(probtransBinpacking)
 {
    /* create transform probdata */
-   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->nvars) );
+   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->lambArr, sourcedata->nvars, sourcedata->nbrMachines) );
 
    /* transform all constraints */
    SCIP_CALL( SCIPtransformConss(scip, (*targetdata)->nitems, (*targetdata)->conss, (*targetdata)->conss) );
@@ -419,6 +422,14 @@ SCIP_VAR***  SCIPprobdataGetLambArr(
    )
 {
    return probdata->lambArr;
+}
+
+/** returns array of lambda variables */
+int  SCIPprobdataGetnbrMachines(
+   SCIP_PROBDATA*        probdata            /**< problem data */
+   )
+{
+   return probdata->nbrMachines;
 }
 
 

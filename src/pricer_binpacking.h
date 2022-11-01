@@ -47,7 +47,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           endCons,
    SCIP_CONS**           makespanCons,
    schedule* s1,
-   SCIP_VAR*** lambArr
+   SCIP_VAR*** lambArr,
+   int** nvars
 
    );
 

@@ -240,6 +240,7 @@ SCIP_Bool consdataCheck(
    SCIP_VAR** vars;
    SCIP_VAR*** lambArr;
    int** nvars;
+   int nbrMachines;
 
    SCIP_VARDATA* vardata;
    SCIP_VAR* var;
@@ -256,8 +257,9 @@ SCIP_Bool consdataCheck(
 
    vars = SCIPprobdataGetVars(probdata);
    lambArr = SCIPprobdataGetLambArr(probdata);
-
-   for( i = 0; i < 2; ++i ) { // TODO replace with nbrMachines
+   nbrMachines = SCIPprobdataGetnbrMachines(probdata);
+   nvars = SCIPprobdataGetNVars(probdata);
+   for( i = 0; i < nbrMachines; ++i ) {
       *(nvars[i]) = (beforeprop ? consdata->npropagatedvars : *(SCIPprobdataGetNVars(probdata))[i]);
       assert(nvars <= SCIPprobdataGetNVars(probdata));
 

@@ -117,6 +117,7 @@ struct SCIP_PricerData
    SCIP_CONS**           makespanCons;
    schedule* s1;
    SCIP_VAR*** lambArr;
+   int** nvars;
  
 };
 
@@ -240,7 +241,7 @@ SCIP_RETCODE addFixedVarsConss(
    int* consids;
    int nconsids;
    int consid;
-   int nvars;
+   int nvars2;
 
    SCIP_VAR** logicorvars;
    SCIP_VAR* var;
@@ -277,7 +278,7 @@ SCIP_RETCODE addFixedVarsConss(
          SCIP_CALL( SCIPallocBufferArray(subscip, &logicorvars, nitems) );
          nlogicorvars = 0;
          consid = consids[0];
-         nvars = 0;
+         nvars2 = 0;
 
          /* loop over these items and create a linear (logicor) constraint which forbids this item combination in the
           * pricing problem; thereby check if this item combination is already forbidden
@@ -291,8 +292,8 @@ SCIP_RETCODE addFixedVarsConss(
             {
                assert( SCIPgetNFixedonesSetppc(scip, cons) == 0 );
 
-               var = vars[nvars];
-               nvars++;
+               var = vars[nvars2];
+               nvars2++;
                assert(var != NULL);
 
                if( o == consid )
@@ -399,7 +400,7 @@ SCIP_RETCODE initPricing(
    SCIP_Bool boundconstr;
 
    int nitems;
-   int nvars;
+   int nvars2;
    int c;
 
    SCIP_CONS** convexityConss;
@@ -421,7 +422,7 @@ SCIP_RETCODE initPricing(
    weights = pricerdata->weights;
    capacity = pricerdata->capacity;
    pt1 = pricerdata->pt1;
-   nvars = 0;
+   nvars2 = 0;
    convexityConss = pricerdata->convexityCons;
    startConss = pricerdata->startCons;
    endConss = pricerdata->endCons;
@@ -1045,7 +1046,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           endCons,
    SCIP_CONS**           makespanCons,
    schedule* s1,
-   SCIP_VAR*** lambArr
+   SCIP_VAR*** lambArr,
+   int** nvars
    
    )
 {
@@ -1071,6 +1073,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->nbrJobs  = nbrJobs;
    pricerdata->s1  = s1;
    pricerdata->lambArr  = lambArr;
+   pricerdata->nvars  = nvars;
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {

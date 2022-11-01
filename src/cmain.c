@@ -69,9 +69,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") ); 
 
    SCIP_PROBDATA* probdata;
-   SCIP_CALL( probdataCreate(scip, &probdata, nvars) );
-   SCIP_CALL( SCIPsetProbData(scip, probdata) );
-
+   
    /* include binpacking branching and branching data */
    SCIP_CALL( SCIPincludeBranchruleRyanFoster(scip) );
    SCIP_CALL( SCIPincludeConshdlrSamediff(scip) );
@@ -130,13 +128,13 @@ SCIP_RETCODE runShell(
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &convexityCons, nbrMachines) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &convexityCons, nbrMachines*sizeof(SCIP_CONS*)) );
    SCIP_CONS** startCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*)) );
    SCIP_CONS** endCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*)) );
    SCIP_CONS** makespanCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &makespanCons, nbrJobs) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &makespanCons, nbrJobs*sizeof(SCIP_CONS*)) );
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
@@ -145,6 +143,8 @@ SCIP_RETCODE runShell(
    int ii = 0;
    int iii = 0;
    for( iii = 0; iii< s1.lastIdx+1; ++iii ) {
+      int init = 0;
+      nvars[iii] = &init; //initialize number of labmdas for each machine to zero, increment in next for loop
       for( i = 0; i < mp1.lastIdx+1; ++i ) {
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
@@ -155,14 +155,13 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
          lambArr[iii][i] = var;
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
-         nvars[iii]++;
+         init++;
       } 
    }
-   probdata->nbrMachines = nbrMachines;
 
-   probdata->nvars = nvars;
-   probdata->lambArr = lambArr;
-
+   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, nvars, nbrMachines) );
+   SCIP_CALL( SCIPsetProbData(scip, probdata) );
+ 
    /* create offset variables and set offset pointers*/
    for( iii = 0; iii< s1.lastIdx+1; ++iii ) {
       sprintf(buf, "offsetM%d", iii);
@@ -284,7 +283,7 @@ SCIP_RETCODE runShell(
    }
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, &s1, lambArr)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, &s1, lambArr,nvars)); 
 
 
    SCIPsolve(scip);
