@@ -37,6 +37,7 @@ struct SCIP_VarData
    int                   nconsids;
    schedule* s1;
    int patternid;
+   pat* pPat;
 };
 
 /**@name Local methods
@@ -52,7 +53,8 @@ SCIP_RETCODE vardataCreate(
    // int*                  consids,            /**< array of constraints ids */
    int                   nconsids,            /**< number of constraints */
    schedule* s1,
-   int patternid
+   int patternid,
+   pat* pPat
    )
 {
    SCIP_CALL( SCIPallocBlockMemory(scip, vardata) );
@@ -63,6 +65,7 @@ SCIP_RETCODE vardataCreate(
    (*vardata)->nconsids = nconsids;
    (*vardata)->s1 = s1;
    (*vardata)->patternid = patternid;
+   (*vardata)->pPat = pPat;
 
    return SCIP_OKAY;
 }
@@ -112,11 +115,12 @@ SCIP_RETCODE SCIPvardataCreateBinpacking(
    // int*                  consids,            /**< array of constraints ids */
    int                   nconsids,            /**< number of constraints */
    schedule* s1,
-   int patternid
+   int patternid,
+   pat* pPat
    )
 {
    // SCIP_CALL( vardataCreate(scip, vardata, consids, nconsids) );
-   SCIP_CALL( vardataCreate(scip, vardata, nconsids, s1, patternid) );
+   SCIP_CALL( vardataCreate(scip, vardata, nconsids, s1, patternid, pPat) );
 
 
    return SCIP_OKAY;
@@ -136,6 +140,14 @@ schedule* SCIPvardataGetSchedule(
    )
 {
    return vardata->s1;
+}
+
+/** get schedule */
+pat* SCIPvardataGetPat(
+   SCIP_VARDATA*         vardata             /**< variable data */
+   )
+{
+   return vardata->pPat;
 }
 
 /** get pattern ID */

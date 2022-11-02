@@ -874,7 +874,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPallocBufferArray(scip, &completionTimes, nbrJobs) ); // for completion times
 
             // get pattern // TODO wrap in SCIP_CALL return SCIP_OKAY if good 
-            altStartingTimes = getPattern(subscip[i], sol, startingTimes, completionTimes,startVars, endVars, nbrJobs);
+            //altStartingTimes = getPattern(subscip[i], sol, startingTimes, completionTimes,startVars, endVars, nbrJobs);
 
             // /* check which variables are fixed -> which item belongs to this packing */
             // for( o = 0, v = 0; o < nitems; ++o )
@@ -904,8 +904,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) ); /* für neue Patternvarriablen als BIN [0,1] und zusätzliche changVarLazyUB sondern  inf und hier mitteilen */
             // create new variable and adjust params
             SCIP_VAR* newVar = NULL;
+            pat p_new;
             sprintf(buf, "lambM%dP%d", i,s1->sched[i].lastIdx); // create name of new pattern var
-            SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx) );
+            SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx,&p_new) ); //FIXME
             s1->sched[i].lastIdx = s1->sched[i].lastIdx + 1;
             SCIP_CALL( SCIPcreateVarBinpacking(scip, &newVar, buf, 0.0, FALSE, TRUE, vardata) );
             SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
@@ -930,9 +931,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             int j;
             for( j = 0; j < nbrJobs; ++j ) {
                SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][n], SCIPgetSolVal(subscip[i], sol, startVars[j]));
+               p_new.job[j].start = (double) SCIPgetSolVal(subscip[i], sol, startVars[j]);
                SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][n], SCIPgetSolVal(subscip[i], sol, endVars[j]));
-               
+               p_new.job[j].end = (double) SCIPgetSolVal(subscip[i], sol, endVars[j]);
+               p_new.lastIdx = j;
             }
+            
 
             SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
             SCIPfreeBufferArray(scip, &completionTimes);

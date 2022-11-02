@@ -260,8 +260,8 @@ SCIP_Bool consdataCheck(
    nbrMachines = SCIPprobdataGetnbrMachines(probdata);
    nvars = SCIPprobdataGetNVars(probdata);
    for( i = 0; i < nbrMachines; ++i ) {
-      nvars[i] = (beforeprop ? consdata->npropagatedvars : SCIPprobdataGetNVars(probdata)[i]);
-      assert(nvars <= SCIPprobdataGetNVars(probdata));
+      // nvars[i] = (beforeprop ? consdata->npropagatedvars : SCIPprobdataGetNVars(probdata)[i]);
+      // assert(nvars <= SCIPprobdataGetNVars(probdata));
 
       for( v = 0; v < nvars[i]; ++v )
       {
@@ -276,6 +276,7 @@ SCIP_Bool consdataCheck(
 
          nconsids = SCIPvardataGetNConsids(vardata);
          consids = SCIPvardataGetConsids(vardata);
+         pat* p = SCIPvardataGetPat(vardata);
 
          existid1 = SCIPsortedvecFindInt(consids, consdata->itemid1, nconsids, &pos);
          existid2 = SCIPsortedvecFindInt(consids, consdata->itemid2, nconsids, &pos);

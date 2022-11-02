@@ -93,15 +93,15 @@ SCIP_RETCODE runShell(
    /*execmain(scip);*/
 
    /* initialize singlePattern*/
-   sPat sp1 = {0.0, 7.0};
+   sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
    sPat sp2 = {7.0, 8.0};
    sPat sp3 = {7.0, 9.0};
    sPat sp4 = {8.0, 11.0};
    /* ... 2 patterns */
-   pat p1 = {.job[0] = sp1, .job[1] = sp2, .lastIdx = 1};
+   pat p1 = {.job[0] = sp1, .job[1] = sp2, .lastIdx = 1}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
    pat p2 = {.job[0] = sp3, .job[1] = sp4, .lastIdx = 1};
-   /* ... and 2 lists of patterns*/
-   mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
+   /* ... and 2 lists à patterns*/
+   mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1}; 
    mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
 
    schedule s1 = {.sched[0] = mp1, .sched[1] = mp2, .lastIdx = 1}; // contains a list of patterns for each machine (mp1,...mpI)
@@ -148,7 +148,7 @@ SCIP_RETCODE runShell(
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
          // SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
-         SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, iii, &s1, i) );
+         SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, iii, &s1, i, &s1.sched[iii].mp[i]) );
          SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, buf, 0.0, FALSE, TRUE, vardata) );
          SCIP_CALL( SCIPaddVar(scip, var) );
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example

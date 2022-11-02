@@ -35,7 +35,8 @@ SCIP_RETCODE SCIPvardataCreateBinpacking(
    // int*                  consids,            /**< array of constraints ids */
    int                   nconsids,            /**< number of constraints */
    schedule* s1,
-   int patternid
+   int patternid,
+   pat* pPat
    );
 
 /** get number of constraints */
@@ -49,6 +50,9 @@ int* SCIPvardataGetConsids(
    );
 // gets the schedule (all patterns)
 schedule* SCIPvardataGetSchedule(
+   SCIP_VARDATA*         vardata             /**< variable data */
+   );
+pat* SCIPvardataGetPat(
    SCIP_VARDATA*         vardata             /**< variable data */
    );
 // gets the pattern id 
