@@ -51,7 +51,7 @@ SCIP_RETCODE runShell(
    SCIP* scip = NULL;
    int nbrJobs = 2;
    int nbrMachines = 2;
-   int** nvars;
+   int* nvars;
    
    /*********
     * Setup *
@@ -124,7 +124,7 @@ SCIP_RETCODE runShell(
       SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], 100*sizeof(SCIP_VAR*)) );
    }
 
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int*)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) );
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
@@ -143,8 +143,7 @@ SCIP_RETCODE runShell(
    int ii = 0;
    int iii = 0;
    for( iii = 0; iii< s1.lastIdx+1; ++iii ) {
-      int init = 0;
-      nvars[iii] = &init; //initialize number of labmdas for each machine to zero, increment in next for loop
+      nvars[iii] = 0; //initialize number of labmdas for each machine to zero, increment in next for loop
       for( i = 0; i < mp1.lastIdx+1; ++i ) {
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
@@ -155,12 +154,13 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
          lambArr[iii][i] = var;
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
-         init++;
+         nvars[iii]++;
       } 
    }
 
    SCIP_CALL( probdataCreate(scip, &probdata, lambArr, nvars, nbrMachines) );
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
+
  
    /* create offset variables and set offset pointers*/
    for( iii = 0; iii< s1.lastIdx+1; ++iii ) {

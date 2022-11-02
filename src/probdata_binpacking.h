@@ -35,7 +35,7 @@ struct SCIP_ProbData
    SCIP_Longint*         weights;      /**< array of item weights */
    int*                  ids;          /**< array of item ids */
    int                   nbrMachines;
-   int**                 nvars;        /**< number of generated variables */
+   int*                  nvars;        /**< number of generated variables */
    int                   varssize;     /**< size of the variable array */
    int                   nitems;       /**< number of items */
    SCIP_Longint          capacity;     /**< bin capacity */
@@ -118,7 +118,7 @@ SCIP_RETCODE probdataCreate(
    // SCIP_Longint*         weights,            /**< array containing the item weights */
    // int*                  ids,                /**< array of item ids */
    SCIP_VAR***              lambArr,
-   int**                   nvars,              /**< number of variables */
+   int*                   nvars,              /**< number of variables */
    int                     nbrMachines
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
@@ -158,7 +158,7 @@ SCIP_VAR** SCIPprobdataGetVars(
    );
 
 /** returns number of variables */
-int** SCIPprobdataGetNVars(
+int* SCIPprobdataGetNVars(
    SCIP_PROBDATA*        probdata            /**< problem data */
    );
 

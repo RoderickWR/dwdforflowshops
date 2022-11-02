@@ -198,7 +198,7 @@ SCIP_RETCODE consdataFixVariables(
    SCIP*                 scip,               /**< SCIP data structure */
    SCIP_CONSDATA*        consdata,           /**< constraint data */
    SCIP_VAR**            vars,               /**< generated variables */
-   int**                   nvars,              /**< number of generated variables */
+   int*                   nvars,              /**< number of generated variables */
    SCIP_RESULT*          result              /**< pointer to store the result of the fixing */
    )
 {
@@ -209,9 +209,9 @@ SCIP_RETCODE consdataFixVariables(
    nfixedvars = 0;
    cutoff = FALSE;
 
-   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, *(nvars[0])); //FIXME
+   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, nvars[0]); //FIXME
 
-   for( v = consdata->npropagatedvars; v < *(nvars[0]) && !cutoff; ++v ) //FIXME
+   for( v = consdata->npropagatedvars; v < nvars[0] && !cutoff; ++v ) //FIXME
    {
       SCIP_CALL( checkVariable(scip, consdata, vars[v], &nfixedvars, &cutoff) );
    }
@@ -239,7 +239,7 @@ SCIP_Bool consdataCheck(
 {
    SCIP_VAR** vars;
    SCIP_VAR*** lambArr;
-   int** nvars;
+   int* nvars;
    int nbrMachines;
 
    SCIP_VARDATA* vardata;
@@ -260,10 +260,10 @@ SCIP_Bool consdataCheck(
    nbrMachines = SCIPprobdataGetnbrMachines(probdata);
    nvars = SCIPprobdataGetNVars(probdata);
    for( i = 0; i < nbrMachines; ++i ) {
-      *(nvars[i]) = (beforeprop ? consdata->npropagatedvars : *(SCIPprobdataGetNVars(probdata))[i]);
+      nvars[i] = (beforeprop ? consdata->npropagatedvars : SCIPprobdataGetNVars(probdata)[i]);
       assert(nvars <= SCIPprobdataGetNVars(probdata));
 
-      for( v = 0; v < *(nvars[i]); ++v )
+      for( v = 0; v < nvars[i]; ++v )
       {
          var = lambArr[i][v];
 
@@ -379,7 +379,7 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    SCIP_CONSDATA* consdata;
 
    SCIP_VAR** vars;
-   int** nvars;
+   int* nvars;
    int c;
    SCIP_VAR*** lambArr;
 
@@ -435,7 +435,7 @@ SCIP_DECL_CONSPROP(consPropSamediff)
          if( *result != SCIP_CUTOFF )
          {
             consdata->propagated = TRUE;
-            consdata->npropagatedvars = *(nvars[0]); //FIXME
+            consdata->npropagatedvars = nvars[0]; //FIXME
          }
          else
             break;
@@ -467,13 +467,13 @@ SCIP_DECL_CONSACTIVE(consActiveSamediff)
 
    consdata = SCIPconsGetData(cons);
    assert(consdata != NULL);
-   assert(consdata->npropagatedvars <= *(SCIPprobdataGetNVars(probdata)[0])); //FIXME
+   assert(consdata->npropagatedvars <= SCIPprobdataGetNVars(probdata)[0]); //FIXME
 
    SCIPdebugMsg(scip, "activate constraint <%s> at node <%"SCIP_LONGINT_FORMAT"> in depth <%d>: ",
       SCIPconsGetName(cons), SCIPnodeGetNumber(consdata->node), SCIPnodeGetDepth(consdata->node));
    SCIPdebug( consdataPrint(scip, consdata, NULL) );
 
-   if( consdata->npropagatedvars != *(SCIPprobdataGetNVars(probdata)[0]) ) //FIXME
+   if( consdata->npropagatedvars != SCIPprobdataGetNVars(probdata)[0] ) //FIXME
    {
       SCIPdebugMsg(scip, "-> mark constraint to be repropagated\n");
       consdata->propagated = FALSE;
@@ -506,7 +506,7 @@ SCIP_DECL_CONSDEACTIVE(consDeactiveSamediff)
    SCIPdebug( consdataPrint(scip, consdata, NULL) );
 
    /* set the number of propagated variables to current number of variables is SCIP */
-   consdata->npropagatedvars = *(SCIPprobdataGetNVars(probdata)[0]); //FIXME
+   consdata->npropagatedvars = SCIPprobdataGetNVars(probdata)[0]; //FIXME
 
    return SCIP_OKAY;
 }

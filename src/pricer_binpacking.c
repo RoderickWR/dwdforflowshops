@@ -117,7 +117,7 @@ struct SCIP_PricerData
    SCIP_CONS**           makespanCons;
    schedule* s1;
    SCIP_VAR*** lambArr;
-   int** nvars;
+   int* nvars;
  
 };
 
@@ -1047,7 +1047,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           makespanCons,
    schedule* s1,
    SCIP_VAR*** lambArr,
-   int** nvars
+   int* nvars
    
    )
 {
