@@ -247,8 +247,8 @@ SCIP_Bool consdataCheck(
 
    int* consids;
    int nconsids;
-   SCIP_Bool existid1;
-   SCIP_Bool existid2;
+   SCIP_Bool id1BeforeId2;
+   SCIP_Bool id2BeforeId1;
    CONSTYPE type;
 
    int pos;
@@ -276,13 +276,14 @@ SCIP_Bool consdataCheck(
 
          nconsids = SCIPvardataGetNConsids(vardata);
          consids = SCIPvardataGetConsids(vardata);
-         pat* p = SCIPvardataGetPat(vardata);
 
-         existid1 = SCIPsortedvecFindInt(consids, consdata->itemid1, nconsids, &pos);
-         existid2 = SCIPsortedvecFindInt(consids, consdata->itemid2, nconsids, &pos);
+         id1BeforeId2 = (p->job[consdata->itemid1].end <= p->job[consdata->itemid2].start);
+         id2BeforeId1 = (p->job[consdata->itemid2].end <= p->job[consdata->itemid1].start);
+   
+
          type = consdata->type;
 
-         if( (type == SAME && existid1 != existid2) || (type == DIFFER && existid1 && existid2) )
+         if( (type == SAME && id2BeforeId1 ) || (type == DIFFER && id1BeforeId2) )
          {
             SCIPdebug( SCIPvardataPrint(scip, vardata, NULL) );
             SCIPdebug( consdataPrint(scip, consdata, NULL) );
