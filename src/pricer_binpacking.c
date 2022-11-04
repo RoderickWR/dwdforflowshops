@@ -137,6 +137,8 @@ SCIP_RETCODE addBranchingDecisionConss(
    SCIP_CONSHDLR*        conshdlr            /**< constraint handler for branching data */
    )
 {
+   printf("Starting addBranchingDecisionConss()\n");
+   fflush(stdout);
    SCIP_CONS** conss;
    SCIP_CONS* cons;
    int nconss;
@@ -234,6 +236,8 @@ SCIP_RETCODE addFixedVarsConss(
    int                   nitems              /**< number of items */
    )
 {
+   printf("Starting addFixedVarsConss()\n");
+   fflush(stdout);
    SCIP_VAR** origvars;
    int norigvars;
 
@@ -390,6 +394,8 @@ SCIP_RETCODE initPricing(
    int                   mIdx
    )
 {
+   printf("Starting initPricing()\n");
+   fflush(stdout);
    SCIP_CONS** conss;
    SCIP_Longint* vals;
    SCIP_CONS* cons;
@@ -514,55 +520,15 @@ SCIP_RETCODE initPricing(
       }
    }
    
-
-   // for( c = 0; c < nitems; ++c )
-   // {
-   //    cons = conss[c];
-
-   //    /* check if each constraint is setppc constraint */
-   //    assert( !strncmp( SCIPconshdlrGetName( SCIPconsGetHdlr(cons) ), "setppc", 6) );
-
-   //    /* constraints which are (locally) disabled/redundant are not of
-   //     * interest since the corresponding job is assigned to a packing
-   //     */
-   //    if( !SCIPconsIsEnabled(cons) ) 
-   //       continue;
-
-   //    if( SCIPgetNFixedonesSetppc(scip, cons) == 1 )
-   //    {
-   //       /* disable constraint locally */
-   //       SCIP_CALL( SCIPdelConsLocal(scip, cons) );
-   //       continue;
-   //    }
-      
-   //    /* dual value in original SCIP */
-   //    dual = SCIPgetDualsolSetppc(scip, cons);
-      
-   //    SCIP_CALL( SCIPcreateVarBasic(subscip, &var, SCIPconsGetName(cons), 0.0, 1.0, dual, SCIP_VARTYPE_BINARY) );
-   //    SCIP_CALL( SCIPaddVar(subscip, var) );
-
-   //    vals[nvars] = weights[c];
-   //    vars[nvars] = var;
-   //    nvars++;
-
-   //    /* release variable */
-   //    SCIP_CALL( SCIPreleaseVar(subscip, &var) );
-   // }
-
-   // /* create capacity constraint */
-   // SCIP_CALL( SCIPcreateConsBasicKnapsack(subscip, &cons, "capacity", nvars, vars, vals, capacity) );
-
-   // SCIP_CALL( SCIPaddCons(subscip, cons) );
-   // SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
-
-   // /* add constraint of the branching decisions */
-   // SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr) );
+   /* add constraint of the branching decisions */
+   SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr) );
 
    // /* avoid to generate columns which are fixed to zero */
    // SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems) );
 
    // SCIPfreeBufferArray(subscip, &vals);
-   
+   printf("Ending addBranchingDecisionConss()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -602,6 +568,8 @@ SCIP_DECL_PRICERFREE(pricerFreeBinpacking)
 static
 SCIP_DECL_PRICERINIT(pricerInitBinpacking)
 {  /*lint --e{715}*/
+   printf("Starting SCIP_DECL_PRICERINIT()\n");
+   fflush(stdout);
    SCIP_PRICERDATA* pricerdata;
    SCIP_CONS* cons;
    int c;
@@ -696,7 +664,8 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
       /* release constraint */
       SCIP_CALL( SCIPreleaseCons(scip, &(pricerdata->conss[c])) );
    }
-
+   printf("Ending SCIP_DECL_PRICERINIT()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -706,7 +675,8 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
 static
 SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 {  /*lint --e{715}*/
-   
+   printf("Starting DECL_PRICERREDCOST()\n");
+   fflush(stdout);
    SCIP_PRICERDATA* pricerdata;
    SCIP_CONS** conss;
    SCIP_VAR** vars;
@@ -963,7 +933,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    // /* free pricer MIP */
    // SCIPfreeBufferArray(scip, &vars);
-
+   printf("Ending DECL_PRICERREDCOST()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 

@@ -95,6 +95,8 @@
 static
 SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
 {  /*lint --e{715}*/
+   printf("Starting SCIP_DECL_BRANCHEXECLP()\n");
+   fflush(stdout);
    SCIP_PROBDATA* probdata;
    int nbrJobs = 2;
    schedule* s1;
@@ -213,7 +215,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    SCIP_CALL( SCIPreleaseCons(scip, &consdiffer) );
 
   *result = SCIP_BRANCHED;
-
+   printf("Ending SCIP_DECL_BRANCHEXECLP()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 

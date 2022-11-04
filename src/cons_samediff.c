@@ -138,7 +138,9 @@ SCIP_RETCODE checkVariable(
    int*                  nfixedvars,         /**< pointer to store the number of fixed variables */
    SCIP_Bool*            cutoff              /**< pointer to store if a cutoff was detected */
    )
-{
+{  
+   printf("Starting checkVariable()\n");
+   fflush(stdout);
    SCIP_VARDATA* vardata;
    int* consids;
    int nconsids;
@@ -188,7 +190,8 @@ SCIP_RETCODE checkVariable(
          (*nfixedvars)++;
       }
    }
-
+   printf("Ending checkVariable()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -202,6 +205,8 @@ SCIP_RETCODE consdataFixVariables(
    SCIP_RESULT*          result              /**< pointer to store the result of the fixing */
    )
 {
+   printf("Start consdataFixVariables()\n");
+   fflush(stdout);
    int nfixedvars;
    int v;
    SCIP_Bool cutoff;
@@ -237,6 +242,8 @@ SCIP_Bool consdataCheck(
    SCIP_Bool             beforeprop          /**< is this check performed before propagation? */
    )
 {
+   printf("Starting consdataCheck()\n");
+   fflush(stdout);
    SCIP_VAR** vars;
    SCIP_VAR*** lambArr;
    int* nvars;
@@ -292,10 +299,14 @@ SCIP_Bool consdataCheck(
             SCIPdebug( SCIPvardataPrint(scip, vardata, NULL) );
             SCIPdebug( consdataPrint(scip, consdata, NULL) );
             SCIPdebug( SCIPprintVar(scip, var, NULL) );
+            printf("Ending consdataCheck()\n");
+            fflush(stdout);
             return FALSE;
          }
       }
    }
+   printf("Ending consdataCheck()\n");
+   fflush(stdout);
    return TRUE;
 }
 #endif
@@ -381,6 +392,8 @@ SCIP_DECL_CONSTRANS(consTransSamediff)
 static
 SCIP_DECL_CONSPROP(consPropSamediff)
 {  /*lint --e{715}*/
+   printf("Starting SCIP_DECL_CONSPROP()\n");
+   fflush(stdout);
    SCIP_PROBDATA* probdata;
    SCIP_CONSDATA* consdata;
 
@@ -450,7 +463,8 @@ SCIP_DECL_CONSPROP(consPropSamediff)
       /* check if constraint is completely propagated */
       assert( consdataCheck(scip, probdata, consdata, FALSE) );
    }
-
+   printf("Ending SCIP_DECL_CONSPROP()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -461,6 +475,8 @@ SCIP_DECL_CONSPROP(consPropSamediff)
 static
 SCIP_DECL_CONSACTIVE(consActiveSamediff)
 {  /*lint --e{715}*/
+   printf("Starting SCIP_DECL_CONSACTIVE()\n");
+   fflush(stdout);
    SCIP_CONSDATA* consdata;
    SCIP_PROBDATA* probdata;
 
@@ -473,19 +489,20 @@ SCIP_DECL_CONSACTIVE(consActiveSamediff)
 
    consdata = SCIPconsGetData(cons);
    assert(consdata != NULL);
-   assert(consdata->npropagatedvars <= SCIPprobdataGetNVars(probdata)[0]); //FIXME
+   assert(consdata->npropagatedvars <= SCIPprobdataGetNVars(probdata)[consdata->machineIdx]); 
 
    SCIPdebugMsg(scip, "activate constraint <%s> at node <%"SCIP_LONGINT_FORMAT"> in depth <%d>: ",
       SCIPconsGetName(cons), SCIPnodeGetNumber(consdata->node), SCIPnodeGetDepth(consdata->node));
    SCIPdebug( consdataPrint(scip, consdata, NULL) );
 
-   if( consdata->npropagatedvars != SCIPprobdataGetNVars(probdata)[0] ) //FIXME
+   if( consdata->npropagatedvars != SCIPprobdataGetNVars(probdata)[consdata->machineIdx] ) 
    {
       SCIPdebugMsg(scip, "-> mark constraint to be repropagated\n");
       consdata->propagated = FALSE;
       SCIP_CALL( SCIPrepropagateNode(scip, consdata->node) );
    }
-
+   printf("Ending SCIP_DECL_CONSACTIVE()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -577,6 +594,8 @@ SCIP_RETCODE SCIPcreateConsSamediff(
    int                   machineIdx
    )
 {
+   printf("Starting SCIPcreateConsSamediff()\n");
+   fflush(stdout);
    SCIP_CONSHDLR* conshdlr;
    SCIP_CONSDATA* consdata;
 
@@ -597,7 +616,8 @@ SCIP_RETCODE SCIPcreateConsSamediff(
 
    SCIPdebugMsg(scip, "created constraint: ");
    SCIPdebug( consdataPrint(scip, consdata, NULL) );
-
+   printf("Ending SCIPcreateConsSamediff()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
