@@ -241,6 +241,8 @@ SCIP_Bool consdataCheck(
    SCIP_VAR*** lambArr;
    int* nvars;
    int nbrMachines;
+   int patternid;
+   schedule* s1;
 
    SCIP_VARDATA* vardata;
    SCIP_VAR* var;
@@ -273,12 +275,14 @@ SCIP_Bool consdataCheck(
 
          /* check if the packing which corresponds to the variable is feasible for this constraint */
          vardata = SCIPvarGetData(var);
+         s1 = SCIPvardataGetSchedule(vardata);
 
          nconsids = SCIPvardataGetNConsids(vardata);
          consids = SCIPvardataGetConsids(vardata);
+         patternid = SCIPvardataGetPatternid(vardata);
 
-         id1BeforeId2 = (p->job[consdata->itemid1].end <= p->job[consdata->itemid2].start);
-         id2BeforeId1 = (p->job[consdata->itemid2].end <= p->job[consdata->itemid1].start);
+         id1BeforeId2 = (s1->sched[i].mp[patternid].job[consdata->itemid1].end <= s1->sched[i].mp[patternid].job[consdata->itemid2].start);
+         id2BeforeId1 = (s1->sched[i].mp[patternid].job[consdata->itemid2].end <= s1->sched[i].mp[patternid].job[consdata->itemid1].start);
    
 
          type = consdata->type;

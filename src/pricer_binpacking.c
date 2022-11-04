@@ -904,15 +904,17 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) ); /* für neue Patternvarriablen als BIN [0,1] und zusätzliche changVarLazyUB sondern  inf und hier mitteilen */
             // create new variable and adjust params
             SCIP_VAR* newVar = NULL;
+            s1->sched[i].lastIdx = s1->sched[i].lastIdx + 1; // count up the pattern counter in s1
+            SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx) ); 
 
             sprintf(buf, "lambM%dP%d", i,s1->sched[i].lastIdx); // create name of new pattern var
-            s1->sched[i].lastIdx = s1->sched[i].lastIdx + 1;
+            
             SCIP_CALL( SCIPcreateVarBinpacking(scip, &newVar, buf, 0.0, FALSE, TRUE, vardata) );
             SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
             SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
 
-            size_t n = sizeof(lambArr[i])/sizeof(lambArr[i][0]); // get the index of last lambda in array
-            lambArr[i][n] = newVar; // add the new var to the lambdas array
+            lambArr[i][s1->sched[i].lastIdx] = newVar; // add the new var to the lambdas array
+            SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
             addvar = TRUE;
      
             // /* check which variable are fixed -> which orders belong to this packing */
@@ -925,19 +927,19 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // SCIPdebug(SCIPprintVar(scip, var, NULL) );
 
             // modify convexity constr on machine i in master problem
-            SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][n], 1.0);
+            SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][s1->sched[i].lastIdx], 1.0);
             // modify start and end time constr in master problem
             int j;
             for( j = 0; j < nbrJobs; ++j ) {
-               SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][n], SCIPgetSolVal(subscip[i], sol, startVars[j]));
+               SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], SCIPgetSolVal(subscip[i], sol, startVars[j]));
                s1->sched[i].mp[s1->sched[i].lastIdx].job[j].start = (double) SCIPgetSolVal(subscip[i], sol, startVars[j]);
-               SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][n], SCIPgetSolVal(subscip[i], sol, endVars[j]));
+               SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], SCIPgetSolVal(subscip[i], sol, endVars[j]));
                s1->sched[i].mp[s1->sched[i].lastIdx].job[j].end = (double) SCIPgetSolVal(subscip[i], sol, endVars[j]);
                
             }
-            SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx) ); 
+            
 
-            SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
+            
             SCIPfreeBufferArray(scip, &completionTimes);
             SCIPfreeBufferArray(scip, &startingTimes);
          }
