@@ -134,7 +134,9 @@ SCIP_RETCODE addBranchingDecisionConss(
    SCIP*                 scip,               /**< SCIP data structure */
    SCIP*                 subscip,            /**< pricing SCIP data structure */
    SCIP_VAR**            vars,               /**< variable array of the subscuip oder variables */
-   SCIP_CONSHDLR*        conshdlr            /**< constraint handler for branching data */
+   SCIP_CONSHDLR*        conshdlr,            /**< constraint handler for branching data */
+   SCIP_VAR**            orderVars,
+   id_t                  nbrJobs
    )
 {
    printf("Starting addBranchingDecisionConss()\n");
@@ -145,6 +147,7 @@ SCIP_RETCODE addBranchingDecisionConss(
    int id1;
    int id2;
    CONSTYPE type;
+   char buf[256];
 
    SCIP_Real vbdcoef;
    SCIP_Real lhs;
@@ -186,37 +189,27 @@ SCIP_RETCODE addBranchingDecisionConss(
        */
       if( type == SAME )
       {
-         lhs = 0.0;
-         rhs = 0.0;
-         vbdcoef = -1.0;
+         sprintf(buf, "yes_precedenceJ%dJ%d", id1,id2);
+         SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
+         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[id1*nbrJobs + id2], 1.0) );
+         SCIP_CALL(SCIPaddCons(subscip,cons));
+         SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
       }
       else if( type == DIFFER )
       {
-         lhs = -SCIPinfinity(scip);
-         rhs = 1.0;
-         vbdcoef = 1.0;
+         sprintf(buf, "no_precedenceJ%dJ%d", id1,id2);
+         SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
+         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[id1*nbrJobs + id2], 1.0) );
+         SCIP_CALL(SCIPaddCons(subscip,cons));
+         SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
       }
       else
       {
          SCIPerrorMessage("unknow constraint type <%d>\n", type);
          return SCIP_INVALIDDATA;
       }
-
-      /* add linear (in that case a variable bound) constraint to pricing MIP depending on the branching type:
-       *
-       * - branching type SAME:  x1 = x2 <=> x1 - x2 = 0 <=> 0 <= x1 - x2 <= 0
-       *
-       * - branching type DIFFER:  x1 + x2 <= 1 <=> -inf <= x1 + x2 <= 1
-       *
-       * note a setppc constraint would be sufficient and even better suitable for such kind of constraint
-       */
-      SCIP_CALL( SCIPcreateConsBasicVarbound(subscip, &cons, SCIPconsGetName(conss[c]),
-            vars[id1], vars[id2], vbdcoef, lhs, rhs) );
-
       SCIPdebugPrintCons(subscip, cons, NULL);
 
-      SCIP_CALL( SCIPaddCons(subscip, cons) );
-      SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
    }
 
    return SCIP_OKAY;
@@ -527,7 +520,7 @@ SCIP_RETCODE initPricing(
    }
    
    /* add constraint of the branching decisions */
-   SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr) );
+   SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr, orderVars, nbrJobs) );
 
    // /* avoid to generate columns which are fixed to zero */
    SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems, mIdx, pricerdata->lambArr, pricerdata->s1) );
