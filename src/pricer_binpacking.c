@@ -233,110 +233,116 @@ SCIP_RETCODE addFixedVarsConss(
    SCIP*                 subscip,            /**< pricing SCIP data structure */
    SCIP_VAR**            vars,               /**< variable array of the subscuip */
    SCIP_CONS**           conss,              /**< array of setppc constraint for each item one */
-   int                   nitems              /**< number of items */
+   int                   nitems,              /**< number of items */
+   int                   mIdx,
+   SCIP_VAR***           lambArr,
+   schedule*             s1
    )
 {
    printf("Starting addFixedVarsConss()\n");
    fflush(stdout);
-   SCIP_VAR** origvars;
-   int norigvars;
+   // not needed since patterns that were fixed to zero should not be generated again due to branching constraints
+   // what is needed is the fixToZero function that reduces the pool of patterns in the MP after a branching decision (=> RMP)
+   // SCIP_VAR** origvars;
+   // int norigvars;
 
-   SCIP_CONS* cons;
-   int* consids;
-   int nconsids;
-   int consid;
-   int nvars2;
+   // SCIP_CONS* cons;
+   // int* consids;
+   // int nconsids;
+   // int consid;
+   // int nvars2;
 
-   SCIP_VAR** logicorvars;
-   SCIP_VAR* var;
-   SCIP_VARDATA* vardata;
-   SCIP_Bool needed;
-   int nlogicorvars;
+   // SCIP_VAR** logicorvars;
+   // SCIP_VAR* var;
+   // SCIP_VARDATA* vardata;
+   // SCIP_Bool needed;
+   // int nlogicorvars;
 
-   int v;
-   int c;
-   int o;
+   // int v;
+   // int c;
+   // int o;
 
-   /* collect all variable which are currently existing */
-   origvars = SCIPgetVars(scip);
-   norigvars = SCIPgetNVars(scip);
+   // // /* collect all variable which are currently existing */
+   // // origvars = SCIPgetVars(scip);
+   // // norigvars = SCIPgetNVars(scip);
 
-   /* loop over all these variables and check if they are fixed to zero */
-   for( v = 0; v < norigvars; ++v )
-   {
-      assert(SCIPvarGetType(origvars[v]) == SCIP_VARTYPE_BINARY);
+   // /* loop over all these variables and check if they are fixed to zero */
+   // for( v = 0; v < s1->sched[mIdx].lastIdx; ++v )
+   // {
+   //    assert(SCIPvarGetType(lambArr[mIdx][v]) == SCIP_VARTYPE_BINARY);
 
-      /* if the upper bound is smaller than 0.5 if follows due to the integrality that the binary variable is fixed to zero */
-      if( SCIPvarGetUbLocal(origvars[v]) < 0.5 )
-      {
-         SCIPdebugMsg(scip, "variable <%s> glb=[%.15g,%.15g] loc=[%.15g,%.15g] is fixed to zero\n",
-            SCIPvarGetName(origvars[v]), SCIPvarGetLbGlobal(origvars[v]), SCIPvarGetUbGlobal(origvars[v]),
-            SCIPvarGetLbLocal(origvars[v]), SCIPvarGetUbLocal(origvars[v]) );
+   //    /* if the upper bound is smaller than 0.5 if follows due to the integrality that the binary variable is fixed to zero */
+   //    if( SCIPvarGetUbLocal(origvars[v]) < 0.5 ) // TODO for those variables add order costraint to sub
+   //    {
+   //       SCIPdebugMsg(scip, "variable <%s> glb=[%.15g,%.15g] loc=[%.15g,%.15g] is fixed to zero\n",
+   //          SCIPvarGetName(lambArr[mIdx][v]), SCIPvarGetLbGlobal(lambArr[mIdx][v]), SCIPvarGetUbGlobal(lambArr[mIdx][v]),
+   //          SCIPvarGetLbLocal(lambArr[mIdx][v]), SCIPvarGetUbLocal(lambArr[mIdx][v]) );
 
-         /* coolect the constraints/items the variable belongs to */
-         vardata = SCIPvarGetData(origvars[v]);
-         nconsids = SCIPvardataGetNConsids(vardata);
-         consids = SCIPvardataGetConsids(vardata);
-         needed = TRUE;
+   //       /* coolect the constraints/items the variable belongs to */
+   //       vardata = SCIPvarGetData(lambArr[mIdx][v]); // DWDforFlowshop implementation ends here for now
+   //       nconsids = SCIPvardataGetNConsids(vardata);
+   //       consids = SCIPvardataGetConsids(vardata);
+   //       needed = TRUE;
 
-         SCIP_CALL( SCIPallocBufferArray(subscip, &logicorvars, nitems) );
-         nlogicorvars = 0;
-         consid = consids[0];
-         nvars2 = 0;
+   //       SCIP_CALL( SCIPallocBufferArray(subscip, &logicorvars, nitems) );
+   //       nlogicorvars = 0;
+   //       consid = consids[0];
+   //       nvars2 = 0;
 
-         /* loop over these items and create a linear (logicor) constraint which forbids this item combination in the
-          * pricing problem; thereby check if this item combination is already forbidden
-          */
-         for( c = 0, o = 0; o < nitems && needed; ++o )
-         {
-            assert(o <= consid);
-            cons = conss[o];
+   //       /* loop over these items and create a linear (logicor) constraint which forbids this item combination in the
+   //        * pricing problem; thereby check if this item combination is already forbidden
+   //        */
+   //       for( c = 0, o = 0; o < nitems && needed; ++o )
+   //       {
+   //          assert(o <= consid);
+   //          cons = conss[o];
 
-            if( SCIPconsIsEnabled(cons) )
-            {
-               assert( SCIPgetNFixedonesSetppc(scip, cons) == 0 );
+   //          if( SCIPconsIsEnabled(cons) )
+   //          {
+   //             assert( SCIPgetNFixedonesSetppc(scip, cons) == 0 );
 
-               var = vars[nvars2];
-               nvars2++;
-               assert(var != NULL);
+   //             var = vars[nvars2];
+   //             nvars2++;
+   //             assert(var != NULL);
 
-               if( o == consid )
-               {
-                  SCIP_CALL( SCIPgetNegatedVar(subscip, var, &var) );
-               }
+   //             if( o == consid )
+   //             {
+   //                SCIP_CALL( SCIPgetNegatedVar(subscip, var, &var) );
+   //             }
 
-               logicorvars[nlogicorvars] = var;
-               nlogicorvars++;
-            }
-            else if( o == consid )
-               needed = FALSE;
+   //             logicorvars[nlogicorvars] = var;
+   //             nlogicorvars++;
+   //          }
+   //          else if( o == consid )
+   //             needed = FALSE;
 
-            if( o == consid )
-            {
-               c++;
-               if ( c == nconsids )
-                  consid = nitems + 100;
-               else
-               {
-                  assert(consid < consids[c]);
-                  consid = consids[c];
-               }
-            }
-         }
+   //          if( o == consid )
+   //          {
+   //             c++;
+   //             if ( c == nconsids )
+   //                consid = nitems + 100;
+   //             else
+   //             {
+   //                assert(consid < consids[c]);
+   //                consid = consids[c];
+   //             }
+   //          }
+   //       }
 
-         if( needed )
-         {
-            SCIP_CALL( SCIPcreateConsBasicLogicor(subscip, &cons, SCIPvarGetName(origvars[v]), nlogicorvars, logicorvars) );
-            SCIP_CALL( SCIPsetConsInitial(subscip, cons, FALSE) );
+   //       if( needed )
+   //       {
+   //          SCIP_CALL( SCIPcreateConsBasicLogicor(subscip, &cons, SCIPvarGetName(origvars[v]), nlogicorvars, logicorvars) );
+   //          SCIP_CALL( SCIPsetConsInitial(subscip, cons, FALSE) );
 
-            SCIP_CALL( SCIPaddCons(subscip, cons) );
-            SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
-         }
+   //          SCIP_CALL( SCIPaddCons(subscip, cons) );
+   //          SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
+   //       }
 
-         SCIPfreeBufferArray(subscip, &logicorvars);
-      }
-   }
-
+   //       SCIPfreeBufferArray(subscip, &logicorvars);
+   //    }
+   // }
+   printf("Ending addFixedVarsConss()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -524,7 +530,7 @@ SCIP_RETCODE initPricing(
    SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr) );
 
    // /* avoid to generate columns which are fixed to zero */
-   // SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems) );
+   SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems, mIdx, pricerdata->lambArr, pricerdata->s1) );
 
    // SCIPfreeBufferArray(subscip, &vals);
    printf("Ending addBranchingDecisionConss()\n");
@@ -842,9 +848,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
             SCIP_CALL( SCIPallocBufferArray(scip, &startingTimes, nbrJobs) ); // allocates memory to store starting times of the patterns
             SCIP_CALL( SCIPallocBufferArray(scip, &completionTimes, nbrJobs) ); // for completion times
-
-            // get pattern // TODO wrap in SCIP_CALL return SCIP_OKAY if good 
-            //altStartingTimes = getPattern(subscip[i], sol, startingTimes, completionTimes,startVars, endVars, nbrJobs);
 
             // /* check which variables are fixed -> which item belongs to this packing */
             // for( o = 0, v = 0; o < nitems; ++o )

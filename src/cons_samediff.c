@@ -144,10 +144,14 @@ SCIP_RETCODE checkVariable(
    SCIP_VARDATA* vardata;
    int* consids;
    int nconsids;
+   int patternid;
+   schedule* s1;
 
    SCIP_Bool existid1;
    SCIP_Bool existid2;
    CONSTYPE type;
+   SCIP_Bool id1BeforeId2;
+   SCIP_Bool id2BeforeId1;
 
    SCIP_Bool fixed;
    SCIP_Bool infeasible;
@@ -167,14 +171,18 @@ SCIP_RETCODE checkVariable(
    /* check if the packing which corresponds to the variable is feasible for this constraint */
    vardata = SCIPvarGetData(var);
 
+   s1 = SCIPvardataGetSchedule(vardata);
+
    nconsids = SCIPvardataGetNConsids(vardata);
    consids = SCIPvardataGetConsids(vardata);
+   patternid = SCIPvardataGetPatternid(vardata);
 
-   existid1 = SCIPsortedvecFindInt(consids, consdata->itemid1, nconsids, &pos);
-   existid2 = SCIPsortedvecFindInt(consids, consdata->itemid2, nconsids, &pos);
+   id1BeforeId2 = (s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid1].end <= s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid2].start);
+   id2BeforeId1 = (s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid2].end <= s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid1].start);
+
    type = consdata->type;
 
-   if( (type == SAME && existid1 != existid2) || (type == DIFFER && existid1 && existid2) )
+   if( (type == SAME && id2BeforeId1 ) || (type == DIFFER && id1BeforeId2) )
    {
       SCIP_CALL( SCIPfixVar(scip, var, 0.0, &infeasible, &fixed) );
 
@@ -190,6 +198,7 @@ SCIP_RETCODE checkVariable(
          (*nfixedvars)++;
       }
    }
+
    printf("Ending checkVariable()\n");
    fflush(stdout);
    return SCIP_OKAY;
@@ -202,10 +211,11 @@ SCIP_RETCODE consdataFixVariables(
    SCIP_CONSDATA*        consdata,           /**< constraint data */
    SCIP_VAR**            vars,               /**< generated variables */
    int*                   nvars,              /**< number of generated variables */
-   SCIP_RESULT*          result              /**< pointer to store the result of the fixing */
+   SCIP_RESULT*          result,              /**< pointer to store the result of the fixing */
+   SCIP_VAR***           lambArr
    )
 {
-   printf("Start consdataFixVariables()\n");
+   printf("Starting consdataFixVariables()\n");
    fflush(stdout);
    int nfixedvars;
    int v;
@@ -214,11 +224,12 @@ SCIP_RETCODE consdataFixVariables(
    nfixedvars = 0;
    cutoff = FALSE;
 
-   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, nvars[0]); //FIXME
+   SCIPdebugMsg(scip, "check variables %d to %d\n", consdata->npropagatedvars, nvars[consdata->machineIdx]); 
+   
 
-   for( v = consdata->npropagatedvars; v < nvars[0] && !cutoff; ++v ) //FIXME
+   for( v = consdata->npropagatedvars; v < nvars[consdata->machineIdx] && !cutoff; ++v ) 
    {
-      SCIP_CALL( checkVariable(scip, consdata, vars[v], &nfixedvars, &cutoff) );
+      SCIP_CALL( checkVariable(scip, consdata, lambArr[consdata->machineIdx][v], &nfixedvars, &cutoff) );
    }
 
    SCIPdebugMsg(scip, "fixed %d variables locally\n", nfixedvars);
@@ -228,6 +239,8 @@ SCIP_RETCODE consdataFixVariables(
    else if( nfixedvars > 0 )
       *result = SCIP_REDUCEDDOM;
 
+   printf("Ending consdataFixVariables()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -422,39 +435,21 @@ SCIP_DECL_CONSPROP(consPropSamediff)
       consdata = SCIPconsGetData(conss[c]);
 
       /* check if all previously generated variables are valid for this constraint */
-      assert( consdataCheck(scip, probdata, consdata, TRUE) );
-
-#ifndef NDEBUG
-      {
-         /* check if there are no equal consdatas */
-         SCIP_CONSDATA* consdata2;
-         int i;
-
-         for( i = c+1; i < nconss; ++i )
-         {
-            consdata2 = SCIPconsGetData(conss[i]);
-            assert( !(consdata->itemid1 == consdata2->itemid1
-                  && consdata->itemid2 == consdata2->itemid2
-                  && consdata->type == consdata2->type) );
-            assert( !(consdata->itemid1 == consdata2->itemid2
-                  && consdata->itemid2 == consdata2->itemid1
-                  && consdata->type == consdata2->type) );
-         }
-      }
-#endif
+      // that might be to early to check that => move behind fixVars
+      // assert( consdataCheck(scip, probdata, consdata, TRUE) );
 
       if( !consdata->propagated )
       {
          SCIPdebugMsg(scip, "propagate constraint <%s> ", SCIPconsGetName(conss[c]));
          SCIPdebug( consdataPrint(scip, consdata, NULL) );
 
-         SCIP_CALL( consdataFixVariables(scip, consdata, vars, nvars, result) );
+         SCIP_CALL( consdataFixVariables(scip, consdata, vars, nvars, result, lambArr) );
          consdata->npropagations++;
 
          if( *result != SCIP_CUTOFF )
          {
             consdata->propagated = TRUE;
-            consdata->npropagatedvars = nvars[0]; //FIXME
+            consdata->npropagatedvars = nvars[consdata->machineIdx]; 
          }
          else
             break;
