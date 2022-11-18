@@ -188,6 +188,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
                ratio_branches = ratio_branches_new;
                i_found = i;
                j_found = j;
+               printf("i_found %d, j_found %d,", i,j);
+               fflush(stdout);
             }
          }
 

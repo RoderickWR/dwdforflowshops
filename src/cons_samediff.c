@@ -177,6 +177,8 @@ SCIP_RETCODE checkVariable(
    consids = SCIPvardataGetConsids(vardata);
    patternid = SCIPvardataGetPatternid(vardata);
 
+   assert(consdata->machineIdx == nconsids );
+
    id1BeforeId2 = (s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid1].end <= s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid2].start);
    id2BeforeId1 = (s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid2].end <= s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid1].start);
 
@@ -414,6 +416,8 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    int* nvars;
    int c;
    SCIP_VAR*** lambArr;
+
+   SCIPwriteTransProblem(scip, "master.lp",NULL,FALSE);
 
    assert(scip != NULL);
    assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);

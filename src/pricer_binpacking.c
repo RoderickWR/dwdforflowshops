@@ -122,7 +122,19 @@ struct SCIP_PricerData
 };
 
 
-
+struct SCIP_ConsData
+{
+   int                   itemid1;            /**< item id one */
+   int                   itemid2;            /**< item id two */
+   CONSTYPE              type;               /**< stores whether the items have to be in the SAME or DIFFER packing */
+   int                   npropagatedvars;    /**< number of variables that existed, the last time, the related node was
+                                              *   propagated, used to determine whether the constraint should be
+                                              *   repropagated*/
+   int                   npropagations;      /**< stores the number propagations runs of this constraint */
+   unsigned int          propagated:1;       /**< is constraint already propagated? */
+   SCIP_NODE*            node;               /**< the node in the B&B-tree at which the cons is sticking */
+   int                   machineIdx;
+};
 /**@name Local methods
  *
  * @{
@@ -136,7 +148,8 @@ SCIP_RETCODE addBranchingDecisionConss(
    SCIP_VAR**            vars,               /**< variable array of the subscuip oder variables */
    SCIP_CONSHDLR*        conshdlr,            /**< constraint handler for branching data */
    SCIP_VAR**            orderVars,
-   id_t                  nbrJobs
+   id_t                  nbrJobs,
+   int                   mIdx
    )
 {
    printf("Starting addBranchingDecisionConss()\n");
@@ -148,6 +161,7 @@ SCIP_RETCODE addBranchingDecisionConss(
    int id2;
    CONSTYPE type;
    char buf[256];
+   SCIP_CONSDATA* consdata;
 
    SCIP_Real vbdcoef;
    SCIP_Real lhs;
@@ -169,11 +183,15 @@ SCIP_RETCODE addBranchingDecisionConss(
    for( c = 0; c < nconss; ++c )
    {
       cons = conss[c];
+      assert(cons != NULL);
+      consdata = SCIPconsGetData(cons);
+      assert(consdata != NULL);
 
+      
       /* ignore constraints which are not active since these are not laying on the current active path of the search
-       * tree
+       * tree and ignore if constraint active but on a different machine 
        */
-      if( !SCIPconsIsActive(cons) )
+      if( !SCIPconsIsActive(cons) || (consdata->machineIdx != mIdx))
          continue;
 
       /* collect the two item ids and the branching type (SAME or DIFFER) on which the constraint branched */
@@ -189,6 +207,7 @@ SCIP_RETCODE addBranchingDecisionConss(
        */
       if( type == SAME )
       {
+         
          sprintf(buf, "yes_precedenceJ%dJ%d", id1,id2);
          SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
          SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[id1*nbrJobs + id2], 1.0) );
@@ -520,7 +539,7 @@ SCIP_RETCODE initPricing(
    }
    
    /* add constraint of the branching decisions */
-   SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr, orderVars, nbrJobs) );
+   SCIP_CALL( addBranchingDecisionConss(scip, subscip, vars, pricerdata->conshdlr, orderVars, nbrJobs,mIdx) );
 
    // /* avoid to generate columns which are fixed to zero */
    SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems, mIdx, pricerdata->lambArr, pricerdata->s1) );
@@ -780,7 +799,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
       /* creating and initializing local pricing problem */
       SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
-
+      SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE); // Why is sub still empty??
       SCIPdebugMsg(scip, "solve pricer problem\n");
       
       /* solve sub SCIP */
@@ -817,7 +836,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          }
 
          /* check if the solution has a value greater than 1.0 */         
-         // SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE);
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
          if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
          {

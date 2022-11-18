@@ -91,7 +91,9 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );
 
    /*execmain(scip);*/
-
+   // show every node in debug mode
+   SCIP_CALL( SCIPsetIntParam(scip,"display/freq",1) );
+   
    /* initialize singlePattern*/
    sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
    sPat sp2 = {7.0, 8.0};
