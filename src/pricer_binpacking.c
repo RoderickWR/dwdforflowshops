@@ -799,11 +799,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
       /* creating and initializing local pricing problem */
       SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
-      SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE); // Why is sub still empty??
+      
       SCIPdebugMsg(scip, "solve pricer problem\n");
       
       /* solve sub SCIP */
       SCIP_CALL( SCIPsolve(subscip[i]) );
+      SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE); // Why is sub still empty??
       if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
       }
