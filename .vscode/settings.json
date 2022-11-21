@@ -10,7 +10,13 @@
         "limits": "c",
         "numeric": "c",
         "probdata_binpacking.h": "c",
-        "scip.h": "c"
+        "scip.h": "c",
+        "array": "c",
+        "deque": "c",
+        "list": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "initializer_list": "c"
     },
     "cmake.configureOnOpen": false
 }

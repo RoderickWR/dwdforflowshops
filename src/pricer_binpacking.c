@@ -80,6 +80,7 @@
 #include "pricer_binpacking.h"
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
+#include "printOut.h"
 
 /**@name Pricer properties
  *
@@ -804,7 +805,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       
       /* solve sub SCIP */
       SCIP_CALL( SCIPsolve(subscip[i]) );
-      SCIPwriteTransProblem(subscip[i],"test.lp",NULL,FALSE); // Why is sub still empty??
+
       if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
       }
@@ -922,9 +923,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
                s1->sched[i].mp[s1->sched[i].lastIdx].job[j].end = (double) SCIPgetSolVal(subscip[i], sol, endVars[j]);
                
             }
-            
-
-            
+      
+            printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
+                     
             SCIPfreeBufferArray(scip, &completionTimes);
             SCIPfreeBufferArray(scip, &startingTimes);
          }

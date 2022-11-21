@@ -31,6 +31,7 @@
 #include "probdata_binpacking.h"
 
 
+
 /** creates the binpacking variable pricer and includes it in SCIP */
 SCIP_RETCODE SCIPincludePricerBinpacking(
    SCIP*                 scip                /**< SCIP data structure */

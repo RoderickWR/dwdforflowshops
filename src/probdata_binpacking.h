@@ -56,9 +56,9 @@ typedef struct pat {
    int lastIdx;
 } pat;
 
-/* one machine can have up to 5 patterns*/
+/* one machine can have up to 50 patterns*/
 typedef struct mPats {
-   pat mp[5];
+   pat mp[50];
    int lastIdx;
 } mPats;
 
