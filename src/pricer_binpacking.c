@@ -697,6 +697,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    printf("Starting DECL_PRICERREDCOST()\n");
    fflush(stdout);
    SCIP_PRICERDATA* pricerdata;
+   SCIP_PROBDATA* probdata;
    SCIP_CONS** conss;
    SCIP_VAR** vars;
    SCIP_VAR** startVars;
@@ -712,6 +713,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_SOL** sols;
    int nsols;
    int s;
+   int* nvars;
 
    int i = 0;
 
@@ -744,6 +746,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    /* get the pricer data */
    pricerdata = SCIPpricerGetData(pricer);
    assert(pricerdata != NULL);
+   /* get the prob data */
+   probdata = SCIPgetProbData(scip);
+   assert(probdata != NULL);
+   nvars = SCIPprobdataGetNVars(probdata);
 
    capacity = pricerdata->capacity;
    conss = pricerdata->conss;
@@ -901,6 +907,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
             lambArr[i][s1->sched[i].lastIdx] = newVar; // add the new var to the lambdas array
             SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
+            nvars[i]++; // incremeat nvars
             addvar = TRUE;
      
             // /* check which variable are fixed -> which orders belong to this packing */
