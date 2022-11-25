@@ -98,7 +98,7 @@ SCIP_RETCODE runShell(
    sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
    sPat sp2 = {7.0, 8.0};
    sPat sp3 = {7.0, 9.0};
-   sPat sp4 = {8.0, 11.0};
+   sPat sp4 = {9.0, 12.0};
    /* ... 2 patterns */
    pat p1 = {.job[0] = sp1, .job[1] = sp2, .lastIdx = 1}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
    pat p2 = {.job[0] = sp3, .job[1] = sp4, .lastIdx = 1};

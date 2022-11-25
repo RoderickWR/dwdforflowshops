@@ -176,7 +176,7 @@ SCIP_RETCODE checkVariable(
    nconsids = SCIPvardataGetNConsids(vardata);
    consids = SCIPvardataGetConsids(vardata);
    patternid = SCIPvardataGetPatternid(vardata);
-
+   // check if consdata on same machine as pattern
    assert(consdata->machineIdx == nconsids );
 
    id1BeforeId2 = (s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid1].end <= s1->sched[consdata->machineIdx].mp[patternid].job[consdata->itemid2].start);
@@ -283,43 +283,43 @@ SCIP_Bool consdataCheck(
    lambArr = SCIPprobdataGetLambArr(probdata);
    nbrMachines = SCIPprobdataGetnbrMachines(probdata);
    nvars = SCIPprobdataGetNVars(probdata);
-   for( i = 0; i < nbrMachines; ++i ) {
-      // nvars[i] = (beforeprop ? consdata->npropagatedvars : SCIPprobdataGetNVars(probdata)[i]);
-      // assert(nvars <= SCIPprobdataGetNVars(probdata));
+   i = consdata->machineIdx;
+   // nvars[i] = (beforeprop ? consdata->npropagatedvars : SCIPprobdataGetNVars(probdata)[i]);
+   // assert(nvars <= SCIPprobdataGetNVars(probdata));
 
-      for( v = 0; v < nvars[i]; ++v )
+   for( v = 0; v < nvars[i]; ++v )
+   {
+      var = lambArr[i][v];
+
+      /* if variables is locally fixed to zero continue */
+      if( SCIPvarGetUbLocal(var) < 0.5 )
+         continue;
+
+      /* check if the packing which corresponds to the variable is feasible for this constraint */
+      vardata = SCIPvarGetData(var);
+      s1 = SCIPvardataGetSchedule(vardata);
+
+      nconsids = SCIPvardataGetNConsids(vardata);
+      consids = SCIPvardataGetConsids(vardata);
+      patternid = SCIPvardataGetPatternid(vardata);
+
+      id1BeforeId2 = (s1->sched[i].mp[patternid].job[consdata->itemid1].end <= s1->sched[i].mp[patternid].job[consdata->itemid2].start);
+      id2BeforeId1 = (s1->sched[i].mp[patternid].job[consdata->itemid2].end <= s1->sched[i].mp[patternid].job[consdata->itemid1].start);
+
+
+      type = consdata->type;
+
+      if( (type == SAME && id2BeforeId1 ) || (type == DIFFER && id1BeforeId2) )
       {
-         var = lambArr[i][v];
-
-         /* if variables is locally fixed to zero continue */
-         if( SCIPvarGetUbLocal(var) < 0.5 )
-            continue;
-
-         /* check if the packing which corresponds to the variable is feasible for this constraint */
-         vardata = SCIPvarGetData(var);
-         s1 = SCIPvardataGetSchedule(vardata);
-
-         nconsids = SCIPvardataGetNConsids(vardata);
-         consids = SCIPvardataGetConsids(vardata);
-         patternid = SCIPvardataGetPatternid(vardata);
-
-         id1BeforeId2 = (s1->sched[i].mp[patternid].job[consdata->itemid1].end <= s1->sched[i].mp[patternid].job[consdata->itemid2].start);
-         id2BeforeId1 = (s1->sched[i].mp[patternid].job[consdata->itemid2].end <= s1->sched[i].mp[patternid].job[consdata->itemid1].start);
-   
-
-         type = consdata->type;
-
-         if( (type == SAME && id2BeforeId1 ) || (type == DIFFER && id1BeforeId2) )
-         {
-            SCIPdebug( SCIPvardataPrint(scip, vardata, NULL) );
-            SCIPdebug( consdataPrint(scip, consdata, NULL) );
-            SCIPdebug( SCIPprintVar(scip, var, NULL) );
-            printf("Ending consdataCheck()\n");
-            fflush(stdout);
-            return FALSE;
-         }
+         SCIPdebug( SCIPvardataPrint(scip, vardata, NULL) );
+         SCIPdebug( consdataPrint(scip, consdata, NULL) );
+         SCIPdebug( SCIPprintVar(scip, var, NULL) );
+         printf("Ending consdataCheck()\n");
+         fflush(stdout);
+         return FALSE;
       }
    }
+   
    printf("Ending consdataCheck()\n");
    fflush(stdout);
    return TRUE;
@@ -434,12 +434,23 @@ SCIP_DECL_CONSPROP(consPropSamediff)
 
    *result = SCIP_DIDNOTFIND;
 
+   printf("nncons: %d\n", nconss);
+   fflush(stdout);
+
+   if (nconss>3) {
+      int test = 0;
+   }
+
    for( c = 0; c < nconss; ++c )
    {
       consdata = SCIPconsGetData(conss[c]);
 
+      if (consdata->machineIdx == 1 ) {
+      int test2 = 1;
+      }
+
       /* check if all previously generated variables are valid for this constraint */
-      // that might be to early to check that => move behind fixVars
+      // that might be to early to check that => moved behind fixVars
       // assert( consdataCheck(scip, probdata, consdata, TRUE) );
 
       if( !consdata->propagated )
