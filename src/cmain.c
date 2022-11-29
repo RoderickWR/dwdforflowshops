@@ -299,6 +299,12 @@ SCIP_RETCODE runShell(
     * Deinitialization *
     ********************/
 
+   for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
+      for( i = 0; i < (*s1).sched[iii].lastIdx+1; ++i ) {
+         SCIP_CALL( SCIPreleaseVar(scip, &lambArr[iii][i]) );
+      }
+   }
+
    SCIP_CALL( SCIPfree(&scip) );
 
    BMScheckEmptyMemory();
