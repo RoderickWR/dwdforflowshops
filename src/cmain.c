@@ -304,6 +304,12 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPreleaseVar(scip, &lambArr[iii][i]) );
       }
    }
+   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
+   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
+   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
+   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
+   // printf("Makespan used after%d",SCIPvarGetNUses(ptrMakespan) );
+   // fflush(stdout);   
 
    SCIP_CALL( SCIPfree(&scip) );
 

@@ -231,7 +231,8 @@ SCIP_RETCODE addBranchingDecisionConss(
       SCIPdebugPrintCons(subscip, cons, NULL);
 
    }
-
+   printf("Ending addBranchingDecisionConss()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -546,7 +547,7 @@ SCIP_RETCODE initPricing(
    SCIP_CALL( addFixedVarsConss(scip, subscip, vars, conss, nitems, mIdx, pricerdata->lambArr, pricerdata->s1) );
 
    // SCIPfreeBufferArray(subscip, &vals);
-   printf("Ending addBranchingDecisionConss()\n");
+   printf("Ending initPricing()\n");
    fflush(stdout);
    return SCIP_OKAY;
 }
@@ -562,6 +563,8 @@ SCIP_RETCODE initPricing(
 static
 SCIP_DECL_PRICERFREE(pricerFreeBinpacking)
 {
+   printf("Starting SCIP_DECL_PRICERFREE()\n");
+   fflush(stdout);
    SCIP_PRICERDATA* pricerdata;
 
    assert(scip != NULL);
@@ -578,7 +581,8 @@ SCIP_DECL_PRICERFREE(pricerFreeBinpacking)
 
       SCIPfreeBlockMemory(scip, &pricerdata);
    }
-
+   printf("Ending SCIP_DECL_PRICERFREE()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
@@ -658,7 +662,8 @@ SCIP_DECL_PRICERINIT(pricerInitBinpacking)
       /* capture transformed constraint */
       SCIP_CALL( SCIPcaptureCons(scip, pricerdata->makespanCons[c2]) );
    }
-  
+   printf("Ending SCIP_DECL_PRICERINIT()\n");
+   fflush(stdout);  
    return SCIP_OKAY;
 }
 
@@ -668,6 +673,8 @@ SCIP_DECL_PRICERINIT(pricerInitBinpacking)
 static
 SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
 {
+   printf("Starting SCIP_DECL_PRICEREXITSOL()\n");
+   fflush(stdout);
    SCIP_PRICERDATA* pricerdata;
    int c;
 
@@ -683,7 +690,7 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
       /* release constraint */
       SCIP_CALL( SCIPreleaseCons(scip, &(pricerdata->conss[c])) );
    }
-   printf("Ending SCIP_DECL_PRICERINIT()\n");
+   printf("Ending SCIP_DECL_PRICEREXITSOL()\n");
    fflush(stdout);
    return SCIP_OKAY;
 }
@@ -907,7 +914,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
             lambArr[i][s1->sched[i].lastIdx] = newVar; // add the new var to the lambdas array
             SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
-            nvars[i]++; // incremeat nvars
+            nvars[i]++; // increment nvars
             addvar = TRUE;
      
             // /* check which variable are fixed -> which orders belong to this packing */
