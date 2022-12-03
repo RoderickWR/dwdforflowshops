@@ -166,27 +166,31 @@ SCIP_RETCODE probdataFree(
    )
 {
    int i;
+   int ii;
 
    assert(scip != NULL);
    assert(probdata != NULL);
 
    /* release all variables */
-   for( i = 0; i < (*probdata)->nvars[0]; ++i ) //FIXME
-   {
-      SCIP_CALL( SCIPreleaseVar(scip, &(*probdata)->vars[i]) );
+   for( ii= 0; ii < (*probdata)->nbrMachines; ++ii) {
+      for( i = 0; i < (*probdata)->nvars[ii]; ++i ) 
+      {
+      SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->lambArr[ii][i] ) ));
+      }
    }
+   
 
-   /* release all constraints */
-   for( i = 0; i < (*probdata)->nitems; ++i )
-   {
-      SCIP_CALL( SCIPreleaseCons(scip, &(*probdata)->conss[i]) );
-   }
+   // /* release all constraints */
+   // for( i = 0; i < (*probdata)->nitems; ++i )
+   // {
+   //    SCIP_CALL( SCIPreleaseCons(scip, &(*probdata)->conss[i]) );
+   // }
 
-   /* free memory of arrays */
-   SCIPfreeBlockMemoryArray(scip, &(*probdata)->vars, (*probdata)->varssize);
-   SCIPfreeBlockMemoryArray(scip, &(*probdata)->conss, (*probdata)->nitems);
-   SCIPfreeBlockMemoryArray(scip, &(*probdata)->weights, (*probdata)->nitems);
-   SCIPfreeBlockMemoryArray(scip, &(*probdata)->ids, (*probdata)->nitems);
+   // /* free memory of arrays */
+   // SCIPfreeBlockMemoryArray(scip, &(*probdata)->vars, (*probdata)->varssize);
+   // SCIPfreeBlockMemoryArray(scip, &(*probdata)->conss, (*probdata)->nitems);
+   // SCIPfreeBlockMemoryArray(scip, &(*probdata)->weights, (*probdata)->nitems);
+   // SCIPfreeBlockMemoryArray(scip, &(*probdata)->ids, (*probdata)->nitems);
 
    /* free probdata */
    SCIPfreeBlockMemory(scip, probdata);
@@ -268,7 +272,7 @@ SCIP_RETCODE createInitialColumns(
  */
 
 /** frees user data of original problem (called when the original problem is freed) */
-static
+
 SCIP_DECL_PROBDELORIG(probdelorigBinpacking)
 {
    SCIPdebugMsg(scip, "free original problem data\n");
@@ -280,7 +284,7 @@ SCIP_DECL_PROBDELORIG(probdelorigBinpacking)
 
 /** creates user data of transformed problem by transforming the original user problem data
  *  (called after problem was transformed) */
-static
+
 SCIP_DECL_PROBTRANS(probtransBinpacking)
 {
    /* create transform probdata */
@@ -296,7 +300,6 @@ SCIP_DECL_PROBTRANS(probtransBinpacking)
 }
 
 /** frees user data of transformed problem (called when the transformed problem is freed) */
-static
 SCIP_DECL_PROBDELTRANS(probdeltransBinpacking)
 {
    SCIPdebugMsg(scip, "free transformed problem data\n");
@@ -307,7 +310,6 @@ SCIP_DECL_PROBDELTRANS(probdeltransBinpacking)
 }
 
 /** solving process initialization method of transformed data (called before the branch and bound process begins) */
-static
 SCIP_DECL_PROBINITSOL(probinitsolBinpacking)
 {
    SCIP_EVENTHDLR* eventhdlr;
@@ -324,7 +326,6 @@ SCIP_DECL_PROBINITSOL(probinitsolBinpacking)
 }
 
 /** solving process deinitialization method of transformed data (called before the branch and bound data is freed) */
-static
 SCIP_DECL_PROBEXITSOL(probexitsolBinpacking)
 {  /*lint --e{715}*/
    SCIP_EVENTHDLR* eventhdlr;

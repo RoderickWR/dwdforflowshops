@@ -67,6 +67,13 @@ SCIP_RETCODE runShell(
    /*SCIP_CALL( SCIPincludeReaderBpa(scip) ); */
    /* create problem in SCIP and add non-NULL callbacks via setter functions */
    SCIP_CALL( SCIPcreateProbBasic(scip, "flowshop1") ); 
+   SCIP_CALL( SCIPsetProbDelorig(scip, probdelorigBinpacking) );
+   // SCIP_CALL( SCIPsetProbTrans(scip, probtransBinpacking) );
+   SCIP_CALL( SCIPsetProbDeltrans(scip, probdeltransBinpacking) );
+   // SCIP_CALL( SCIPsetProbInitsol(scip, probinitsolBinpacking) );
+   // SCIP_CALL( SCIPsetProbExitsol(scip, probexitsolBinpacking) );
+
+
 
    SCIP_PROBDATA* probdata;
    
@@ -273,6 +280,7 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii+1].ptrStart[i], -1));
          SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
+         
       }
    }
 
@@ -292,24 +300,17 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
    SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars)); 
 
-
    SCIPsolve(scip);
 
    /********************
     * Deinitialization *
     ********************/
 
-   for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
-      for( i = 0; i < (*s1).sched[iii].lastIdx+1; ++i ) {
-         SCIP_CALL( SCIPreleaseVar(scip, &lambArr[iii][i]) );
-      }
-   }
-   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
-   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
-   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
-   // SCIP_CALL( SCIPreleaseVar(scip, &ptrMakespan) );
-   // printf("Makespan used after%d",SCIPvarGetNUses(ptrMakespan) );
-   // fflush(stdout);   
+   // for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
+   //    for( i = 0; i < (*s1).sched[iii].lastIdx+1; ++i ) {
+   //       SCIP_CALL( SCIPreleaseVar(scip, &lambArr[iii][i]) );
+   //    }
+   // }
 
    SCIP_CALL( SCIPfree(&scip) );
 

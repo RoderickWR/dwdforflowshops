@@ -174,4 +174,10 @@ SCIP_RETCODE SCIPprobdataAddVar(
    SCIP_VAR*             var                 /**< variables to add */
    );
 
+SCIP_DECL_PROBDELORIG(probdelorigBinpacking);
+SCIP_DECL_PROBTRANS(probtransBinpacking);
+SCIP_DECL_PROBDELTRANS(probdeltransBinpacking);
+SCIP_DECL_PROBINITSOL(probinitsolBinpacking);
+SCIP_DECL_PROBEXITSOL(probexitsolBinpacking);
+
 #endif
