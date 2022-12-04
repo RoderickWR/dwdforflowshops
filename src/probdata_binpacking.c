@@ -127,7 +127,8 @@ SCIP_RETCODE probdataCreate(
    start                   startTimes,
    end                     endTimes,
    int*                   nvars,              /**< number of variables */
-   int                     nbrMachines
+   int                     nbrMachines,
+   int                     nbrJobs
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
    )
@@ -155,6 +156,7 @@ SCIP_RETCODE probdataCreate(
    (*probdata)->endTimes = endTimes;
    (*probdata)->nvars = nvars;
    (*probdata)->nbrMachines = nbrMachines;
+   (*probdata)->nbrJobs = nbrJobs;
    // (*probdata)->varssize = nvars;
    // (*probdata)->nitems = nitems;
    // (*probdata)->capacity = capacity;
@@ -171,6 +173,7 @@ SCIP_RETCODE probdataFree(
 {
    int i;
    int ii;
+   int iii;
 
    assert(scip != NULL);
    assert(probdata != NULL);
@@ -181,6 +184,12 @@ SCIP_RETCODE probdataFree(
       {
       SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->lambArr[ii][i] ) ));
       }
+      // for( iii = 0; iii< (*probdata)->nbrJobs; ++iii ) 
+      // {
+      // SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->startTimes.startOnMachine[ii].ptrStart[iii] ) ));
+      // SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->endTimes.endOnMachine[ii].ptrEnd[iii] ) ));
+      // }
+      
    }
    
 
@@ -292,7 +301,7 @@ SCIP_DECL_PROBDELORIG(probdelorigBinpacking)
 SCIP_DECL_PROBTRANS(probtransBinpacking)
 {
    /* create transform probdata */
-   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->lambArr, sourcedata->startTimes, sourcedata->endTimes, sourcedata->nvars, sourcedata->nbrMachines) );
+   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->lambArr, sourcedata->startTimes, sourcedata->endTimes, sourcedata->nvars, sourcedata->nbrMachines, sourcedata->nbrJobs) );
 
    /* transform all constraints */
    SCIP_CALL( SCIPtransformConss(scip, (*targetdata)->nitems, (*targetdata)->conss, (*targetdata)->conss) );

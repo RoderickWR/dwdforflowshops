@@ -172,7 +172,7 @@ SCIP_RETCODE runShell(
       } 
    }
 
-   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startTimes, endTimes, nvars, nbrMachines) );
+   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startTimes, endTimes, nvars, nbrMachines, nbrJobs) );
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
  
