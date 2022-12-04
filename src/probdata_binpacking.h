@@ -28,21 +28,6 @@
 
 #include "scip/scip.h"
 
-struct SCIP_ProbData
-{
-   SCIP_VAR**            vars;         /**< all exiting variables in the problem */
-   SCIP_CONS**           conss;        /**< set partitioning constraints for each item exactly one */
-   SCIP_Longint*         weights;      /**< array of item weights */
-   int*                  ids;          /**< array of item ids */
-   int                   nbrMachines;
-   int*                  nvars;        /**< number of generated variables */
-   int                   varssize;     /**< size of the variable array */
-   int                   nitems;       /**< number of items */
-   SCIP_Longint          capacity;     /**< bin capacity */
-   SCIP_VAR***           lambArr;
-   
-};
-
 /* typedefs for flowshop*/
 /* singlePattern (sPat) struct contains start and end time of one job*/
 typedef struct sPat {
@@ -100,6 +85,23 @@ typedef struct end{
    endMi endOnMachine[5];
 } end;
 
+struct SCIP_ProbData
+{
+   SCIP_VAR**            vars;         /**< all exiting variables in the problem */
+   SCIP_CONS**           conss;        /**< set partitioning constraints for each item exactly one */
+   SCIP_Longint*         weights;      /**< array of item weights */
+   int*                  ids;          /**< array of item ids */
+   int                   nbrMachines;
+   int*                  nvars;        /**< number of generated variables */
+   int                   varssize;     /**< size of the variable array */
+   int                   nitems;       /**< number of items */
+   SCIP_Longint          capacity;     /**< bin capacity */
+   SCIP_VAR***           lambArr;
+   start                 startTimes;
+   end                   endTimes;
+   
+};
+
 /** sets up the problem data */
 SCIP_RETCODE SCIPprobdataCreate(
    SCIP*                 scip,               /**< SCIP data structure */
@@ -118,6 +120,8 @@ SCIP_RETCODE probdataCreate(
    // SCIP_Longint*         weights,            /**< array containing the item weights */
    // int*                  ids,                /**< array of item ids */
    SCIP_VAR***              lambArr,
+   start                    startTimes,
+   end                      endTimes,
    int*                   nvars,              /**< number of variables */
    int                     nbrMachines
    // int                   nitems,             /**< number of items */

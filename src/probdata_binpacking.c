@@ -124,6 +124,8 @@ SCIP_RETCODE probdataCreate(
    // SCIP_Longint*         weights,            /**< array containing the item weights */
    // int*                  ids,                /**< array of item ids */
    SCIP_VAR***              lambArr,
+   start                   startTimes,
+   end                     endTimes,
    int*                   nvars,              /**< number of variables */
    int                     nbrMachines
    // int                   nitems,             /**< number of items */
@@ -149,6 +151,8 @@ SCIP_RETCODE probdataCreate(
    // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->weights, weights, nitems) );
    // SCIP_CALL( SCIPduplicateBlockMemoryArray(scip, &(*probdata)->ids, ids, nitems) );
    (*probdata)->lambArr = lambArr;
+   (*probdata)->startTimes = startTimes;
+   (*probdata)->endTimes = endTimes;
    (*probdata)->nvars = nvars;
    (*probdata)->nbrMachines = nbrMachines;
    // (*probdata)->varssize = nvars;
@@ -288,7 +292,7 @@ SCIP_DECL_PROBDELORIG(probdelorigBinpacking)
 SCIP_DECL_PROBTRANS(probtransBinpacking)
 {
    /* create transform probdata */
-   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->lambArr, sourcedata->nvars, sourcedata->nbrMachines) );
+   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->lambArr, sourcedata->startTimes, sourcedata->endTimes, sourcedata->nvars, sourcedata->nbrMachines) );
 
    /* transform all constraints */
    SCIP_CALL( SCIPtransformConss(scip, (*targetdata)->nitems, (*targetdata)->conss, (*targetdata)->conss) );
