@@ -43,7 +43,7 @@ typedef struct pat {
 
 /* one machine can have up to 50 patterns*/
 typedef struct mPats {
-   pat mp[50];
+   pat mp[500];
    int lastIdx;
 } mPats;
 

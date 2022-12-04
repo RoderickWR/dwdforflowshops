@@ -938,7 +938,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
                
             }
       
-            printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
+            //printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
                      
             SCIPfreeBufferArray(scip, &completionTimes);
             SCIPfreeBufferArray(scip, &startingTimes);
