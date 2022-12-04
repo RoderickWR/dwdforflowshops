@@ -713,7 +713,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    schedule* s1;
    SCIP_VAR*** lambArr;
    int* ids;
-   SCIP_Bool addvar;
+   SCIP_Bool addvar = FALSE;
    SCIP_Bool allSubsOptimal = TRUE;
    char buf[256];
 
@@ -825,7 +825,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
       sols = SCIPgetSols(subscip[i]);
       nsols = SCIPgetNSols(subscip[i]);
-      addvar = FALSE;
    
       /* loop over all solutions and create the corresponding column to master if the reduced cost are negative for master,
       * that is the objective value i greater than 1.0
@@ -952,15 +951,14 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       SCIPfreeBufferArray(scip, &endVars );
       SCIPfreeBufferArray(scip, &startVars ); /*free for start and finish vars */
       
-      
-
-      if( addvar || allSubsOptimal ) // a variable was added by a sub problem or all sub problems are optimal and not variable was added
-         (*result) = SCIP_SUCCESS;
-
       /* free sub SCIP */
       SCIP_CALL( SCIPfree(&subscip[i]) );
    }
 
+   if( addvar || allSubsOptimal ) {
+      // a variable was added by a sub problem or all sub problems are optimal and not variable was added
+      (*result) = SCIP_SUCCESS;
+   } 
    // /* free pricer MIP */
    // SCIPfreeBufferArray(scip, &vars);
    printf("Ending DECL_PRICERREDCOST()\n");
