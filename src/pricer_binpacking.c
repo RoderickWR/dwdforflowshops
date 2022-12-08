@@ -848,10 +848,18 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             continue;
          }
 
-         /* check if the solution has a value greater than 1.0 */         
+         /* check if the solution has a value greater than 1.0 */       
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-         if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
+         // if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
+         if( SCIPgetSolOrigObj(subscip[i], sol) - dual < -1e-5)
          {
+            printf("SolVal %lf \n" , ( SCIPgetSolOrigObj(subscip[i], sol)));
+            printf("dual %lf \n" , ( dual));
+            fflush(stdout);  
+            SCIPwriteTransProblem(subscip[i], "sub.lp",NULL,TRUE);
+
+
+
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;
             int* consids;
@@ -955,6 +963,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    }
 
    if( addvar || allSubsOptimal ) { // a variable was added by a sub problem or all sub problems are optimal and not variable was added
+   if (addvar) {
+      printf("Added Var in this pricer loop \n");
+      fflush(stdout);
+   }
    (*result) = SCIP_SUCCESS;
    }
    // /* free pricer MIP */
