@@ -860,12 +860,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
          /* check if the solution has a value greater than 1.0 */         
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
+         printf("SolVal %lf \n" , ( SCIPgetSolOrigObj(subscip[i], sol)));
+         printf("dual %lf \n" , ( dual));
+         fflush(stdout);  
          if( SCIPgetSolOrigObj(subscip[i], sol) - dual < -1e-5)
-         {
-            printf("SolVal %lf \n" , ( SCIPgetSolOrigObj(subscip[i], sol)));
-            printf("dual %lf \n" , ( dual));
-            fflush(stdout);  
-            
+         {          
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;
             int* consids;
@@ -974,8 +973,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       printf("All subs are opt and no var has been added => SCIP_SUCCESS \n");
       fflush(stdout);
       }
-      (*result) = SCIP_SUCCESS;
+      
    } 
+   (*result) = SCIP_SUCCESS;
    // /* free pricer MIP */
    // SCIPfreeBufferArray(scip, &vars);
    printf("Ending DECL_PRICERREDCOST()\n");

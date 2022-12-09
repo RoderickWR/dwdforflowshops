@@ -49,7 +49,7 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 2;
+   int nbrJobs = 4;
    int nbrMachines = 2;
    int* nvars;
    
@@ -101,11 +101,15 @@ SCIP_RETCODE runShell(
    // show every node in debug mode
    SCIP_CALL( SCIPsetIntParam(scip,"display/freq",1) );
    
-   /* initialize singlePattern*/
+      /* initialize singlePattern*/
    sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
    sPat sp2 = {7.0, 8.0};
+   sPat sp5 = {8.0, 13.0};
+   sPat sp6 = {13.0, 17.0};
    sPat sp3 = {7.0, 9.0};
    sPat sp4 = {9.0, 12.0};
+   sPat sp7 = {12.0, 14.0};
+   sPat sp8 = {14.0, 17.0};
    /* ... 2 patterns */
    pat p1 = {.job[0] = sp1, .job[1] = sp2, .job[2] = sp5, .job[3] = sp6, .lastIdx = 3}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
    pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
