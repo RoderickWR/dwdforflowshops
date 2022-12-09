@@ -112,8 +112,8 @@ SCIP_RETCODE runShell(
    sPat sp8 = {14.0, 17.0};
    
    /* ... 2 patterns */
-   pat p1 = {.job[0] = sp1, .job[1] = sp2, .job[2] = sp5, .job[3] = sp6, .lastIdx = 1}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
-   pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 1};
+   pat p1 = {.job[0] = sp1, .job[1] = sp2, .job[2] = sp5, .job[3] = sp6, .lastIdx = 3}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
+   pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
    /* ... and 2 lists à patterns*/
    mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1}; 
    mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
