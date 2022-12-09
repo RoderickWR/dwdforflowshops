@@ -496,7 +496,6 @@ SCIP_RETCODE initPricing(
    SCIP_CONS* startFinish[nbrJobs];
    SCIP_CONS* precedence[nbrJobs][nbrJobs];
    SCIP_CONS* finishStart[nbrJobs];
-
    for( i = 0; i < nbrJobs; ++i ) {
       SCIP_CONS* cons = NULL;  
       sprintf(buf, "startFinish%d", i);
@@ -505,21 +504,28 @@ SCIP_RETCODE initPricing(
       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
       SCIP_CALL(SCIPaddCons(subscip,cons));
       SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
+   }
 
+   for( i = 0; i < nbrJobs; ++i ) {
       for( ii = 0; ii < nbrJobs; ++ii ) {
-         sprintf(buf, "finishStart%d", i);
-         SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -50.0, 1e+20));
-         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[ii], 1.0) );
-         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
-         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], -50.0) );
-         SCIP_CALL(SCIPaddCons(subscip,cons));
-         SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
+         if (i != ii) {
+            SCIP_CONS* cons = NULL;
+            sprintf(buf, "finishStart%d%d", i,ii);
+            SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -50.0, 1e+20));
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[ii], 1.0) );
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], -50.0) );
+            SCIP_CALL(SCIPaddCons(subscip,cons));
+            SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
+         }
+         
       }
    }
 
    for( i = 0; i < nbrJobs; ++i ) {
       for( ii = 0; ii < nbrJobs; ++ii ) {
          if (i != ii) {
+            SCIP_CONS* cons = NULL;
             sprintf(buf, "precedence%d", i);
             SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], 1.0) );
@@ -527,17 +533,18 @@ SCIP_RETCODE initPricing(
             SCIP_CALL(SCIPaddCons(subscip,cons));
             SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
          }
-         sprintf(buf, "fixAtZero%d", i);
-         SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -(nbrJobs-1)*50, 1e+20));
-         SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], -1.0) );
-         for (iii=0; iii < nbrJobs; ++iii) {
-            if (iii != i) {
-               SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + iii], -50.0) );
-            }
-         }
-         SCIP_CALL(SCIPaddCons(subscip,cons));
-         SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
       }
+      SCIP_CONS* cons = NULL;
+      sprintf(buf, "fixAtZero%d", i);
+      SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -(nbrJobs-1)*50, 1e+20));
+      SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], -1.0) );
+      for (iii=0; iii < nbrJobs; ++iii) {
+         if (iii != i) {
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + iii], -50.0) );
+         }
+      }
+      SCIP_CALL(SCIPaddCons(subscip,cons));
+      SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
    }
    
    /* add constraint of the branching decisions */
@@ -792,7 +799,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       SCIP_CALL( SCIPincludeDefaultPlugins(subscip[i]) );
 
       /* create problem in sub SCIP */
-      SCIP_CALL( SCIPcreateProbBasic(subscip[i], "pricing") );
+      SCIP_CALL( SCIPcreateProbBasic(subscip[i], "pricing" ));
       SCIP_CALL( SCIPsetObjsense(subscip[i], SCIP_OBJSENSE_MINIMIZE) );
 
       /* do not abort subproblem on CTRL-C */
@@ -818,6 +825,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       
       /* solve sub SCIP */
       SCIP_CALL( SCIPsolve(subscip[i]) );
+
+      SCIPwriteOrigProblem(subscip[i], "sub.lp",NULL,FALSE);
 
       if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
@@ -853,6 +862,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
          if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
          {
+            printf("SolVal %lf \n" , ( SCIPgetSolOrigObj(subscip[i], sol)));
+            printf("dual %lf \n" , ( dual));
+            fflush(stdout);  
+            
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;
             int* consids;
