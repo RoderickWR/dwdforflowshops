@@ -107,8 +107,8 @@ SCIP_RETCODE runShell(
    sPat sp3 = {7.0, 9.0};
    sPat sp4 = {9.0, 12.0};
    /* ... 2 patterns */
-   pat p1 = {.job[0] = sp1, .job[1] = sp2, .lastIdx = 1}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
-   pat p2 = {.job[0] = sp3, .job[1] = sp4, .lastIdx = 1};
+   pat p1 = {.job[0] = sp1, .job[1] = sp2, .job[2] = sp5, .job[3] = sp6, .lastIdx = 3}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
+   pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
    /* ... and 2 lists à patterns*/
    mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1}; 
    mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
@@ -121,7 +121,7 @@ SCIP_RETCODE runShell(
    
  
    /* and processing times*/
-   processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 1, .machine[0].m[3] = 1,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3}; 
+   processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
 
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
