@@ -860,7 +860,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
          /* check if the solution has a value greater than 1.0 */         
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-         if( SCIPisFeasGT(subscip[i], dual , SCIPgetSolOrigObj(subscip[i], sol)) )
+         if( SCIPgetSolOrigObj(subscip[i], sol) - dual < -1e-5)
          {
             printf("SolVal %lf \n" , ( SCIPgetSolOrigObj(subscip[i], sol)));
             printf("dual %lf \n" , ( dual));
