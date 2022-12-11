@@ -838,7 +838,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       /* loop over all solutions and create the corresponding column to master if the reduced cost are negative for master,
       * that is the objective value i greater than 1.0
       */
-      for( s = 0; s < nsols; ++s )
+      for( s = 0; s < 1; ++s ) // only use best solution 
       {
          SCIP_Bool feasible;
          SCIP_SOL* sol;
