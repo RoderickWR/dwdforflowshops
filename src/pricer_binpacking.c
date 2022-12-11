@@ -464,10 +464,11 @@ SCIP_RETCODE initPricing(
    int iii;
    char buf[256];
    char* num; 
+
    for( i = 0; i < nbrJobs; ++i ) {
          /* dual value in original SCIP */
          
-         SCIPgetDualSolVal(scip, startConss[mIdx*nbrMachines + i], pDual, pBoundconstr);
+         SCIPgetDualSolVal(scip, startConss[mIdx*nbrJobs + i], pDual, pBoundconstr);
          sprintf(buf, "startM%dJ%d", mIdx,i);
          SCIP_VAR* var = NULL;
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
@@ -475,7 +476,7 @@ SCIP_RETCODE initPricing(
          startVars[i] = var;
          //SCIP_CALL( SCIPreleaseVar(subscip, &var) );
       /* create end variables and set end pointers*/
-         SCIPgetDualSolVal(scip, endConss[mIdx*nbrMachines + i], pDual, pBoundconstr);
+         SCIPgetDualSolVal(scip, endConss[mIdx*nbrJobs + i], pDual, pBoundconstr);
          sprintf(buf, "endM%dJ%d", mIdx,i);
          SCIP_VAR* var2 = NULL;
          SCIP_CALL(SCIPcreateVarBasic(subscip, &var2, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
@@ -826,7 +827,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       /* solve sub SCIP */
       SCIP_CALL( SCIPsolve(subscip[i]) );
 
-      SCIPwriteOrigProblem(subscip[i], "sub.lp",NULL,FALSE);
+     // SCIPwriteOrigProblem(subscip[i], "sub.lp",NULL,FALSE);
 
       if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
