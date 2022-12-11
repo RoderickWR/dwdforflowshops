@@ -520,6 +520,8 @@ SCIP_DECL_CONSACTIVE(consActiveSamediff)
 static
 SCIP_DECL_CONSDEACTIVE(consDeactiveSamediff)
 {  /*lint --e{715}*/
+   printf("Starting SCIP_DECL_CONSDEACTIVE()\n");
+   fflush(stdout);
    SCIP_CONSDATA* consdata;
    SCIP_PROBDATA* probdata;
 
@@ -539,8 +541,10 @@ SCIP_DECL_CONSDEACTIVE(consDeactiveSamediff)
    SCIPdebug( consdataPrint(scip, consdata, NULL) );
 
    /* set the number of propagated variables to current number of variables is SCIP */
-   consdata->npropagatedvars = SCIPprobdataGetNVars(probdata)[0]; //FIXME
+   consdata->npropagatedvars = SCIPprobdataGetNVars(probdata)[consdata->machineIdx]; 
 
+   printf("Ending SCIP_DECL_CONSDEACTIVE()\n");
+   fflush(stdout);
    return SCIP_OKAY;
 }
 
