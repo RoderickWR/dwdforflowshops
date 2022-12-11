@@ -91,6 +91,16 @@
  * @{
  */
 
+
+SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
+   SCIP_Bool alreadyBranched = FALSE;
+   SCIP_NODE* currentNode = SCIPgetCurrentNode(scip);
+  
+   
+}
+
+
+
 /** branching execution method for fractional LP solutions */
 static
 SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
