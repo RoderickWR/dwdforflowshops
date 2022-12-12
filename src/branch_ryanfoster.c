@@ -94,8 +94,26 @@
 
 SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    SCIP_Bool alreadyBranched = FALSE;
-   SCIP_NODE* currentNode = SCIPgetCurrentNode(scip);
-  
+   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   SCIP_VAR** branchVars;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &branchVars, 100*sizeof(SCIP_VAR*)) );
+   SCIP_Real* branchBounds;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &branchBounds, 100*sizeof(SCIP_Real)) );
+   SCIP_BOUNDTYPE* boundTypes;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &boundTypes, 100*sizeof(SCIP_BOUNDTYPE)) );
+   int* nbranchVars;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nbranchVars, 100*sizeof(int)) );
+   int branchVarSize;
+
+   assert(iterNode != NULL);
+   assert(branchVars != NULL);
+   assert(branchBounds != NULL);
+   assert(boundTypes != NULL);
+   assert(nbranchVars != NULL);
+   assert(branchVarSize >= 0);
+
+   SCIPnodeGetAncestorBranchings(iterNode, branchVars, branchBounds, boundTypes, nbranchVars, branchVarSize);
+   
    
 }
 
@@ -173,6 +191,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
          if( i != j ) {
             float sumrequired = 0;
             float sumforbidden = 0;
+            checkAlreadyBranched(scip, i,j,nconsids_main);
             for( v = 0; v < nlpcands; ++v ) {
                assert(lpcands[v] != NULL);
                vardata = SCIPvarGetData(lpcands[v]);
