@@ -73,6 +73,20 @@
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
 
+struct SCIP_ConsData
+{
+   int                   itemid1;            /**< item id one */
+   int                   itemid2;            /**< item id two */
+   CONSTYPE              type;               /**< stores whether the items have to be in the SAME or DIFFER packing */
+   int                   npropagatedvars;    /**< number of variables that existed, the last time, the related node was
+                                              *   propagated, used to determine whether the constraint should be
+                                              *   repropagated*/
+   int                   npropagations;      /**< stores the number propagations runs of this constraint */
+   unsigned int          propagated:1;       /**< is constraint already propagated? */
+   SCIP_NODE*            node;               /**< the node in the B&B-tree at which the cons is sticking */
+   int                   machineIdx;
+};
+
 /**@name Branching rule properties
  *
  * @{
@@ -95,24 +109,32 @@
 SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    SCIP_Bool alreadyBranched = FALSE;
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
-   SCIP_VAR** branchVars;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &branchVars, 100*sizeof(SCIP_VAR*)) );
-   SCIP_Real* branchBounds;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &branchBounds, 100*sizeof(SCIP_Real)) );
-   SCIP_BOUNDTYPE* boundTypes;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &boundTypes, 100*sizeof(SCIP_BOUNDTYPE)) );
-   int* nbranchVars;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nbranchVars, 100*sizeof(int)) );
-   int branchVarSize;
-
+   int iterDepth = SCIPnodeGetDepth(iterNode);
    assert(iterNode != NULL);
-   assert(branchVars != NULL);
-   assert(branchBounds != NULL);
-   assert(boundTypes != NULL);
-   assert(nbranchVars != NULL);
-   assert(branchVarSize >= 0);
 
-   SCIPnodeGetAncestorBranchings(iterNode, branchVars, branchBounds, boundTypes, nbranchVars, branchVarSize);
+   SCIP_CONS** addedconss;
+   SCIP_CONS* cons = NULL;
+   SCIP_CONSDATA* consdata;
+   
+
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &addedconss, 100*sizeof(SCIP_CONS*)) );
+   int* naddedconss;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &naddedconss, 100*sizeof(int)) );
+   int addedconssize;
+
+   int i = 0;
+   for (i=0; i < iterDepth; i++) {
+      SCIPnodeGetAddedConss(iterNode, addedconss, naddedconss, addedconssize);
+      if (addedconss[0] == NULL) {
+         continue;
+      }
+      cons = addedconss[0];
+      consdata = SCIPconsGetData(cons);
+      if (consdata->itemid1 == k | consdata->itemid2 == j) {
+         int p = 0;
+      }
+      
+   }
    
    
 }
