@@ -118,9 +118,9 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    
 
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &addedconss, 100*sizeof(SCIP_CONS*)) );
-   int* naddedconss;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &naddedconss, 100*sizeof(int)) );
-   int addedconssize;
+   int num_naddedconss = 0;
+   int* naddedconss = &num_naddedconss;
+   int addedconssize = 0;
 
    int i = 0;
    for (i=0; i < iterDepth; i++) {
@@ -131,11 +131,13 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
       cons = addedconss[0];
       consdata = SCIPconsGetData(cons);
       if (consdata->itemid1 == k | consdata->itemid2 == j) {
-         int p = 0;
+         alreadyBranched = TRUE;
+         return alreadyBranched;
       }
+      iterNode = SCIPnodeGetParent(iterNode);
       
    }
-   
+   return alreadyBranched;
    
 }
 
@@ -157,6 +159,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    int nlpcands;
    SCIP_Real bestvalue;
    SCIP_Real value;
+   SCIP_Bool alreadyBranched;
+   SCIP_Bool alreadyBranchedImpl;
 
    SCIP_NODE* childsame;
    SCIP_NODE* childdiffer;
@@ -213,28 +217,34 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
          if( i != j ) {
             float sumrequired = 0;
             float sumforbidden = 0;
-            checkAlreadyBranched(scip, i,j,nconsids_main);
-            for( v = 0; v < nlpcands; ++v ) {
-               assert(lpcands[v] != NULL);
-               vardata = SCIPvarGetData(lpcands[v]);
-               nconsids = SCIPvardataGetNConsids(vardata);
-               s1 = SCIPvardataGetSchedule(vardata);
-               patternid = SCIPvardataGetPatternid(vardata);
-               if( nconsids == nconsids_main ) {
-                  SCIP_Real solval;
-                  solval = lpcandsfrac[v];
-                  if( s1->sched[nconsids_main].mp[patternid].job[i].start < s1->sched[nconsids_main].mp[patternid].job[j].start ) {
-                     sumrequired += solval;
-                  }
-                  else {
-                     sumforbidden += solval;
-                  }
-                  
-                  
-               }
+            alreadyBranched = checkAlreadyBranched(scip, i,j,nconsids_main);
+            if(alreadyBranched) {
+               printf("alreadyBranchedIsTrue"); //this should not appear since covered by scoring system for branching cands
+               fflush(stdout);
             }
-            // after lp cands were checked compute ratio
-            ratio_branches_new = fmin(sumrequired,sumforbidden)/fmax(sumrequired,sumforbidden);
+            if (!(alreadyBranched)) {
+               for( v = 0; v < nlpcands; ++v ) {
+                  assert(lpcands[v] != NULL);
+                  vardata = SCIPvarGetData(lpcands[v]);
+                  nconsids = SCIPvardataGetNConsids(vardata);
+                  s1 = SCIPvardataGetSchedule(vardata);
+                  patternid = SCIPvardataGetPatternid(vardata);
+                  if( nconsids == nconsids_main ) {
+                     SCIP_Real solval;
+                     solval = lpcandsfrac[v];
+                     if( s1->sched[nconsids_main].mp[patternid].job[i].start < s1->sched[nconsids_main].mp[patternid].job[j].start ) {
+                        sumrequired += solval;
+                     }
+                     else {
+                        sumforbidden += solval;
+                     }
+                     
+                     
+                  }
+               }
+               // after lp cands were checked compute ratio
+               ratio_branches_new = fmin(sumrequired,sumforbidden)/fmax(sumrequired,sumforbidden);
+            }
             if( ratio_branches_new >= ratio_branches ) {
                ratio_branches = ratio_branches_new;
                i_found = i;

@@ -8,8 +8,8 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "-f",
-                "${workspaceFolder}/data/u20_00.bpa"
+                "--trackorigins= yes"
+                
                 
             ],
             "stopAtEntry": false,
