@@ -110,11 +110,14 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    SCIP_Bool alreadyBranched = FALSE;
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
    int iterDepth = SCIPnodeGetDepth(iterNode);
-   assert(iterNode != NULL);
-   int id1 = SCIPnodeGetId1(iterNode);
-   int id2 = SCIPnodeGetId2(iterNode);
    int i;
+   if (iterDepth >1) {
+      int test = 0;
+   }
    for (i=0; i < iterDepth; ++i) {
+      assert(iterNode != NULL);
+      int id1 = SCIPnodeGetId1(iterNode);
+      int id2 = SCIPnodeGetId2(iterNode);
       if (id1 == -1) {
          continue;
       }
