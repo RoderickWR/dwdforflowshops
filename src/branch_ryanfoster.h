@@ -36,4 +36,5 @@ SCIP_RETCODE SCIPincludeBranchruleRyanFoster(
 
 
 SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx);
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx);
 #endif

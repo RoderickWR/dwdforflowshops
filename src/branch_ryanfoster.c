@@ -87,6 +87,15 @@ struct SCIP_ConsData
    int                   machineIdx;
 };
 
+typedef struct order{
+   int id1;
+   int id2; 
+} order;
+
+typedef struct orderList{
+   order ol[50];
+} orderList;
+
 /**@name Branching rule properties
  *
  * @{
@@ -129,6 +138,33 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
       
    }
    return alreadyBranched;
+   
+
+}
+
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx) {
+   SCIP_Bool alreadyBranchedImpl = FALSE;
+   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   int iterDepth = SCIPnodeGetDepth(iterNode);
+   int i;
+   if (iterDepth >1) {
+      int test = 0;
+   }
+   for (i=0; i < iterDepth; ++i) {
+      assert(iterNode != NULL);
+      int id1 = SCIPnodeGetId1(iterNode);
+      int id2 = SCIPnodeGetId2(iterNode);
+      if (id1 == -1) {
+         continue;
+      }
+      if ((id1 == k & id2 == j) | (id1 == j & id2 == k)) {
+         alreadyBranchedImpl = TRUE;
+         return alreadyBranchedImpl;
+      }
+      iterNode = SCIPnodeGetParent(iterNode);
+      
+   }
+   return alreadyBranchedImpl;
    
 
 }
@@ -208,6 +244,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
       for( j = 0; j < nbrJobs; ++j ) {
          if( i != j ) {
             alreadyBranched = checkAlreadyBranched(scip, i,j,nconsids_main);
+            alreadyBranchedImpl = checkAlreadyBranchedImpl(scip, i,j,nconsids_main);
             if(alreadyBranched) {
                printf("alreadyBranchedIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
                fflush(stdout);
