@@ -111,13 +111,14 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
    int iterDepth = SCIPnodeGetDepth(iterNode);
    assert(iterNode != NULL);
-
+   int id1 = SCIPnodeGetId1(iterNode);
+   int id2 = SCIPnodeGetId2(iterNode);
    int i;
    for (i=0; i < iterDepth; ++i) {
-      if (iterNode->id1 == -1) {
+      if (id1 == -1) {
          continue;
       }
-      if (iterNode->id1 == k | iterNode->id2 == j) {
+      if ((id1 == k & id2 == j) | (id1 == j & id2 == k)) {
          alreadyBranched = TRUE;
          return alreadyBranched;
       }
@@ -205,7 +206,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
          if( i != j ) {
             alreadyBranched = checkAlreadyBranched(scip, i,j,nconsids_main);
             if(alreadyBranched) {
-               printf("alreadyBranchedIsTrue"); //this should not appear since covered by scoring system for branching cands
+               printf("alreadyBranchedIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
                fflush(stdout);
             }
             if (!(alreadyBranched)) {
@@ -233,7 +234,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
                // after lp cands were checked compute ratio
                ratio_branches_new = fmin(sumrequired,sumforbidden)/fmax(sumrequired,sumforbidden);
             }
-            if( ratio_branches_new >= ratio_branches ) {
+            if( ratio_branches_new > ratio_branches ) {
                ratio_branches = ratio_branches_new;
                i_found = i;
                j_found = j;
