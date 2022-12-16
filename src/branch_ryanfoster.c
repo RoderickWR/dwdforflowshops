@@ -112,25 +112,12 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    int iterDepth = SCIPnodeGetDepth(iterNode);
    assert(iterNode != NULL);
 
-   SCIP_CONS** addedconss;
-   SCIP_CONS* cons = NULL;
-   SCIP_CONSDATA* consdata;
-   
-
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &addedconss, 100*sizeof(SCIP_CONS*)) );
-   int num_naddedconss = 0;
-   int* naddedconss = &num_naddedconss;
-   int addedconssize = 0;
-
-   int i = 0;
-   for (i=0; i < iterDepth; i++) {
-      SCIPnodeGetAddedConss(iterNode, addedconss, naddedconss, addedconssize);
-      if (addedconss[0] == NULL) {
+   int i;
+   for (i=0; i < iterDepth; ++i) {
+      if (iterNode->id1 == -1) {
          continue;
       }
-      cons = addedconss[0];
-      consdata = SCIPconsGetData(cons);
-      if (consdata->itemid1 == k | consdata->itemid2 == j) {
+      if (iterNode->id1 == k | iterNode->id2 == j) {
          alreadyBranched = TRUE;
          return alreadyBranched;
       }
@@ -139,6 +126,7 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    }
    return alreadyBranched;
    
+
 }
 
 
@@ -215,14 +203,14 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    for( i = 0; i < nbrJobs; ++i ) {
       for( j = 0; j < nbrJobs; ++j ) {
          if( i != j ) {
-            float sumrequired = 0;
-            float sumforbidden = 0;
             alreadyBranched = checkAlreadyBranched(scip, i,j,nconsids_main);
             if(alreadyBranched) {
                printf("alreadyBranchedIsTrue"); //this should not appear since covered by scoring system for branching cands
                fflush(stdout);
             }
             if (!(alreadyBranched)) {
+               float sumrequired = 0;
+               float sumforbidden = 0;
                for( v = 0; v < nlpcands; ++v ) {
                   assert(lpcands[v] != NULL);
                   vardata = SCIPvarGetData(lpcands[v]);
@@ -249,8 +237,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
                ratio_branches = ratio_branches_new;
                i_found = i;
                j_found = j;
-               printf("i_found %d, j_found %d,", i,j);
-               fflush(stdout);
+       
             }
          }
 
@@ -260,7 +247,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    if (i_found == -1 & j_found == -1) {
       return SCIP_CUTOFF; // CUTOFF this node if no order to branch on
    }
-
+   printf("i_found %d, j_found %d \n", i_found,j_found);
+   fflush(stdout);
    /* create the branch-and-bound tree child nodes of the current node */
    SCIP_CALL( SCIPcreateChild(scip, &childsame, 0.0, SCIPgetLocalTransEstimate(scip)) );
    SCIP_CALL( SCIPcreateChild(scip, &childdiffer, 0.0, SCIPgetLocalTransEstimate(scip)) );
@@ -268,6 +256,10 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    /* create corresponding constraints */
    SCIP_CALL( SCIPcreateConsSamediff(scip, &conssame, "same", i_found, j_found, SAME, childsame, TRUE, nconsids_main) );
    SCIP_CALL( SCIPcreateConsSamediff(scip, &consdiffer, "differ", i_found, j_found, DIFFER, childdiffer, TRUE, nconsids_main) );
+
+   // add ID info to nodes
+   SCIPnodeSetIDs(childsame, i_found, j_found);
+   SCIPnodeSetIDs(childdiffer, i_found, j_found);
 
   /* add constraints to nodes */
    SCIP_CALL( SCIPaddConsNode(scip, childsame, conssame, NULL) );
