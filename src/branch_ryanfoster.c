@@ -94,6 +94,7 @@ typedef struct order{
 
 typedef struct orderList{
    order ol[50];
+   int lastIdx;
 } orderList;
 
 /**@name Branching rule properties
@@ -144,26 +145,21 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
 
 SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx) {
    SCIP_Bool alreadyBranchedImpl = FALSE;
-   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
-   int iterDepth = SCIPnodeGetDepth(iterNode);
-   int i;
-   if (iterDepth >1) {
-      int test = 0;
-   }
-   for (i=0; i < iterDepth; ++i) {
-      assert(iterNode != NULL);
-      int id1 = SCIPnodeGetId1(iterNode);
-      int id2 = SCIPnodeGetId2(iterNode);
-      if (id1 == -1) {
-         continue;
-      }
-      if ((id1 == k & id2 == j) | (id1 == j & id2 == k)) {
-         alreadyBranchedImpl = TRUE;
-         return alreadyBranchedImpl;
-      }
-      iterNode = SCIPnodeGetParent(iterNode);
+   orderList ol1;
+   ol1.lastIdx = 49;
+   // SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   // int iterDepth = SCIPnodeGetDepth(iterNode);
+   // int i;
+   // for (i=0; i < iterDepth; ++i) {
+   //    assert(iterNode != NULL);
+   //    int id1 = SCIPnodeGetId1(iterNode);
+   //    int id2 = SCIPnodeGetId2(iterNode);
+   //    assert(id1 != -1);
+   //    ol1.ol[i].id1 = id1
       
-   }
+   //    iterNode = SCIPnodeGetParent(iterNode);
+      
+   // }
    return alreadyBranchedImpl;
    
 
@@ -301,6 +297,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    // add ID info to nodes
    SCIPnodeSetIDs(childsame, i_found, j_found);
    SCIPnodeSetIDs(childdiffer, i_found, j_found);
+   SCIPnodeSetIneqSign(childsame, 1);
+   SCIPnodeSetIneqSign(childdiffer, 0);
 
   /* add constraints to nodes */
    SCIP_CALL( SCIPaddConsNode(scip, childsame, conssame, NULL) );
