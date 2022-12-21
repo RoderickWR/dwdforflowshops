@@ -72,6 +72,7 @@
 #include "cons_samediff.h"
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
+#include "printOut.h"
 
 struct SCIP_ConsData
 {
@@ -86,16 +87,6 @@ struct SCIP_ConsData
    SCIP_NODE*            node;               /**< the node in the B&B-tree at which the cons is sticking */
    int                   machineIdx;
 };
-
-typedef struct order{
-   int id1;
-   int id2; 
-} order;
-
-typedef struct orderList{
-   order ol[50];
-   int lastIdx;
-} orderList;
 
 /**@name Branching rule properties
  *
@@ -116,7 +107,7 @@ typedef struct orderList{
  */
 
 
-SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
+SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j) {
    SCIP_Bool alreadyBranched = FALSE;
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
    int iterDepth = SCIPnodeGetDepth(iterNode);
@@ -142,24 +133,67 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx) {
    
 
 }
+// checks if a branching on (iter0, j) on the paths to root node already took place, then set alreadyBranched flag and return true, 
+// else set iter0 to the next RHS element and search again
+// if no iter0 is found on the LHS return true and dont change alreadyBranched flag
+static
+SCIP_Bool search(int iter0, int j, branchingList bl1, SCIP_Bool alreadyBranchedImpl) {
+   int i = 0;
+   for (i=0; i < bl1.lastIdx; ++i) {
+      if ((iter0 == bl1.bl[i].id1) & (j == bl1.bl[i].id2)) {
+         alreadyBranchedImpl = TRUE;
+         return TRUE;   
+      }
+      else if ((iter0 == bl1.bl[i].id1) & (j != bl1.bl[i].id2)) {
+         iter0 = bl1.bl[i].id2;
+         return FALSE; 
+      }
+   }
+   return TRUE;
+}
 
-SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx) {
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
    SCIP_Bool alreadyBranchedImpl = FALSE;
-   orderList ol1;
-   ol1.lastIdx = 49;
-   // SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
-   // int iterDepth = SCIPnodeGetDepth(iterNode);
-   // int i;
-   // for (i=0; i < iterDepth; ++i) {
-   //    assert(iterNode != NULL);
-   //    int id1 = SCIPnodeGetId1(iterNode);
-   //    int id2 = SCIPnodeGetId2(iterNode);
-   //    assert(id1 != -1);
-   //    ol1.ol[i].id1 = id1
+   branchingList bl1;
+   bl1.lastIdx = 0;
+   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   int iterDepth = SCIPnodeGetDepth(iterNode);
+   int i;
+   for (i=0; i < iterDepth; ++i) {
+      assert(iterNode != NULL);
+      int id1 = SCIPnodeGetId1(iterNode);
+      int id2 = SCIPnodeGetId2(iterNode);
+      assert(id1 != -1);
+
+      int sign = SCIPnodeGetIneqSign(iterNode);
+      if (sign == 1) {
+         bl1.bl[i].id1 = id1;
+         bl1.bl[i].id2 = id2;
+         bl1.lastIdx += 1; 
+      }
+      else {
+         assert(sign == 0);
+         bl1.bl[i].id1 = id2;
+         bl1.bl[i].id2 = id1; 
+         bl1.lastIdx += 1; 
+      }
       
-   //    iterNode = SCIPnodeGetParent(iterNode);
       
-   // }
+      iterNode = SCIPnodeGetParent(iterNode);
+      
+   }
+
+   printOutBrachingList(bl1);
+
+   SCIP_Bool found1 = FALSE;
+   SCIP_Bool found2 = FALSE;
+   int iter0 = k;
+   int iter00 = j;
+   while (found1 == FALSE & found2 == FALSE) {
+      found1 = search(iter0,j,bl1,alreadyBranchedImpl);
+      found2 = search(j,iter00,bl1,alreadyBranchedImpl);
+   }
+
    return alreadyBranchedImpl;
    
 
@@ -239,13 +273,13 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    for( i = 0; i < nbrJobs; ++i ) {
       for( j = 0; j < nbrJobs; ++j ) {
          if( i != j ) {
-            alreadyBranched = checkAlreadyBranched(scip, i,j,nconsids_main);
-            alreadyBranchedImpl = checkAlreadyBranchedImpl(scip, i,j,nconsids_main);
+            alreadyBranched = checkAlreadyBranched(scip, i,j);
+            alreadyBranchedImpl = checkAlreadyBranchedImpl(scip, i,j);
             if(alreadyBranched) {
                printf("alreadyBranchedIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
                fflush(stdout);
             }
-            if (!(alreadyBranched)) {
+            if (!(alreadyBranched) & !(alreadyBranchedImpl)) {
                float sumrequired = 0;
                float sumforbidden = 0;
                for( v = 0; v < nlpcands; ++v ) {

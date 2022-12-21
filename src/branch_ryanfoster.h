@@ -35,6 +35,18 @@ SCIP_RETCODE SCIPincludeBranchruleRyanFoster(
    );
 
 
-SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx);
-SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx);
+SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j);
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j);
+
+typedef struct branching{
+   int id1;
+   int id2; 
+} branching;
+
+typedef struct branchingList{
+   branching bl[50];
+   int lastIdx;
+} branchingList;
+
 #endif
+
