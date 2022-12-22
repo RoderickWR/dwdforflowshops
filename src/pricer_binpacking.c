@@ -500,7 +500,7 @@ SCIP_RETCODE initPricing(
    for( i = 0; i < nbrJobs; ++i ) {
       SCIP_CONS* cons = NULL;  
       sprintf(buf, "startFinish%d", i);
-      SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -1e+20, -pt1.machine[mIdx].m[i]));
+      SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -pt1.machine[mIdx].m[i], -pt1.machine[mIdx].m[i]));
       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], 1.0) );
       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
       SCIP_CALL(SCIPaddCons(subscip,cons));
