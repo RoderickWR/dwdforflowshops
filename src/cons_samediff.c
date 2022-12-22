@@ -184,9 +184,18 @@ SCIP_RETCODE checkVariable(
 
    type = consdata->type;
 
+   // SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   // int iterDepth = SCIPnodeGetDepth(iterNode);
+
+   // if(SCIPvardataGetPatternid(vardata) == 9 & nconsids == 1 & iterDepth >3) {
+   //    int p = 0;
+   // }
+
    if( (type == SAME && id2BeforeId1 ) || (type == DIFFER && id1BeforeId2) )
    {
       SCIP_CALL( SCIPfixVar(scip, var, 0.0, &infeasible, &fixed) );
+      printf("fixed pattern %d to zero on machine %d \n", SCIPvardataGetPatternid(vardata), nconsids);
+      fflush(stdout);
 
       if( infeasible )
       {
@@ -417,8 +426,6 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    int c;
    SCIP_VAR*** lambArr;
 
-   SCIPwriteTransProblem(scip, "master.lp",NULL,FALSE);
-
    assert(scip != NULL);
    assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
    assert(result != NULL);
@@ -437,20 +444,12 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    printf("nncons: %d\n", nconss);
    fflush(stdout);
 
-   if (nconss>3) {
-      int test = 0;
-   }
-
    for( c = 0; c < nconss; ++c )
    {
       consdata = SCIPconsGetData(conss[c]);
 
-      if (consdata->machineIdx == 1 ) {
-      int test2 = 1;
-      }
-
       /* check if all previously generated variables are valid for this constraint */
-      // that might be to early to check that => moved behind fixVars
+      // R: that might be to early to check that => moved behind fixVars
       // assert( consdataCheck(scip, probdata, consdata, TRUE) );
 
       if( !consdata->propagated )
@@ -475,6 +474,7 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    }
    printf("Ending SCIP_DECL_CONSPROP()\n");
    fflush(stdout);
+   SCIPwriteTransProblem(scip, "master.lp",NULL,FALSE);
    return SCIP_OKAY;
 }
 

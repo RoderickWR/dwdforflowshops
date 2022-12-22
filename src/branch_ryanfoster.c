@@ -183,12 +183,7 @@ SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
       iterNode = SCIPnodeGetParent(iterNode);
       
    }
-
    printOutBrachingList(bl1);
-   if(bl1.lastIdx == 4) {
-      int p = 0;
-   }
-
    SCIP_Bool found1 = FALSE;
    SCIP_Bool found2 = FALSE;
    int iter0 = k;
@@ -328,7 +323,10 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    }
 
    if (i_found == -1 & j_found == -1) {
-      return SCIP_CUTOFF; // CUTOFF this node if no order to branch on
+      printf("No branching cand found. \n");
+      fflush(stdout);
+      *result = SCIP_CUTOFF;
+      return SCIP_OKAY; // CUTOFF this node if no order to branch on
    }
    printf("i_found %d, j_found %d \n", i_found,j_found);
    fflush(stdout);
