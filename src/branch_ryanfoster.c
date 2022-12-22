@@ -137,15 +137,15 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j) {
 // else set iter0 to the next RHS element and search again
 // if no iter0 is found on the LHS return true and dont change alreadyBranched flag
 static
-SCIP_Bool search(int iter0, int j, branchingList bl1, SCIP_Bool alreadyBranchedImpl) {
+SCIP_Bool search(int* pIter0, int j, branchingList bl1, SCIP_Bool* pAlreadyBranchedImpl) {
    int i = 0;
    for (i=0; i < bl1.lastIdx; ++i) {
-      if ((iter0 == bl1.bl[i].id1) & (j == bl1.bl[i].id2)) {
-         alreadyBranchedImpl = TRUE;
+      if ((*(pIter0) == bl1.bl[i].id1) & (j == bl1.bl[i].id2)) {
+         *(pAlreadyBranchedImpl) = TRUE;
          return TRUE;   
       }
-      else if ((iter0 == bl1.bl[i].id1) & (j != bl1.bl[i].id2)) {
-         iter0 = bl1.bl[i].id2;
+      else if ((*(pIter0) == bl1.bl[i].id1) & (j != bl1.bl[i].id2)) {
+         *(pIter0) = bl1.bl[i].id2;
          return FALSE; 
       }
    }
@@ -154,6 +154,7 @@ SCIP_Bool search(int iter0, int j, branchingList bl1, SCIP_Bool alreadyBranchedI
 
 SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
    SCIP_Bool alreadyBranchedImpl = FALSE;
+   SCIP_Bool* pAlreadyBranchedImpl = &alreadyBranchedImpl;
    branchingList bl1;
    bl1.lastIdx = 0;
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
@@ -184,17 +185,24 @@ SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
    }
 
    printOutBrachingList(bl1);
+   if(bl1.lastIdx == 4) {
+      int p = 0;
+   }
 
    SCIP_Bool found1 = FALSE;
    SCIP_Bool found2 = FALSE;
    int iter0 = k;
-   int iter00 = j;
-   while (found1 == FALSE & found2 == FALSE) {
-      found1 = search(iter0,j,bl1,alreadyBranchedImpl);
-      found2 = search(j,iter00,bl1,alreadyBranchedImpl);
+   int* pIter0 = &iter0;
+   int iter00= j;
+   int* pIter00 = &iter00;
+   while (found1 == FALSE) {
+      found1 = search(pIter0,j,bl1,pAlreadyBranchedImpl);
+   }
+   while (found2 == FALSE) {
+      found2 = search(pIter00,k,bl1,pAlreadyBranchedImpl); // to check permutation as well
    }
 
-   return alreadyBranchedImpl;
+   return *(pAlreadyBranchedImpl);
    
 
 }
@@ -277,6 +285,10 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
             alreadyBranchedImpl = checkAlreadyBranchedImpl(scip, i,j);
             if(alreadyBranched) {
                printf("alreadyBranchedIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
+               fflush(stdout);
+            }
+            if(alreadyBranchedImpl) {
+               printf("alreadyBranchedImplIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
                fflush(stdout);
             }
             if (!(alreadyBranched) & !(alreadyBranchedImpl)) {
