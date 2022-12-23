@@ -261,18 +261,18 @@ SCIP_RETCODE runShell(
          endCons[iii*nbrJobs + i] = cons;
       }
    }
-   /*add processing constraint*/   
-   for( iii = 0; iii < s1->lastIdx+1; ++iii ) { 
-      for( i = 0; i < nbrJobs; ++i ) {
-         sprintf(buf, "processingM%dJ%d", iii,i);
-         SCIP_CONS* cons = NULL;  
-         SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
-         SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
-         SCIP_CALL(SCIPaddCons(scip,cons));
-      }
-   }
+   // /*add processing constraint*/   
+   // for( iii = 0; iii < s1->lastIdx+1; ++iii ) { 
+   //    for( i = 0; i < nbrJobs; ++i ) {
+   //       sprintf(buf, "processingM%dJ%d", iii,i);
+   //       SCIP_CONS* cons = NULL;  
+   //       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
+   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
+   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
+   //       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
+   //       SCIP_CALL(SCIPaddCons(scip,cons));
+   //    }
+   // }
 
    /*add inter machine constraint*/   
    for( iii = 0; iii < s1->lastIdx; ++iii ) { 

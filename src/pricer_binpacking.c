@@ -831,6 +831,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
       if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
+         printf("Subproblem on machine %d exits not optimal", i);
+         fflush(stdout);
       }
 
       sols = SCIPgetSols(subscip[i]);
@@ -839,15 +841,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       /* loop over all solutions and create the corresponding column to master if the reduced cost are negative for master,
       * that is the objective value i greater than 1.0
       */
-      for( s = 0; s < 1; ++s ) // only use best solution 
+      // for( s = 0; s < 1; ++s ) // only use best solution 
       {
          SCIP_Bool feasible;
          SCIP_SOL* sol;
 
-         /* the soultion should be sorted w.r.t. the objective function value */
-         //assert(s == 0 || SCIPisFeasGE(subscip[i], SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
+         // /* the soultion should be sorted w.r.t. the objective function value */
+         // assert(s == 0 || SCIPisFeasGE(subscip[i], SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
 
-         sol = sols[s];
+         // sol = sols[s];
+         sol = SCIPgetBestSol(subscip[i]);
          assert(sol != NULL);
 
          /* check if solution is feasible in original sub SCIP */
@@ -1001,6 +1004,7 @@ SCIP_DECL_PRICERFARKAS(pricerFarkasBinpacking)
     *           that column/packing, there exists at least one other column/packing containing this particular item due
     *           to the covering constraints.
     */
+   SCIPwriteTransProblem(scip, "master.lp",NULL,FALSE);
    SCIPwarningMessage(scip, "Current master LP is infeasible, but Farkas pricing was not implemented\n");
    SCIPABORT();
 
