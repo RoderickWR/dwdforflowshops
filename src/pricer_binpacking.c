@@ -971,7 +971,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    if( addvar || allSubsOptimal ) {
       // a variable was added by a sub problem or all sub problems are optimal and not variable was added
       (*result) = SCIP_SUCCESS;
-      if (allSubsOptimal & !(addvar)) {
+      if (allSubsOptimal && !(addvar)) {
       printf("All subs are opt and no var has been added => SCIP_SUCCESS \n");
       fflush(stdout);
       }

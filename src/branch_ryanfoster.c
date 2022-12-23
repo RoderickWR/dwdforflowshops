@@ -122,7 +122,7 @@ SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j) {
       if (id1 == -1) {
          continue;
       }
-      if ((id1 == k & id2 == j) | (id1 == j & id2 == k)) {
+      if ((id1 == k && id2 == j) || (id1 == j && id2 == k)) {
          alreadyBranched = TRUE;
          return alreadyBranched;
       }
@@ -140,11 +140,11 @@ static
 SCIP_Bool search(int* pIter0, int j, branchingList bl1, SCIP_Bool* pAlreadyBranchedImpl) {
    int i = 0;
    for (i=0; i < bl1.lastIdx; ++i) {
-      if ((*(pIter0) == bl1.bl[i].id1) & (j == bl1.bl[i].id2)) {
+      if ((*(pIter0) == bl1.bl[i].id1) && (j == bl1.bl[i].id2)) {
          *(pAlreadyBranchedImpl) = TRUE;
          return TRUE;   
       }
-      else if ((*(pIter0) == bl1.bl[i].id1) & (j != bl1.bl[i].id2)) {
+      else if ((*(pIter0) == bl1.bl[i].id1) && (j != bl1.bl[i].id2)) {
          *(pIter0) = bl1.bl[i].id2;
          return FALSE; 
       }
@@ -286,7 +286,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
                printf("alreadyBranchedImplIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
                fflush(stdout);
             }
-            if (!(alreadyBranched) & !(alreadyBranchedImpl)) {
+            if (!(alreadyBranched) && !(alreadyBranchedImpl)) {
                float sumrequired = 0;
                float sumforbidden = 0;
                for( v = 0; v < nlpcands; ++v ) {
@@ -322,7 +322,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
       }
    }
 
-   if (i_found == -1 & j_found == -1) {
+   if (i_found == -1 && j_found == -1) {
       printf("No branching cand found. \n");
       fflush(stdout);
       *result = SCIP_CUTOFF;
