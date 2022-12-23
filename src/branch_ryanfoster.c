@@ -196,7 +196,7 @@ SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx) {
       return *(pAlreadyBranchedImpl);      
    }
 
-   printOutBrachingList(bl1);
+   printOutBrachingList(bl1,mIdx);
 
    SCIP_Bool found1 = FALSE;
    SCIP_Bool found2 = FALSE;

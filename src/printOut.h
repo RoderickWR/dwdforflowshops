@@ -3,4 +3,4 @@
 
 
 void printOutPattern(pat p, int nbrJobs);
-void printOutBrachingList(branchingList ol1);
+void printOutBrachingList(branchingList ol1, int mIdx);

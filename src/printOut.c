@@ -13,9 +13,9 @@ void printOutPattern(pat p, int nbrJobs) {
 
 }
 
-void printOutBrachingList(branchingList bl1) {
+void printOutBrachingList(branchingList bl1, int mIdx) {
     int i = 0;
-    printf("Branching List: \n");
+    printf("Branching List on machine %d: \n", mIdx);
     for (i=0 ; i < bl1.lastIdx; i++) {
         printf("%d:(%d, %d)\n", i,bl1.bl[i].id1,bl1.bl[i].id2);
     }
