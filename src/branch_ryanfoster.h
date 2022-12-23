@@ -35,8 +35,8 @@ SCIP_RETCODE SCIPincludeBranchruleRyanFoster(
    );
 
 
-SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j);
-SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j);
+SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx);
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx);
 
 typedef struct branching{
    int id1;
@@ -48,7 +48,7 @@ typedef struct branchingList{
    int lastIdx;
 } branchingList;
 
-branchingList createBL(SCIP_NODE* iterNode);
+branchingList createBL(SCIP_NODE* iterNode, int mIdx);
 
 #endif
 

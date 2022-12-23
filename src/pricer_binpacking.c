@@ -867,7 +867,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          printf("SolVal %lf \n" , ( SCIPgetSolOrigObj(subscip[i], sol)));
          printf("dual %lf \n" , ( dual));
          fflush(stdout);  
-         if( SCIPgetSolOrigObj(subscip[i], sol) - dual < -1e-5)
+         if( SCIPgetSolOrigObj(subscip[i], sol) - dual < (double) -1e-5)
          {          
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;

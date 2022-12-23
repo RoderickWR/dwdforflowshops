@@ -107,24 +107,22 @@ struct SCIP_ConsData
  */
 
 
-SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j) {
+SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int  mIdx) {
    SCIP_Bool alreadyBranched = FALSE;
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
    int iterDepth = SCIPnodeGetDepth(iterNode);
    int i;
-   if (iterDepth >1) {
-      int test = 0;
-   }
    for (i=0; i < iterDepth; ++i) {
       assert(iterNode != NULL);
-      int id1 = SCIPnodeGetId1(iterNode);
-      int id2 = SCIPnodeGetId2(iterNode);
-      if (id1 == -1) {
-         continue;
-      }
-      if ((id1 == k && id2 == j) || (id1 == j && id2 == k)) {
-         alreadyBranched = TRUE;
-         return alreadyBranched;
+      int iterNodeMIdx = SCIPnodeGetMIdx(iterNode);
+      if (iterNodeMIdx == mIdx) {
+         int id1 = SCIPnodeGetId1(iterNode);
+         int id2 = SCIPnodeGetId2(iterNode);
+         assert(id1 != -1 && id2 != -1);
+         if ((id1 == k && id2 == j) || (id1 == j && id2 == k)) {
+            alreadyBranched = TRUE;
+            return alreadyBranched;
+         }
       }
       iterNode = SCIPnodeGetParent(iterNode);
       
@@ -152,30 +150,32 @@ SCIP_Bool search(int* pIter0, int j, branchingList bl1, SCIP_Bool* pAlreadyBranc
    return TRUE;
 }
 
-branchingList createBL(SCIP_NODE* iterNode) {
+branchingList createBL(SCIP_NODE* iterNode, int mIdx) {
    branchingList bl1;
    bl1.lastIdx = 0;
    int iterDepth = SCIPnodeGetDepth(iterNode);
    int i;
    for (i=0; i < iterDepth; ++i) {
       assert(iterNode != NULL);
-      int id1 = SCIPnodeGetId1(iterNode);
-      int id2 = SCIPnodeGetId2(iterNode);
-      assert(id1 != -1);
+      int iterNodeMIdx = SCIPnodeGetMIdx(iterNode);
+      if (iterNodeMIdx == mIdx) {
+         int id1 = SCIPnodeGetId1(iterNode);
+         int id2 = SCIPnodeGetId2(iterNode);
+         assert(id1 != -1 && id2 != -1);
 
-      int sign = SCIPnodeGetIneqSign(iterNode);
-      if (sign == 1) {
-         bl1.bl[i].id1 = id1;
-         bl1.bl[i].id2 = id2;
-         bl1.lastIdx += 1; 
+         int sign = SCIPnodeGetIneqSign(iterNode);
+         assert(sign == 1 || sign == 0);
+         if (sign == 1) {
+            bl1.bl[bl1.lastIdx].id1 = id1;
+            bl1.bl[bl1.lastIdx].id2 = id2;
+            bl1.lastIdx += 1; 
+         }
+         else {
+            bl1.bl[bl1.lastIdx].id1 = id2;
+            bl1.bl[bl1.lastIdx].id2 = id1; 
+            bl1.lastIdx += 1; 
+         }
       }
-      else {
-         assert(sign == 0);
-         bl1.bl[i].id1 = id2;
-         bl1.bl[i].id2 = id1; 
-         bl1.lastIdx += 1; 
-      }
-      
       
       iterNode = SCIPnodeGetParent(iterNode);
       
@@ -185,14 +185,19 @@ branchingList createBL(SCIP_NODE* iterNode) {
 
 }
 
-SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx) {
    SCIP_Bool alreadyBranchedImpl = FALSE;
    SCIP_Bool* pAlreadyBranchedImpl = &alreadyBranchedImpl;
 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
-   branchingList bl1 = createBL(iterNode);
+   int iterDepth = SCIPnodeGetDepth(iterNode);
+   branchingList bl1 = createBL(iterNode, mIdx);
+   if (iterDepth == 0 || bl1.lastIdx == 0) { // if at root node or no branchings on this machine, directly return since no branching happened so far
+      return *(pAlreadyBranchedImpl);      
+   }
+
    printOutBrachingList(bl1);
-   
+
    SCIP_Bool found1 = FALSE;
    SCIP_Bool found2 = FALSE;
    int iter0 = k;
@@ -285,14 +290,14 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    for( i = 0; i < nbrJobs; ++i ) {
       for( j = 0; j < nbrJobs; ++j ) {
          if( i != j ) {
-            alreadyBranched = checkAlreadyBranched(scip, i,j);
-            alreadyBranchedImpl = checkAlreadyBranchedImpl(scip, i,j);
+            alreadyBranched = checkAlreadyBranched(scip, i,j,nconsids_main);
+            alreadyBranchedImpl = checkAlreadyBranchedImpl(scip, i,j,nconsids_main);
             if(alreadyBranched) {
-               printf("alreadyBranchedIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
+               printf("alreadyBranchedIsTrue for i:%d, j: %d \n", i,j); 
                fflush(stdout);
             }
             if(alreadyBranchedImpl) {
-               printf("alreadyBranchedImplIsTrue for i:%d, j: %d \n", i,j); //this should not appear since covered by scoring system for branching cands
+               printf("alreadyBranchedImplIsTrue for i:%d, j: %d \n", i,j); 
                fflush(stdout);
             }
             if (!(alreadyBranched) && !(alreadyBranchedImpl)) {
@@ -337,7 +342,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
       *result = SCIP_CUTOFF;
       return SCIP_OKAY; // CUTOFF this node if no order to branch on
    }
-   printf("i_found %d, j_found %d \n", i_found,j_found);
+   printf("i_found %d, j_found %d for machine %d \n", i_found,j_found, nconsids_main);
    fflush(stdout);
    /* create the branch-and-bound tree child nodes of the current node */
    SCIP_CALL( SCIPcreateChild(scip, &childsame, 0.0, SCIPgetLocalTransEstimate(scip)) );
@@ -352,6 +357,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    SCIPnodeSetIDs(childdiffer, i_found, j_found);
    SCIPnodeSetIneqSign(childsame, 1);
    SCIPnodeSetIneqSign(childdiffer, 0);
+   SCIPnodeSetMIdx(childsame,nconsids_main);
+   SCIPnodeSetMIdx(childdiffer,nconsids_main);
 
   /* add constraints to nodes */
    SCIP_CALL( SCIPaddConsNode(scip, childsame, conssame, NULL) );
