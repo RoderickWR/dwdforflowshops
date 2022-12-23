@@ -30,6 +30,8 @@
 #include "cons_samediff.h"
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
+#include "branch_ryanfoster.h"
+#include "printOut.h"
 
 
 /**@name Constraint handler properties
@@ -429,6 +431,13 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    assert(scip != NULL);
    assert(strcmp(SCIPconshdlrGetName(conshdlr), CONSHDLR_NAME) == 0);
    assert(result != NULL);
+
+   // SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   // int iterDepth = SCIPnodeGetDepth(iterNode);
+   // printf("Current BnB Level:%d /n", iterDepth);
+   // fflush(stdout);
+   // branchingList bl1 = createBL(iterNode);
+   // printOutBrachingList(bl1);
 
    SCIPdebugMsg(scip, "propagation constraints of constraint handler <"CONSHDLR_NAME">\n");
 

@@ -48,5 +48,7 @@ typedef struct branchingList{
    int lastIdx;
 } branchingList;
 
+branchingList createBL(SCIP_NODE* iterNode);
+
 #endif
 

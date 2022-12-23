@@ -152,12 +152,9 @@ SCIP_Bool search(int* pIter0, int j, branchingList bl1, SCIP_Bool* pAlreadyBranc
    return TRUE;
 }
 
-SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
-   SCIP_Bool alreadyBranchedImpl = FALSE;
-   SCIP_Bool* pAlreadyBranchedImpl = &alreadyBranchedImpl;
+branchingList createBL(SCIP_NODE* iterNode) {
    branchingList bl1;
    bl1.lastIdx = 0;
-   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
    int iterDepth = SCIPnodeGetDepth(iterNode);
    int i;
    for (i=0; i < iterDepth; ++i) {
@@ -183,7 +180,19 @@ SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
       iterNode = SCIPnodeGetParent(iterNode);
       
    }
+
+   return bl1;
+
+}
+
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j) {
+   SCIP_Bool alreadyBranchedImpl = FALSE;
+   SCIP_Bool* pAlreadyBranchedImpl = &alreadyBranchedImpl;
+
+   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   branchingList bl1 = createBL(iterNode);
    printOutBrachingList(bl1);
+   
    SCIP_Bool found1 = FALSE;
    SCIP_Bool found2 = FALSE;
    int iter0 = k;
