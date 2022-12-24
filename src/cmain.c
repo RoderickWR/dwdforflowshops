@@ -197,14 +197,14 @@ SCIP_RETCODE runShell(
       for( i = 0; i < nbrJobs; ++i ) {
          sprintf(buf, "startM%dJ%d", iii,i);
          SCIP_VAR* var = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 150.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
          startTimes.startOnMachine[iii].ptrStart[i] = var;
          SCIP_CALL(SCIPaddVar(scip,var));
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
       /* create end variables and set end pointers*/
          sprintf(buf, "endM%dJ%d", iii,i);
          SCIP_VAR* var2 = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 150.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
          endTimes.endOnMachine[iii].ptrEnd[i] = var2;
          SCIP_CALL(SCIPaddVar(scip,var2));
          SCIP_CALL( SCIPreleaseVar(scip, &var2) ); 
@@ -212,7 +212,7 @@ SCIP_RETCODE runShell(
    }
    /* create makespan variable*/
    SCIP_VAR* var3 = NULL;
-   SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 50.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
+   SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 150.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
    ptrMakespan = var3;
    SCIP_CALL(SCIPaddVar(scip,var3));
    SCIP_CALL( SCIPreleaseVar(scip, &var3) );
