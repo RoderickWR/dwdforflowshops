@@ -495,6 +495,14 @@ int* SCIPprobdataGetNVars(
    return probdata->nvars;
 }
 
+/** returns number of jobs */
+int SCIPprobdataGetnbrJobs(
+   SCIP_PROBDATA*        probdata            /**< problem data */
+   )
+{
+   return probdata->nbrJobs;
+}
+
 /** returns array of set partitioning constrains */
 SCIP_CONS** SCIPprobdataGetConss(
    SCIP_PROBDATA*        probdata            /**< problem data */

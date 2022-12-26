@@ -225,7 +225,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    printf("Starting SCIP_DECL_BRANCHEXECLP()\n");
    fflush(stdout);
    SCIP_PROBDATA* probdata;
-   int nbrJobs = 4;
+   int nbrJobs;
    schedule* s1;
    int patternid;
    SCIP_Real** pairweights;
@@ -266,7 +266,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    *result = SCIP_DIDNOTRUN;
 
    probdata = SCIPgetProbData(scip);
-   // assert(probdata != NULL);
+   assert(probdata != NULL);
+   nbrJobs = SCIPprobdataGetnbrJobs(probdata);
 
    // nitems = SCIPprobdataGetNItems(probdata);
 

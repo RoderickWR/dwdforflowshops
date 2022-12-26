@@ -168,6 +168,10 @@ int* SCIPprobdataGetNVars(
    SCIP_PROBDATA*        probdata            /**< problem data */
    );
 
+int SCIPprobdataGetnbrJobs(
+   SCIP_PROBDATA*        probdata            /**< problem data */
+   );
+
 /** returns array of set partitioning constrains */
 SCIP_CONS** SCIPprobdataGetConss(
    SCIP_PROBDATA*        probdata            /**< problem data */
