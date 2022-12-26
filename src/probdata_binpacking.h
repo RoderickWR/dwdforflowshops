@@ -93,6 +93,7 @@ struct SCIP_ProbData
    int*                  ids;          /**< array of item ids */
    int                   nbrMachines;
    int                   nbrJobs;
+   double                maxTime;
    int*                  nvars;        /**< number of generated variables */
    int                   varssize;     /**< size of the variable array */
    int                   nitems;       /**< number of items */
@@ -125,7 +126,8 @@ SCIP_RETCODE probdataCreate(
    end                      endTimes,
    int*                   nvars,              /**< number of variables */
    int                     nbrMachines,
-   int                     nbrJobs
+   int                     nbrJobs,
+   double                  maxTime
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
    );

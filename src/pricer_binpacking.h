@@ -49,7 +49,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           makespanCons,
    schedule* s1,
    SCIP_VAR*** lambArr,
-   int* nvars
+   int* nvars,
+   double maxTime
 
    );
 

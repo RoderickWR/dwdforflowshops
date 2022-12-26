@@ -119,6 +119,7 @@ struct SCIP_PricerData
    schedule* s1;
    SCIP_VAR*** lambArr;
    int* nvars;
+   double maxTime;
  
 };
 
@@ -435,6 +436,7 @@ SCIP_RETCODE initPricing(
    SCIP_CONS** makespanConss;
    int nbrMachines;
    int nbrJobs;
+   double maxTime;
    SCIP_Bool* pBoundconstr = &boundconstr;
    SCIP_Real* pDual = &dual;
 
@@ -455,6 +457,7 @@ SCIP_RETCODE initPricing(
    makespanConss = pricerdata->makespanCons;
    nbrMachines = pricerdata->nbrMachines;
    nbrJobs = pricerdata->nbrJobs;
+   maxTime = pricerdata->maxTime;
 
 
    // SCIP_CALL( SCIPallocBufferArray(subscip, &vals, nitems) );
@@ -471,7 +474,7 @@ SCIP_RETCODE initPricing(
          SCIPgetDualSolVal(scip, startConss[mIdx*nbrJobs + i], pDual, pBoundconstr);
          sprintf(buf, "startM%dJ%d", mIdx,i);
          SCIP_VAR* var = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(subscip, &var, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(subscip, &var, buf, 0.0, maxTime, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var));
          startVars[i] = var;
          //SCIP_CALL( SCIPreleaseVar(subscip, &var) );
@@ -479,7 +482,7 @@ SCIP_RETCODE initPricing(
          SCIPgetDualSolVal(scip, endConss[mIdx*nbrJobs + i], pDual, pBoundconstr);
          sprintf(buf, "endM%dJ%d", mIdx,i);
          SCIP_VAR* var2 = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(subscip, &var2, buf, 0.0, 50.0, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(subscip, &var2, buf, 0.0, maxTime, (-1)*dual, SCIP_VARTYPE_CONTINUOUS));
          SCIP_CALL(SCIPaddVar(subscip,var2));
          endVars[i] = var2;
          //SCIP_CALL( SCIPreleaseVar(subscip, &var2) );
@@ -512,10 +515,10 @@ SCIP_RETCODE initPricing(
          if (i != ii) {
             SCIP_CONS* cons = NULL;
             sprintf(buf, "finishStart%d%d", i,ii);
-            SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -50.0, 1e+20));
+            SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -maxTime, 1e+20));
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[ii], 1.0) );
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i], -1.0) );
-            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], -50.0) );
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii], -maxTime) );
             SCIP_CALL(SCIPaddCons(subscip,cons));
             SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
          }
@@ -1045,6 +1048,7 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->nbrMachines = 0;
    pricerdata->nbrJobs = 0;
    pricerdata->lambArr = NULL;
+   pricerdata->maxTime = 0.0;
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
@@ -1073,7 +1077,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_CONS**           makespanCons,
    schedule* s1,
    SCIP_VAR*** lambArr,
-   int* nvars
+   int* nvars,
+   double maxTime
    
    )
 {
@@ -1100,6 +1105,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->s1  = s1;
    pricerdata->lambArr  = lambArr;
    pricerdata->nvars  = nvars;
+   pricerdata->maxTime  = maxTime;
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {

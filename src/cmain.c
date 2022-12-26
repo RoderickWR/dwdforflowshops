@@ -52,6 +52,7 @@ SCIP_RETCODE runShell(
    int nbrJobs = 4;
    int nbrMachines = 2;
    int* nvars;
+   double maxTime = 50.0;
    
    /*********
     * Setup *
@@ -176,7 +177,7 @@ SCIP_RETCODE runShell(
       } 
    }
 
-   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startTimes, endTimes, nvars, nbrMachines, nbrJobs) );
+   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startTimes, endTimes, nvars, nbrMachines, nbrJobs, maxTime) );
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
  
@@ -184,7 +185,7 @@ SCIP_RETCODE runShell(
    for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
       sprintf(buf, "offsetM%d", iii);
       SCIP_VAR* var = NULL;
-      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
       offset[iii] = var;
       SCIP_CALL(SCIPaddVar(scip,var));
       SCIP_CALL( SCIPreleaseVar(scip, &var) );
@@ -197,14 +198,14 @@ SCIP_RETCODE runShell(
       for( i = 0; i < nbrJobs; ++i ) {
          sprintf(buf, "startM%dJ%d", iii,i);
          SCIP_VAR* var = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 150.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
          startTimes.startOnMachine[iii].ptrStart[i] = var;
          SCIP_CALL(SCIPaddVar(scip,var));
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
       /* create end variables and set end pointers*/
          sprintf(buf, "endM%dJ%d", iii,i);
          SCIP_VAR* var2 = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 150.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
          endTimes.endOnMachine[iii].ptrEnd[i] = var2;
          SCIP_CALL(SCIPaddVar(scip,var2));
          SCIP_CALL( SCIPreleaseVar(scip, &var2) ); 
@@ -212,7 +213,7 @@ SCIP_RETCODE runShell(
    }
    /* create makespan variable*/
    SCIP_VAR* var3 = NULL;
-   SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 150.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
+   SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 2*maxTime, 1.0, SCIP_VARTYPE_CONTINUOUS));
    ptrMakespan = var3;
    SCIP_CALL(SCIPaddVar(scip,var3));
    SCIP_CALL( SCIPreleaseVar(scip, &var3) );
@@ -302,7 +303,7 @@ SCIP_RETCODE runShell(
    }
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars, maxTime)); 
 
    SCIPsolve(scip);
 
