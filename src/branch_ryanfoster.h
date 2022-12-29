@@ -34,4 +34,21 @@ SCIP_RETCODE SCIPincludeBranchruleRyanFoster(
    SCIP*                 scip                /**< SCIP data structure */
    );
 
+
+SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int mIdx);
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx);
+
+typedef struct branching{
+   int id1;
+   int id2; 
+} branching;
+
+typedef struct branchingList{
+   branching bl[50];
+   int lastIdx;
+} branchingList;
+
+branchingList createBL(SCIP_NODE* iterNode, int mIdx);
+
 #endif
+

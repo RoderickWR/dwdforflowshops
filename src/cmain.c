@@ -49,9 +49,10 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 2;
+   int nbrJobs = 4;
    int nbrMachines = 2;
    int* nvars;
+   double maxTime = 50.0;
    
    /*********
     * Setup *
@@ -101,14 +102,18 @@ SCIP_RETCODE runShell(
    // show every node in debug mode
    SCIP_CALL( SCIPsetIntParam(scip,"display/freq",1) );
    
-   /* initialize singlePattern*/
+      /* initialize singlePattern*/
    sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
    sPat sp2 = {7.0, 8.0};
+   sPat sp5 = {8.0, 13.0};
+   sPat sp6 = {13.0, 17.0};
    sPat sp3 = {7.0, 9.0};
    sPat sp4 = {9.0, 12.0};
+   sPat sp7 = {12.0, 14.0};
+   sPat sp8 = {14.0, 17.0};
    /* ... 2 patterns */
-   pat p1 = {.job[0] = sp1, .job[1] = sp2, .lastIdx = 1}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
-   pat p2 = {.job[0] = sp3, .job[1] = sp4, .lastIdx = 1};
+   pat p1 = {.job[0] = sp1, .job[1] = sp2, .job[2] = sp5, .job[3] = sp6, .lastIdx = 3}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
+   pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
    /* ... and 2 lists à patterns*/
    mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1}; 
    mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
@@ -121,7 +126,7 @@ SCIP_RETCODE runShell(
    
  
    /* and processing times*/
-   processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 1, .machine[0].m[3] = 1,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3}; 
+   processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
 
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
@@ -172,7 +177,7 @@ SCIP_RETCODE runShell(
       } 
    }
 
-   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startTimes, endTimes, nvars, nbrMachines, nbrJobs) );
+   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startTimes, endTimes, nvars, nbrMachines, nbrJobs, maxTime) );
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
  
@@ -180,7 +185,7 @@ SCIP_RETCODE runShell(
    for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
       sprintf(buf, "offsetM%d", iii);
       SCIP_VAR* var = NULL;
-      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+      SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
       offset[iii] = var;
       SCIP_CALL(SCIPaddVar(scip,var));
       SCIP_CALL( SCIPreleaseVar(scip, &var) );
@@ -193,14 +198,14 @@ SCIP_RETCODE runShell(
       for( i = 0; i < nbrJobs; ++i ) {
          sprintf(buf, "startM%dJ%d", iii,i);
          SCIP_VAR* var = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
          startTimes.startOnMachine[iii].ptrStart[i] = var;
          SCIP_CALL(SCIPaddVar(scip,var));
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
       /* create end variables and set end pointers*/
          sprintf(buf, "endM%dJ%d", iii,i);
          SCIP_VAR* var2 = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 50.0, 0.0, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
          endTimes.endOnMachine[iii].ptrEnd[i] = var2;
          SCIP_CALL(SCIPaddVar(scip,var2));
          SCIP_CALL( SCIPreleaseVar(scip, &var2) ); 
@@ -208,7 +213,7 @@ SCIP_RETCODE runShell(
    }
    /* create makespan variable*/
    SCIP_VAR* var3 = NULL;
-   SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 50.0, 1.0, SCIP_VARTYPE_CONTINUOUS));
+   SCIP_CALL(SCIPcreateVarBasic(scip, &var3, "makespan", 0.0, 2*maxTime, 1.0, SCIP_VARTYPE_CONTINUOUS));
    ptrMakespan = var3;
    SCIP_CALL(SCIPaddVar(scip,var3));
    SCIP_CALL( SCIPreleaseVar(scip, &var3) );
@@ -257,18 +262,18 @@ SCIP_RETCODE runShell(
          endCons[iii*nbrJobs + i] = cons;
       }
    }
-   /*add processing constraint*/   
-   for( iii = 0; iii < s1->lastIdx+1; ++iii ) { 
-      for( i = 0; i < nbrJobs; ++i ) {
-         sprintf(buf, "processingM%dJ%d", iii,i);
-         SCIP_CONS* cons = NULL;  
-         SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
-         SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
-         SCIP_CALL(SCIPaddCons(scip,cons));
-      }
-   }
+   // /*add processing constraint*/   
+   // for( iii = 0; iii < s1->lastIdx+1; ++iii ) { 
+   //    for( i = 0; i < nbrJobs; ++i ) {
+   //       sprintf(buf, "processingM%dJ%d", iii,i);
+   //       SCIP_CONS* cons = NULL;  
+   //       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
+   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
+   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
+   //       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
+   //       SCIP_CALL(SCIPaddCons(scip,cons));
+   //    }
+   // }
 
    /*add inter machine constraint*/   
    for( iii = 0; iii < s1->lastIdx; ++iii ) { 
@@ -298,7 +303,7 @@ SCIP_RETCODE runShell(
    }
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars, maxTime)); 
 
    SCIPsolve(scip);
 

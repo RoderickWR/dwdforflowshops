@@ -72,6 +72,21 @@
 #include "cons_samediff.h"
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
+#include "printOut.h"
+
+struct SCIP_ConsData
+{
+   int                   itemid1;            /**< item id one */
+   int                   itemid2;            /**< item id two */
+   CONSTYPE              type;               /**< stores whether the items have to be in the SAME or DIFFER packing */
+   int                   npropagatedvars;    /**< number of variables that existed, the last time, the related node was
+                                              *   propagated, used to determine whether the constraint should be
+                                              *   repropagated*/
+   int                   npropagations;      /**< stores the number propagations runs of this constraint */
+   unsigned int          propagated:1;       /**< is constraint already propagated? */
+   SCIP_NODE*            node;               /**< the node in the B&B-tree at which the cons is sticking */
+   int                   machineIdx;
+};
 
 /**@name Branching rule properties
  *
@@ -91,6 +106,118 @@
  * @{
  */
 
+
+SCIP_Bool checkAlreadyBranched(SCIP* scip, int k, int j, int  mIdx) {
+   SCIP_Bool alreadyBranched = FALSE;
+   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   int iterDepth = SCIPnodeGetDepth(iterNode);
+   int i;
+   for (i=0; i < iterDepth; ++i) {
+      assert(iterNode != NULL);
+      int iterNodeMIdx = SCIPnodeGetMIdx(iterNode);
+      if (iterNodeMIdx == mIdx) {
+         int id1 = SCIPnodeGetId1(iterNode);
+         int id2 = SCIPnodeGetId2(iterNode);
+         assert(id1 != -1 && id2 != -1);
+         if ((id1 == k && id2 == j) || (id1 == j && id2 == k)) {
+            alreadyBranched = TRUE;
+            return alreadyBranched;
+         }
+      }
+      iterNode = SCIPnodeGetParent(iterNode);
+      
+   }
+   return alreadyBranched;
+   
+
+}
+// checks if a branching on (iter0, j) on the paths to root node already took place, then set alreadyBranched flag and return true, 
+// else set iter0 to the next RHS element and search again
+// if no iter0 is found on the LHS return true and dont change alreadyBranched flag
+static
+SCIP_Bool search(int* pIter0, int j, branchingList bl1, SCIP_Bool* pAlreadyBranchedImpl) {
+   int i = 0;
+   for (i=0; i < bl1.lastIdx; ++i) {
+      if ((*(pIter0) == bl1.bl[i].id1) && (j == bl1.bl[i].id2)) {
+         *(pAlreadyBranchedImpl) = TRUE;
+         return TRUE;   
+      }
+      else if ((*(pIter0) == bl1.bl[i].id1) && (j != bl1.bl[i].id2)) {
+         *(pIter0) = bl1.bl[i].id2;
+         return FALSE; 
+      }
+   }
+   return TRUE;
+}
+
+branchingList createBL(SCIP_NODE* iterNode, int mIdx) {
+   branchingList bl1;
+   bl1.lastIdx = 0;
+   int iterDepth = SCIPnodeGetDepth(iterNode);
+   int i;
+   for (i=0; i < iterDepth; ++i) {
+      assert(iterNode != NULL);
+      int iterNodeMIdx = SCIPnodeGetMIdx(iterNode);
+      if (iterNodeMIdx == mIdx) {
+         int id1 = SCIPnodeGetId1(iterNode);
+         int id2 = SCIPnodeGetId2(iterNode);
+         assert(id1 != -1 && id2 != -1);
+
+         int sign = SCIPnodeGetIneqSign(iterNode);
+         assert(sign == 1 || sign == 0);
+         if (sign == 1) {
+            bl1.bl[bl1.lastIdx].id1 = id1;
+            bl1.bl[bl1.lastIdx].id2 = id2;
+            bl1.lastIdx += 1; 
+         }
+         else {
+            bl1.bl[bl1.lastIdx].id1 = id2;
+            bl1.bl[bl1.lastIdx].id2 = id1; 
+            bl1.lastIdx += 1; 
+         }
+      }
+      
+      iterNode = SCIPnodeGetParent(iterNode);
+      
+   }
+
+   return bl1;
+
+}
+
+SCIP_Bool checkAlreadyBranchedImpl(SCIP* scip, int k, int j, int mIdx) {
+   SCIP_Bool alreadyBranchedImpl = FALSE;
+   SCIP_Bool* pAlreadyBranchedImpl = &alreadyBranchedImpl;
+
+   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+   int iterDepth = SCIPnodeGetDepth(iterNode);
+   branchingList bl1 = createBL(iterNode, mIdx);
+   if (iterDepth == 0 || bl1.lastIdx == 0) { // if at root node or no branchings on this machine, directly return since no branching happened so far
+      return *(pAlreadyBranchedImpl);      
+   }
+
+   printOutBrachingList(bl1,mIdx);
+
+   SCIP_Bool found1 = FALSE;
+   SCIP_Bool found2 = FALSE;
+   int iter0 = k;
+   int* pIter0 = &iter0;
+   int iter00= j;
+   int* pIter00 = &iter00;
+   while (found1 == FALSE) {
+      found1 = search(pIter0,j,bl1,pAlreadyBranchedImpl);
+   }
+   while (found2 == FALSE) {
+      found2 = search(pIter00,k,bl1,pAlreadyBranchedImpl); // to check permutation as well
+   }
+
+   return *(pAlreadyBranchedImpl);
+   
+
+}
+
+
+
 /** branching execution method for fractional LP solutions */
 static
 SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
@@ -98,7 +225,7 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    printf("Starting SCIP_DECL_BRANCHEXECLP()\n");
    fflush(stdout);
    SCIP_PROBDATA* probdata;
-   int nbrJobs = 2;
+   int nbrJobs;
    schedule* s1;
    int patternid;
    SCIP_Real** pairweights;
@@ -107,6 +234,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    int nlpcands;
    SCIP_Real bestvalue;
    SCIP_Real value;
+   SCIP_Bool alreadyBranched;
+   SCIP_Bool alreadyBranchedImpl;
 
    SCIP_NODE* childsame;
    SCIP_NODE* childdiffer;
@@ -137,7 +266,8 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    *result = SCIP_DIDNOTRUN;
 
    probdata = SCIPgetProbData(scip);
-   // assert(probdata != NULL);
+   assert(probdata != NULL);
+   nbrJobs = SCIPprobdataGetnbrJobs(probdata);
 
    // nitems = SCIPprobdataGetNItems(probdata);
 
@@ -161,45 +291,60 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    for( i = 0; i < nbrJobs; ++i ) {
       for( j = 0; j < nbrJobs; ++j ) {
          if( i != j ) {
-            float sumrequired = 0;
-            float sumforbidden = 0;
-            for( v = 0; v < nlpcands; ++v ) {
-               assert(lpcands[v] != NULL);
-               vardata = SCIPvarGetData(lpcands[v]);
-               nconsids = SCIPvardataGetNConsids(vardata);
-               s1 = SCIPvardataGetSchedule(vardata);
-               patternid = SCIPvardataGetPatternid(vardata);
-               if( nconsids == nconsids_main ) {
-                  SCIP_Real solval;
-                  solval = lpcandsfrac[v];
-                  if( s1->sched[nconsids_main].mp[patternid].job[i].start < s1->sched[nconsids_main].mp[patternid].job[j].start ) {
-                     sumrequired += solval;
-                  }
-                  else {
-                     sumforbidden += solval;
-                  }
-                  
-                  
-               }
+            alreadyBranched = checkAlreadyBranched(scip, i,j,nconsids_main);
+            alreadyBranchedImpl = checkAlreadyBranchedImpl(scip, i,j,nconsids_main);
+            if(alreadyBranched) {
+               printf("alreadyBranchedIsTrue for i:%d, j: %d \n", i,j); 
+               fflush(stdout);
             }
-            // after lp cands were checked compute ratio
-            ratio_branches_new = fmin(sumrequired,sumforbidden)/fmax(sumrequired,sumforbidden);
-            if( ratio_branches_new >= ratio_branches ) {
+            if(alreadyBranchedImpl) {
+               printf("alreadyBranchedImplIsTrue for i:%d, j: %d \n", i,j); 
+               fflush(stdout);
+            }
+            if (!(alreadyBranched) && !(alreadyBranchedImpl)) {
+               float sumrequired = 0;
+               float sumforbidden = 0;
+               for( v = 0; v < nlpcands; ++v ) {
+                  assert(lpcands[v] != NULL);
+                  vardata = SCIPvarGetData(lpcands[v]);
+                  nconsids = SCIPvardataGetNConsids(vardata);
+                  s1 = SCIPvardataGetSchedule(vardata);
+                  patternid = SCIPvardataGetPatternid(vardata);
+                  if( nconsids == nconsids_main ) {
+                     SCIP_Real solval;
+                     solval = lpcandsfrac[v];
+                     if( s1->sched[nconsids_main].mp[patternid].job[i].start < s1->sched[nconsids_main].mp[patternid].job[j].start ) {
+                        sumrequired += solval;
+                     }
+                     else {
+                        sumforbidden += solval;
+                     }
+                     
+                     
+                  }
+               }
+               // after lp cands were checked compute ratio
+               ratio_branches_new = fmin(sumrequired,sumforbidden)/fmax(sumrequired,sumforbidden);
+            }
+            if( ratio_branches_new > ratio_branches ) {
                ratio_branches = ratio_branches_new;
                i_found = i;
                j_found = j;
-               printf("i_found %d, j_found %d,", i,j);
-               fflush(stdout);
+       
             }
          }
 
       }
    }
 
-   if (i_found == -1 & j_found == -1) {
-      return SCIP_CUTOFF; // CUTOFF this node if no order to branch on
+   if (i_found == -1 && j_found == -1) {
+      printf("No branching cand found. \n");
+      fflush(stdout);
+      *result = SCIP_CUTOFF;
+      return SCIP_OKAY; // CUTOFF this node if no order to branch on
    }
-
+   printf("i_found %d, j_found %d for machine %d \n", i_found,j_found, nconsids_main);
+   fflush(stdout);
    /* create the branch-and-bound tree child nodes of the current node */
    SCIP_CALL( SCIPcreateChild(scip, &childsame, 0.0, SCIPgetLocalTransEstimate(scip)) );
    SCIP_CALL( SCIPcreateChild(scip, &childdiffer, 0.0, SCIPgetLocalTransEstimate(scip)) );
@@ -207,6 +352,14 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    /* create corresponding constraints */
    SCIP_CALL( SCIPcreateConsSamediff(scip, &conssame, "same", i_found, j_found, SAME, childsame, TRUE, nconsids_main) );
    SCIP_CALL( SCIPcreateConsSamediff(scip, &consdiffer, "differ", i_found, j_found, DIFFER, childdiffer, TRUE, nconsids_main) );
+
+   // add ID info to nodes
+   SCIPnodeSetIDs(childsame, i_found, j_found);
+   SCIPnodeSetIDs(childdiffer, i_found, j_found);
+   SCIPnodeSetIneqSign(childsame, 1);
+   SCIPnodeSetIneqSign(childdiffer, 0);
+   SCIPnodeSetMIdx(childsame,nconsids_main);
+   SCIPnodeSetMIdx(childdiffer,nconsids_main);
 
   /* add constraints to nodes */
    SCIP_CALL( SCIPaddConsNode(scip, childsame, conssame, NULL) );

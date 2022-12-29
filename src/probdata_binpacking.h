@@ -43,7 +43,7 @@ typedef struct pat {
 
 /* one machine can have up to 50 patterns*/
 typedef struct mPats {
-   pat mp[50];
+   pat mp[100];
    int lastIdx;
 } mPats;
 
@@ -93,6 +93,7 @@ struct SCIP_ProbData
    int*                  ids;          /**< array of item ids */
    int                   nbrMachines;
    int                   nbrJobs;
+   double                maxTime;
    int*                  nvars;        /**< number of generated variables */
    int                   varssize;     /**< size of the variable array */
    int                   nitems;       /**< number of items */
@@ -125,7 +126,8 @@ SCIP_RETCODE probdataCreate(
    end                      endTimes,
    int*                   nvars,              /**< number of variables */
    int                     nbrMachines,
-   int                     nbrJobs
+   int                     nbrJobs,
+   double                  maxTime
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
    );
@@ -165,6 +167,10 @@ SCIP_VAR** SCIPprobdataGetVars(
 
 /** returns number of variables */
 int* SCIPprobdataGetNVars(
+   SCIP_PROBDATA*        probdata            /**< problem data */
+   );
+
+int SCIPprobdataGetnbrJobs(
    SCIP_PROBDATA*        probdata            /**< problem data */
    );
 
