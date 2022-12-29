@@ -120,6 +120,7 @@ struct SCIP_PricerData
    SCIP_VAR*** lambArr;
    int* nvars;
    double maxTime;
+   int numCalls;
  
 };
 
@@ -782,12 +783,15 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    nbrJobs = pricerdata->nbrJobs;
    pt1 = pricerdata->pt1;
    lambArr = pricerdata->lambArr;
+   assert(pricerdata->numCalls != -1);
+   pricerdata->numCalls = pricerdata->numCalls + 1;
 
    SCIP* subscip[nbrJobs];
    
 
 
-
+   printf("numCalls: %d \n", pricerdata->numCalls);
+   fflush(stdout);
    /* get the remaining time and memory limit */
    SCIP_CALL( SCIPgetRealParam(scip, "limits/time", &timelimit) );
    if( !SCIPisInfinity(scip, timelimit) )
@@ -1049,6 +1053,8 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->nbrJobs = 0;
    pricerdata->lambArr = NULL;
    pricerdata->maxTime = 0.0;
+   pricerdata->numCalls = -1;
+
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
@@ -1078,7 +1084,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    schedule* s1,
    SCIP_VAR*** lambArr,
    int* nvars,
-   double maxTime
+   double maxTime,
+   int numCalls
    
    )
 {
@@ -1106,6 +1113,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->lambArr  = lambArr;
    pricerdata->nvars  = nvars;
    pricerdata->maxTime  = maxTime;
+   pricerdata->numCalls = numCalls;
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {
