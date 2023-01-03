@@ -121,6 +121,7 @@ struct SCIP_PricerData
    int* nvars;
    double maxTime;
    int numCalls;
+   SCIP**                subscip;
  
 };
 
@@ -402,6 +403,39 @@ void releaseVars(SCIP* subscip,
       for( ii = 0; ii < nbrJobs; ii++ ) {
          SCIPreleaseVar(subscip, &orderVars[i*nbrJobs + ii + + mIdx*nbrJobs*nbrJobs]);
       }
+   }
+}
+
+static
+void concatArrays(SCIP_VAR*** mergedArr, SCIP_VAR** startVars, SCIP_VAR** endVars, int nbrJobs, int nbrMachines) {
+   int i = 0;
+   int i2 = 0;
+  
+   for (i=0; i < nbrMachines; ++i ) { 
+      for (i2=0; i2 < nbrJobs; ++i2 ) { 
+         mergedArr[i][i2] = startVars[i2 + i*nbrJobs];
+      }
+      for (i2=0; i2 < nbrJobs; ++i2 ) { 
+         mergedArr[i][nbrJobs + i2] = endVars[i2 + i*nbrJobs];
+      }
+   }
+}
+
+static
+void getCoefs(SCIP* scip, SCIP_Real* coefs,SCIP_CONS** startConss, SCIP_CONS** endConss,int nbrJobs,int mIdx) {
+   int i;
+   int ii;
+   SCIP_Real dual;
+   SCIP_Bool boundconstr;
+   SCIP_Bool* pBoundconstr = &boundconstr;
+   SCIP_Real* pDual = &dual;
+
+   for( i = 0; i < nbrJobs; ++i ) {
+      SCIPgetDualSolVal(scip, startConss[mIdx*nbrJobs + i], pDual, pBoundconstr);
+      coefs[i] = -1*dual;
+      SCIPgetDualSolVal(scip, endConss[mIdx*nbrJobs + i], pDual, pBoundconstr);
+      coefs[i+ nbrJobs] = -1*dual;
+
    }
 }
 
@@ -724,6 +758,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_VAR** startVars;
    SCIP_VAR** endVars;
    SCIP_VAR** orderVars;
+   
 
    schedule* s1;
    SCIP_VAR*** lambArr;
@@ -756,6 +791,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    
    SCIP_VAR** SFvars;
    SCIP_VAR** Ovars;
+   SCIP** subscip;
 
    SCIP_Real timelimit;
    SCIP_Real memorylimit;
@@ -788,9 +824,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    lambArr = pricerdata->lambArr;
    assert(pricerdata->numCalls != -1);
    pricerdata->numCalls = pricerdata->numCalls + 1;
-
-   SCIP* subscip[nbrJobs];
-   
+   subscip = pricerdata->subscip;
 
 
    printf("numCalls: %d \n", pricerdata->numCalls);
@@ -807,8 +841,17 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_CALL( SCIPallocBufferArray(scip, &startVars, nbrJobs*nbrMachines) ); /*allocate for start and finish vars */
    SCIP_CALL( SCIPallocBufferArray(scip, &endVars, nbrJobs*nbrMachines) );
    SCIP_CALL( SCIPallocBufferArray(scip, &orderVars, nbrJobs*nbrJobs*nbrMachines) ); /*allocate for order vars */
+   // create merged array, needed for reopt
+   SCIP_VAR*** mergedArr;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mergedArr, nbrMachines*sizeof(SCIP_VAR**)) );
+   for( i = 0; i< nbrMachines; ++i ) {
+      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mergedArr[i], 2*nbrJobs*sizeof(SCIP_VAR*)) );
+   }
+   // create coefs array, neede for reopt
+   SCIP_Real* coefs;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &coefs, 2*nbrJobs*sizeof(SCIP_Real)) );
 
-   if (pricerdata->numCalls != -1) {
+   if (pricerdata->numCalls == 1) {
       for ( i = 0; i < nbrMachines; i++ )
       {
          /* initialize SCIP */
@@ -829,13 +872,19 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/time", timelimit) );
          SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/memory", memorylimit) );      
 
+         // enable reopt
+         SCIP_CALL( SCIPenableReoptimization(subscip[i], TRUE));
          /* creating and initializing local pricing problem */
          SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
       }
+      concatArrays(mergedArr, startVars,endVars,nbrJobs, nbrMachines);
    }
    else {
       for( i = 0; i < nbrMachines; i++ ) {
-         // toDo
+         // free subproblem for reopt
+         SCIP_CALL( SCIPfreeReoptSolve(pricerdata->subscip[i]));
+         getCoefs(scip, coefs,startCons,endCons,nbrJobs, i);
+         SCIP_CALL( SCIPchgReoptObjective(subscip[i]));
       }
    }
 
@@ -981,22 +1030,24 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             break;
       }
    }
-   for( i = 0; i < nbrMachines; i++ ) {
-      // release vars of sub and release their buffers
-      releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs,i);  
-      /* free sub SCIP */
-      SCIP_CALL( SCIPfree(&subscip[i]) );
-   }
-   SCIPfreeBufferArray(scip, &orderVars); /*free for order vars */
-   SCIPfreeBufferArray(scip, &endVars );
-   SCIPfreeBufferArray(scip, &startVars ); /*free for start and finish vars */
-   
+
+
    if( addvar || allSubsOptimal ) {
       // a variable was added by a sub problem or all sub problems are optimal and not variable was added
       (*result) = SCIP_SUCCESS;
       if (allSubsOptimal && !(addvar)) {
-      printf("All subs are opt and no var has been added => SCIP_SUCCESS \n");
-      fflush(stdout);
+         printf("All subs are opt and no var has been added => SCIP_SUCCESS \n");
+         fflush(stdout);
+         // release vars of subs...
+         for( i = 0; i < nbrMachines; i++ ) {
+            releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs,i);  
+            /* ...free sub SCIPs... */
+            SCIP_CALL( SCIPfree(&subscip[i]) );
+         }
+         // ...and release their buffers
+         SCIPfreeBufferArray(scip, &orderVars);
+         SCIPfreeBufferArray(scip, &endVars );
+         SCIPfreeBufferArray(scip, &startVars ); 
       }
       
    } 
@@ -1127,6 +1178,11 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->nvars  = nvars;
    pricerdata->maxTime  = maxTime;
    pricerdata->numCalls = numCalls;
+
+   SCIP** subscip;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &subscip, nbrMachines*sizeof(SCIP*)) );
+   pricerdata->subscip = subscip;
+
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
    {
