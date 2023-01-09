@@ -122,6 +122,10 @@ struct SCIP_PricerData
    double maxTime;
    int numCalls;
    SCIP**                subscip;
+   SCIP_VAR***           mergedArr;
+   SCIP_VAR**            startVars;
+   SCIP_VAR**            endVars;
+   SCIP_VAR**            orderVars;
  
 };
 
@@ -792,6 +796,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_VAR** SFvars;
    SCIP_VAR** Ovars;
    SCIP** subscip;
+   // create merged array, needed for reopt
+   SCIP_VAR*** mergedArr;
 
    SCIP_Real timelimit;
    SCIP_Real memorylimit;
@@ -825,6 +831,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    assert(pricerdata->numCalls != -1);
    pricerdata->numCalls = pricerdata->numCalls + 1;
    subscip = pricerdata->subscip;
+   mergedArr = pricerdata->mergedArr;
+   startVars = pricerdata->startVars;
+   endVars = pricerdata->endVars;
+   orderVars = pricerdata->orderVars;
 
 
    printf("numCalls: %d \n", pricerdata->numCalls);
@@ -837,16 +847,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    if( !SCIPisInfinity(scip, memorylimit) )
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
-   /* allocate in orginal scip, since otherwise the buffer counts in subscip are not correct */
-   SCIP_CALL( SCIPallocBufferArray(scip, &startVars, nbrJobs*nbrMachines) ); /*allocate for start and finish vars */
-   SCIP_CALL( SCIPallocBufferArray(scip, &endVars, nbrJobs*nbrMachines) );
-   SCIP_CALL( SCIPallocBufferArray(scip, &orderVars, nbrJobs*nbrJobs*nbrMachines) ); /*allocate for order vars */
-   // create merged array, needed for reopt
-   SCIP_VAR*** mergedArr;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mergedArr, nbrMachines*sizeof(SCIP_VAR**)) );
-   for( i = 0; i< nbrMachines; ++i ) {
-      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mergedArr[i], 2*nbrJobs*sizeof(SCIP_VAR*)) );
-   }
+   
    // create coefs array, neede for reopt
    SCIP_Real* coefs;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &coefs, 2*nbrJobs*sizeof(SCIP_Real)) );
@@ -878,22 +879,25 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
       }
       concatArrays(mergedArr, startVars,endVars,nbrJobs, nbrMachines);
+      // now we optimize all subs for the first time
+      for ( i = 0; i < nbrMachines; i++ ) {
+         SCIPdebugMsg(scip, "solve pricer problem\n");
+         /* solve sub SCIP */
+         SCIP_CALL( SCIPsolve(subscip[i]) );
+      }
    }
    else {
       for( i = 0; i < nbrMachines; i++ ) {
          // free subproblem for reopt
-         SCIP_CALL( SCIPfreeReoptSolve(pricerdata->subscip[i]));
+         SCIP_CALL( SCIPfreeReoptSolve(subscip[i]));
          getCoefs(scip, coefs,startCons,endCons,nbrJobs, i);
-         SCIP_CALL( SCIPchgReoptObjective(subscip[i]));
+         SCIP_CALL( SCIPchgReoptObjective(subscip[i],SCIP_OBJSENSE_MINIMIZE,mergedArr[i],coefs,nbrJobs*2));
+         /* solve sub SCIP */
+         SCIP_CALL( SCIPsolve(subscip[i]) );
       }
    }
 
    for( i = 0; i < nbrMachines; i++ ) {
-      
-      SCIPdebugMsg(scip, "solve pricer problem\n");
-      
-      /* solve sub SCIP */
-      SCIP_CALL( SCIPsolve(subscip[i]) );
 
      // SCIPwriteOrigProblem(subscip[i], "sub.lp",NULL,FALSE);
 
@@ -1045,9 +1049,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPfree(&subscip[i]) );
          }
          // ...and release their buffers
-         SCIPfreeBufferArray(scip, &orderVars);
-         SCIPfreeBufferArray(scip, &endVars );
-         SCIPfreeBufferArray(scip, &startVars ); 
+         SCIPfreeBlockMemoryArray(scip, &orderVars, nbrJobs*nbrMachines);
+         SCIPfreeBlockMemoryArray(scip, &endVars, nbrJobs*nbrMachines );
+         SCIPfreeBlockMemoryArray(scip, &startVars, nbrJobs*nbrJobs*nbrMachines ); 
       }
       
    } 
@@ -1182,6 +1186,25 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP** subscip;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &subscip, nbrMachines*sizeof(SCIP*)) );
    pricerdata->subscip = subscip;
+
+   /* allocate in orginal scip, since otherwise the buffer counts in subscip are not correct */
+   SCIP_VAR** startVars;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startVars, nbrJobs*nbrMachines) ); /*allocate for start and finish vars */
+   pricerdata->startVars = startVars;
+   SCIP_VAR** endVars;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endVars, nbrJobs*nbrMachines) );
+   pricerdata->endVars = endVars;
+   SCIP_VAR** orderVars;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &orderVars, nbrJobs*nbrJobs*nbrMachines) ); /*allocate for order vars */
+   pricerdata->orderVars = orderVars;
+
+   SCIP_VAR*** mergedArr;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mergedArr, nbrMachines*sizeof(SCIP_VAR**)) );
+   int i;
+   for( i = 0; i< nbrMachines; ++i ) {
+      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mergedArr[i], 2*nbrJobs*sizeof(SCIP_VAR*)) );
+   }
+   pricerdata->mergedArr = mergedArr;
 
    /* capture all constraints */
    for( c = 0; c < nbrMachines; ++c )
