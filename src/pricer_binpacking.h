@@ -50,7 +50,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    schedule* s1,
    SCIP_VAR*** lambArr,
    int* nvars,
-   double maxTime
+   double maxTime,
+   int numCalls
 
    );
 
