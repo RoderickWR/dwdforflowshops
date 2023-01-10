@@ -859,6 +859,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_CALL( SCIPcreate(&subscip[i]) );
          SCIP_CALL( SCIPincludeDefaultPlugins(subscip[i]) );
 
+         /* for column generation instances, disable restarts */
+         SCIP_CALL( SCIPsetIntParam(subscip[i],"presolving/maxrestarts",0) );
+         SCIP_CALL( SCIPsetIntParam(subscip[i],"presolving/maxrounds",0) );
+         
+
          /* create problem in sub SCIP */
          SCIP_CALL( SCIPcreateProbBasic(subscip[i], "pricing" ));
          SCIP_CALL( SCIPsetObjsense(subscip[i], SCIP_OBJSENSE_MINIMIZE) );
@@ -890,6 +895,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       for( i = 0; i < nbrMachines; i++ ) {
          // free subproblem for reopt
          SCIP_CALL( SCIPfreeReoptSolve(subscip[i]));
+         /* add constraint of the branching decisions */
+         SCIP_CALL( addBranchingDecisionConss(scip, subscip[i], vars, pricerdata->conshdlr, orderVars, nbrJobs,i) );
+         // /* avoid to generate columns which are fixed to zero */
+         SCIP_CALL( addFixedVarsConss(scip, subscip[i], vars, conss, nitems, i, pricerdata->lambArr, pricerdata->s1) );
+         // change objective
          getCoefs(scip, coefs,startCons,endCons,nbrJobs, i);
          SCIP_CALL( SCIPchgReoptObjective(subscip[i],SCIP_OBJSENSE_MINIMIZE,mergedArr[i],coefs,nbrJobs*2));
          /* solve sub SCIP */
@@ -1042,16 +1052,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       if (allSubsOptimal && !(addvar)) {
          printf("All subs are opt and no var has been added => SCIP_SUCCESS \n");
          fflush(stdout);
-         // release vars of subs...
-         for( i = 0; i < nbrMachines; i++ ) {
-            releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs,i);  
-            /* ...free sub SCIPs... */
-            SCIP_CALL( SCIPfree(&subscip[i]) );
-         }
-         // ...and release their buffers
-         SCIPfreeBlockMemoryArray(scip, &orderVars, nbrJobs*nbrMachines);
-         SCIPfreeBlockMemoryArray(scip, &endVars, nbrJobs*nbrMachines );
-         SCIPfreeBlockMemoryArray(scip, &startVars, nbrJobs*nbrJobs*nbrMachines ); 
+         // // release vars of subs...[DONT USE WHEN REOPT IS USED]
+         // for( i = 0; i < nbrMachines; i++ ) {
+         //    releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs,i);  
+         //    /* ...free sub SCIPs... */
+         //    SCIP_CALL( SCIPfree(&subscip[i]) );
+         // }
+         // // ...and release their buffers
+         // SCIPfreeBlockMemoryArray(scip, &orderVars, nbrJobs*nbrMachines);
+         // SCIPfreeBlockMemoryArray(scip, &endVars, nbrJobs*nbrMachines );
+         // SCIPfreeBlockMemoryArray(scip, &startVars, nbrJobs*nbrJobs*nbrMachines ); 
       }
       
    } 
