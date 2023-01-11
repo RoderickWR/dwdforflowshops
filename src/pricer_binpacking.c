@@ -171,12 +171,6 @@ SCIP_RETCODE addBranchingDecisionConss(
    char buf[256];
    SCIP_CONSDATA* consdata;
 
-   SCIP_Real vbdcoef;
-   SCIP_Real lhs;
-   SCIP_Real rhs;
-
-   int c;
-
    assert( scip != NULL );
    assert( subscip != NULL );
    assert( conshdlr != NULL );
@@ -188,6 +182,7 @@ SCIP_RETCODE addBranchingDecisionConss(
    /* loop over all branching decision constraints and apply the branching decision if the corresponding constraint is
     * active
     */
+   int c;
    for( c = 0; c < nconss; ++c )
    {
       cons = conss[c];
@@ -264,133 +259,11 @@ SCIP_RETCODE addFixedVarsConss(
    fflush(stdout);
    // not needed since patterns that were fixed to zero should not be generated again due to branching constraints
    // what is needed is the fixToZero function that reduces the pool of patterns in the MP after a branching decision (=> RMP)
-   // SCIP_VAR** origvars;
-   // int norigvars;
-
-   // SCIP_CONS* cons;
-   // int* consids;
-   // int nconsids;
-   // int consid;
-   // int nvars2;
-
-   // SCIP_VAR** logicorvars;
-   // SCIP_VAR* var;
-   // SCIP_VARDATA* vardata;
-   // SCIP_Bool needed;
-   // int nlogicorvars;
-
-   // int v;
-   // int c;
-   // int o;
-
-   // // /* collect all variable which are currently existing */
-   // // origvars = SCIPgetVars(scip);
-   // // norigvars = SCIPgetNVars(scip);
-
-   // /* loop over all these variables and check if they are fixed to zero */
-   // for( v = 0; v < s1->sched[mIdx].lastIdx; ++v )
-   // {
-   //    assert(SCIPvarGetType(lambArr[mIdx][v]) == SCIP_VARTYPE_BINARY);
-
-   //    /* if the upper bound is smaller than 0.5 if follows due to the integrality that the binary variable is fixed to zero */
-   //    if( SCIPvarGetUbLocal(origvars[v]) < 0.5 ) // TODO for those variables add order costraint to sub
-   //    {
-   //       SCIPdebugMsg(scip, "variable <%s> glb=[%.15g,%.15g] loc=[%.15g,%.15g] is fixed to zero\n",
-   //          SCIPvarGetName(lambArr[mIdx][v]), SCIPvarGetLbGlobal(lambArr[mIdx][v]), SCIPvarGetUbGlobal(lambArr[mIdx][v]),
-   //          SCIPvarGetLbLocal(lambArr[mIdx][v]), SCIPvarGetUbLocal(lambArr[mIdx][v]) );
-
-   //       /* coolect the constraints/items the variable belongs to */
-   //       vardata = SCIPvarGetData(lambArr[mIdx][v]); // DWDforFlowshop implementation ends here for now
-   //       nconsids = SCIPvardataGetNConsids(vardata);
-   //       consids = SCIPvardataGetConsids(vardata);
-   //       needed = TRUE;
-
-   //       SCIP_CALL( SCIPallocBufferArray(subscip, &logicorvars, nitems) );
-   //       nlogicorvars = 0;
-   //       consid = consids[0];
-   //       nvars2 = 0;
-
-   //       /* loop over these items and create a linear (logicor) constraint which forbids this item combination in the
-   //        * pricing problem; thereby check if this item combination is already forbidden
-   //        */
-   //       for( c = 0, o = 0; o < nitems && needed; ++o )
-   //       {
-   //          assert(o <= consid);
-   //          cons = conss[o];
-
-   //          if( SCIPconsIsEnabled(cons) )
-   //          {
-   //             assert( SCIPgetNFixedonesSetppc(scip, cons) == 0 );
-
-   //             var = vars[nvars2];
-   //             nvars2++;
-   //             assert(var != NULL);
-
-   //             if( o == consid )
-   //             {
-   //                SCIP_CALL( SCIPgetNegatedVar(subscip, var, &var) );
-   //             }
-
-   //             logicorvars[nlogicorvars] = var;
-   //             nlogicorvars++;
-   //          }
-   //          else if( o == consid )
-   //             needed = FALSE;
-
-   //          if( o == consid )
-   //          {
-   //             c++;
-   //             if ( c == nconsids )
-   //                consid = nitems + 100;
-   //             else
-   //             {
-   //                assert(consid < consids[c]);
-   //                consid = consids[c];
-   //             }
-   //          }
-   //       }
-
-   //       if( needed )
-   //       {
-   //          SCIP_CALL( SCIPcreateConsBasicLogicor(subscip, &cons, SCIPvarGetName(origvars[v]), nlogicorvars, logicorvars) );
-   //          SCIP_CALL( SCIPsetConsInitial(subscip, cons, FALSE) );
-
-   //          SCIP_CALL( SCIPaddCons(subscip, cons) );
-   //          SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
-   //       }
-
-   //       SCIPfreeBufferArray(subscip, &logicorvars);
-   //    }
-   // }
    printf("Ending addFixedVarsConss()\n");
    fflush(stdout);
    return SCIP_OKAY;
 }
-
-SCIP_Real getPattern(
-   SCIP* subscip,
-   SCIP_SOL* sol,
-   SCIP_Real** sTimes,
-   SCIP_Real** cTimes,
-   SCIP_VAR**            startVars,
-   SCIP_VAR**            endVars,
-   int nbrJobs
-   )
-{
-   int i;
-   SCIP_Real altStartingTimes;
-   for( i = 0; i < nbrJobs; ++i ) {
-      SCIP_Real r1;
-      r1 = SCIPgetSolVal(subscip, sol, startVars[i]);
-      sTimes[i] = &r1;
-      altStartingTimes = r1;
-      SCIP_Real r2;
-      r2 = SCIPgetSolVal(subscip, sol, endVars[i]);
-      cTimes[i] = &r2;
-   }
-   return altStartingTimes;
-}
-
+// releases all variables of the subproblems
 void releaseVars(SCIP* subscip,
                SCIP_VAR**            startVars,
                SCIP_VAR**            endVars,
@@ -409,7 +282,7 @@ void releaseVars(SCIP* subscip,
       }
    }
 }
-
+// concatenates the startVars and endVars of all subproblems into one array, needed for reoptimization
 static
 void concatArrays(SCIP_VAR*** mergedArr, SCIP_VAR** startVars, SCIP_VAR** endVars, int nbrJobs, int nbrMachines) {
    int i = 0;
@@ -424,7 +297,7 @@ void concatArrays(SCIP_VAR*** mergedArr, SCIP_VAR** startVars, SCIP_VAR** endVar
       }
    }
 }
-
+// creates a coefficient array from the master constraints, needed for reoptimization to change the sub objectives
 static
 void getCoefs(SCIP* scip, SCIP_Real* coefs,SCIP_CONS** startConss, SCIP_CONS** endConss,int nbrJobs,int mIdx) {
    int i;
@@ -579,17 +452,6 @@ SCIP_RETCODE initPricing(
             SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
          }
       }
-      // SCIP_CONS* cons = NULL;
-      // sprintf(buf, "fixAtZero%d", i);
-      // SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -(nbrJobs-1)*50, 1e+20));
-      // SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[i], -1.0) );
-      // for (iii=0; iii < nbrJobs; ++iii) {
-      //    if (iii != i) {
-      //       SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + iii], -50.0) );
-      //    }
-      // }
-      // SCIP_CALL(SCIPaddCons(subscip,cons));
-      // SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
    }
    
    /* add constraint of the branching decisions */
@@ -729,12 +591,15 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
    fflush(stdout);
    SCIP_PRICERDATA* pricerdata;
    int c;
+   
 
    assert(scip != NULL);
    assert(pricer != NULL);
 
    pricerdata = SCIPpricerGetData(pricer);
    assert(pricerdata != NULL);
+   int nbrJobs = pricerdata->nbrJobs;
+   int nbrMachines = pricerdata->nbrMachines;
 
    /* get release constraints */
    for( c = 0; c < pricerdata->nitems; ++c )
@@ -742,6 +607,11 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
       /* release constraint */
       SCIP_CALL( SCIPreleaseCons(scip, &(pricerdata->conss[c])) );
    }
+   // free the variables of the subscips
+   SCIPfreeBlockMemoryArray(scip, &(pricerdata->orderVars), nbrJobs*nbrMachines);
+   SCIPfreeBlockMemoryArray(scip, &(pricerdata->endVars), nbrJobs*nbrMachines );
+   SCIPfreeBlockMemoryArray(scip, &(pricerdata->startVars), nbrJobs*nbrJobs*nbrMachines ); 
+
    printf("Ending SCIP_DECL_PRICEREXITSOL()\n");
    fflush(stdout);
    return SCIP_OKAY;
@@ -770,10 +640,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_Bool addvar = FALSE;
    SCIP_Bool allSubsOptimal = TRUE;
    char buf[256];
-
-   SCIP_SOL** sols;
-   int nsols;
-   int s;
    int* nvars;
 
    int i = 0;
@@ -795,9 +661,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    
    SCIP_VAR** SFvars;
    SCIP_VAR** Ovars;
-   SCIP** subscip;
-   // create merged array, needed for reopt
-   SCIP_VAR*** mergedArr;
+   SCIP** subscip; 
+   SCIP_VAR*** mergedArr; //needed for reopt
 
    SCIP_Real timelimit;
    SCIP_Real memorylimit;
@@ -830,6 +695,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    lambArr = pricerdata->lambArr;
    assert(pricerdata->numCalls != -1);
    pricerdata->numCalls = pricerdata->numCalls + 1;
+   // use pointers stored in pricerdata 
    subscip = pricerdata->subscip;
    mergedArr = pricerdata->mergedArr;
    startVars = pricerdata->startVars;
@@ -848,7 +714,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
    
-   // create coefs array, neede for reopt
+   // create coefs array, needed for reopt
    SCIP_Real* coefs;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &coefs, 2*nbrJobs*sizeof(SCIP_Real)) );
 
@@ -909,29 +775,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    for( i = 0; i < nbrMachines; i++ ) {
 
-     // SCIPwriteOrigProblem(subscip[i], "sub.lp",NULL,FALSE);
-
       if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
          printf("Subproblem on machine %d exits not optimal", i);
          fflush(stdout);
       }
-
-      sols = SCIPgetSols(subscip[i]);
-      nsols = SCIPgetNSols(subscip[i]);
-   
-      /* loop over all solutions and create the corresponding column to master if the reduced cost are negative for master,
-      * that is the objective value i greater than 1.0
-      */
-      // for( s = 0; s < 1; ++s ) // only use best solution 
+  
       {
          SCIP_Bool feasible;
          SCIP_SOL* sol;
-
-         // /* the soultion should be sorted w.r.t. the objective function value */
-         // assert(s == 0 || SCIPisFeasGE(subscip[i], SCIPgetSolOrigObj(subscip[i], sols[s-1]), SCIPgetSolOrigObj(subscip[i], sols[s])));
-
-         // sol = sols[s];
+         // we only look at the best solution 
          sol = SCIPgetBestSol(subscip[i]);
          assert(sol != NULL);
 
@@ -944,7 +797,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             continue;
          }
 
-         /* check if the solution has a value greater than 1.0 */         
+         /* check if the solution indicates that a new pattern should be added */         
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
          printf("SolVal %lf \n" , ( SCIPgetSolOrigObj(subscip[i], sol)));
          printf("dual %lf \n" , ( dual));
@@ -953,52 +806,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          {          
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;
-            int* consids;
-            SCIP_Real** startingTimes;
-            SCIP_Real** completionTimes;
-            SCIP_Real altStartingTimes;
-            char strtmp[SCIP_MAXSTRLEN];
-            char name[SCIP_MAXSTRLEN];
-            int nconss;
-            int o;
-            int v;
             s1 = pricerdata->s1;
 
-            SCIPdebug( SCIP_CALL( SCIPprintSol(subscip[i], sol, NULL, FALSE) ) );
-
-            nconss = 0;
-            (void) SCIPsnprintf(name, SCIP_MAXSTRLEN, "items");
-
-            SCIP_CALL( SCIPallocBufferArray(scip, &startingTimes, nbrJobs) ); // allocates memory to store starting times of the patterns
-            SCIP_CALL( SCIPallocBufferArray(scip, &completionTimes, nbrJobs) ); // for completion times
-
-            // /* check which variables are fixed -> which item belongs to this packing */
-            // for( o = 0, v = 0; o < nitems; ++o )
-            // {
-            //    if( !SCIPconsIsEnabled(conss[o]) )
-            //       continue;
-  
-            //    assert(SCIPgetNFixedonesSetppc(scip, conss[o]) == 0);
-
-            //    if( SCIPgetSolVal(subscip[i], sol, vars[v]) > 0.5 )
-            //    {
-            //       (void) SCIPsnprintf(strtmp, SCIP_MAXSTRLEN, "_%d", ids[o]);
-            //       strcat(name, strtmp);
-
-            //       consids[nconss] = o;
-            //       nconss++;
-            //    }
-            //    else
-            //       assert( SCIPisFeasEQ(subscip[i], SCIPgetSolVal(subscip[i], sol, vars[v]), 0.0) );
-
-            //    v++;
-            // }
-
-            // SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, consids, nconss) );
-
-            /* create variable for a new column with objective function coefficient 0.0 */
-            // SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, name, 1.0, FALSE, TRUE, vardata) ); /* für neue Patternvarriablen als BIN [0,1] und zusätzliche changVarLazyUB sondern  inf und hier mitteilen */
-            // create new variable and adjust params
+            SCIPdebug( SCIP_CALL( SCIPprintSol(subscip[i], sol, NULL, FALSE) ) );     
+            
             SCIP_VAR* newVar = NULL;
             s1->sched[i].lastIdx = s1->sched[i].lastIdx + 1; // count up the pattern counter in s1
             SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx) ); 
@@ -1014,15 +825,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             nvars[i]++; // increment nvars
             addvar = TRUE;
      
-            // /* check which variable are fixed -> which orders belong to this packing */
-            // for( v = 0; v < nconss; ++v )
-            // {
-            //    assert(SCIPconsIsEnabled(conss[consids[v]]));
-            //    SCIP_CALL( SCIPaddCoefSetppc(scip, conss[consids[v]], var) );
-            // }
-            // use add coeffLinear() 
-            // SCIPdebug(SCIPprintVar(scip, var, NULL) );
-
             // modify convexity constr on machine i in master problem
             SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][s1->sched[i].lastIdx], 1.0);
             // modify start and end time constr in master problem
@@ -1037,8 +839,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       
             printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
                      
-            SCIPfreeBufferArray(scip, &completionTimes);
-            SCIPfreeBufferArray(scip, &startingTimes);
+ 
          }
          else
             break;
@@ -1052,16 +853,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       if (allSubsOptimal && !(addvar)) {
          printf("All subs are opt and no var has been added => SCIP_SUCCESS \n");
          fflush(stdout);
-         // release vars of subs...[DONT USE WHEN REOPT IS USED]
+         // release vars of subs...[DONT RELEASE SUBSCIPS WHEN REOPT IS USED]
          for( i = 0; i < nbrMachines; i++ ) {
             releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs,i);  
             /* ...free sub SCIPs... */
             SCIP_CALL( SCIPfree(&subscip[i]) );
          }
-         // // ...and release their buffers
-         // SCIPfreeBlockMemoryArray(scip, &orderVars, nbrJobs*nbrMachines);
-         // SCIPfreeBlockMemoryArray(scip, &endVars, nbrJobs*nbrMachines );
-         // SCIPfreeBlockMemoryArray(scip, &startVars, nbrJobs*nbrJobs*nbrMachines ); 
       }
       
    } 
