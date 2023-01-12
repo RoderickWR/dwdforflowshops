@@ -1,0 +1,1 @@
+#define SPX_GITHASH "71a5873d"
