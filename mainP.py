@@ -1,10 +1,14 @@
-# # build.py
-# from distutils.ccompiler import new_compiler
+# build.py
+from distutils.ccompiler import new_compiler
+import subprocess
 
-# if __name__ == '__main__':
-#     compiler = new_compiler()
-#     compiler.compile(['mainC.c'])
-#     compiler.link_executable(['mainC.so'], 'main')
+if __name__ == '__main__':
+    compiler = new_compiler()
+    compiler.compile(['mainC.c'])
+    compiler.link_executable(['mainC.o'], 'main')
+    subprocess.call()
+
+
 
 # ctypes_test.py
 import ctypes
