@@ -879,7 +879,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/memory", memorylimit) );      
 
          // enable reopt
-         SCIP_CALL( SCIPenableReoptimization(subscip[i], TRUE));
+         // SCIP_CALL( SCIPenableReoptimization(subscip[i], TRUE));
          /* creating and initializing local pricing problem */
          SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
       }
@@ -894,7 +894,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    else {
       for( i = 0; i < nbrMachines; i++ ) {
          // free subproblem for reopt
-         SCIP_CALL( SCIPfreeReoptSolve(subscip[i]));
+         // SCIP_CALL( SCIPfreeReoptSolve(subscip[i]));
+         SCIPwriteOrigProblem(subscip[i], "sub_org.lp",NULL,FALSE);
+         SCIPwriteTransProblem(subscip[i], "sub_trans.lp",NULL,FALSE);
+         SCIP_CALL( SCIPfreeTransform(subscip[i]));
          /* add constraint of the branching decisions */
          SCIP_CALL( addBranchingDecisionConss(scip, subscip[i], vars, pricerdata->conshdlr, orderVars, nbrJobs,i) );
          // /* avoid to generate columns which are fixed to zero */
@@ -904,6 +907,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_CALL( SCIPchgReoptObjective(subscip[i],SCIP_OBJSENSE_MINIMIZE,mergedArr[i],coefs,nbrJobs*2));
          /* solve sub SCIP */
          SCIP_CALL( SCIPsolve(subscip[i]) );
+         SCIPwriteTransProblem(subscip[i], "sub_trans_after.lp",NULL,FALSE);
       }
    }
 
