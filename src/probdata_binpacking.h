@@ -69,22 +69,6 @@ typedef struct lamb{
    lambMi lambOnMachine[5];
 } lamb;
 
-typedef struct startMi{
-   SCIP_VAR *ptrStart[5];
-} startMi;
-
-typedef struct start{
-   startMi startOnMachine[5];
-} start;
-
-typedef struct endMi{
-   SCIP_VAR *ptrEnd[5];
-} endMi;
-
-typedef struct end{
-   endMi endOnMachine[5];
-} end;
-
 struct SCIP_ProbData
 {
    SCIP_VAR**            vars;         /**< all exiting variables in the problem */
@@ -99,9 +83,8 @@ struct SCIP_ProbData
    int                   nitems;       /**< number of items */
    SCIP_Longint          capacity;     /**< bin capacity */
    SCIP_VAR***           lambArr;
-   start                 startTimes;
-   end                   endTimes;
-   
+   SCIP_VAR**            startArr;
+   SCIP_VAR**            endArr;   
 };
 
 /** sets up the problem data */
@@ -122,8 +105,8 @@ SCIP_RETCODE probdataCreate(
    // SCIP_Longint*         weights,            /**< array containing the item weights */
    // int*                  ids,                /**< array of item ids */
    SCIP_VAR***              lambArr,
-   start                    startTimes,
-   end                      endTimes,
+   SCIP_VAR**               startArr,
+   SCIP_VAR**               endArr,
    int*                   nvars,              /**< number of variables */
    int                     nbrMachines,
    int                     nbrJobs,

@@ -581,7 +581,42 @@ SCIP_DECL_PRICERINIT(pricerInitBinpacking)
    return SCIP_OKAY;
 }
 
+static
+void writeFinalResult(SCIP* scip, SCIP_PRICERDATA* pricerdata) {
+   FILE* fpt;
+   SCIP_PROBDATA* probdata;
+   SCIP_VAR** startArr;
+   SCIP_VAR** endArr;
+   int nbrJobs;
+   int nbrMachines;
+   int i;
+   int ii;
+   SCIP_SOL* sol;
 
+   assert(scip != NULL);
+   probdata = SCIPgetProbData(scip);
+   startArr = probdata->startArr;
+   endArr = probdata->endArr;
+   nbrJobs = probdata->nbrJobs;
+   nbrMachines = probdata->nbrMachines;
+
+   sol = SCIPgetBestSol(scip);
+
+   assert(sol != NULL);
+
+   fpt = fopen("GanttRawData.csv", "w+");
+   fprintf(fpt,"Machine, Job, Start, End\n"); // define header
+
+   for (i=0; i < nbrMachines; i++) {
+      for (ii=0; ii < nbrJobs; ii++) {
+         // fprintf(fpt,"%d, %d, %f, %f\n", SCIPgetSolVal(scip, sol, startTimes.startOnMachine[i].ptrStart[ii]));    
+         // fprintf(fpt,"%f\n", SCIPgetSolVal(scip, sol, startTimes.startOnMachine[i].ptrStart[ii]));    
+         fprintf(fpt,"%f\n", SCIPgetSolVal(scip, sol, startArr[i*nbrJobs + ii])); 
+      }
+   }
+   fclose(fpt);
+
+}
 /** solving process deinitialization method of variable pricer (called before branch and bound process data is freed) */
 /* releast alle transf constraints aus pricer data*/
 static
@@ -600,6 +635,8 @@ SCIP_DECL_PRICEREXITSOL(pricerExitsolBinpacking)
    assert(pricerdata != NULL);
    int nbrJobs = pricerdata->nbrJobs;
    int nbrMachines = pricerdata->nbrMachines;
+
+   writeFinalResult(scip, pricerdata);
 
    /* get release constraints */
    for( c = 0; c < pricerdata->nitems; ++c )

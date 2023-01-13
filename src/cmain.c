@@ -132,8 +132,6 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
    /* create structs for pointers to all variables*/
-   start startTimes;
-   end endTimes;
    SCIP_VAR* ptrMakespan;
    SCIP_VAR* offset[nbrMachines];
    SCIP_VARDATA*        vardata;
@@ -143,6 +141,10 @@ SCIP_RETCODE runShell(
    for( iv = 0; iv< nbrMachines; ++iv ) {
       SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], 100*sizeof(SCIP_VAR*)) );
    }
+   SCIP_VAR** startArr;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) );
+   SCIP_VAR** endArr;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) );
 
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) );
 
@@ -178,10 +180,6 @@ SCIP_RETCODE runShell(
       } 
    }
 
-   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startTimes, endTimes, nvars, nbrMachines, nbrJobs, maxTime) );
-   SCIP_CALL( SCIPsetProbData(scip, probdata) );
-
- 
    /* create offset variables and set offset pointers*/
    for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
       sprintf(buf, "offsetM%d", iii);
@@ -200,14 +198,14 @@ SCIP_RETCODE runShell(
          sprintf(buf, "startM%dJ%d", iii,i);
          SCIP_VAR* var = NULL;
          SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
-         startTimes.startOnMachine[iii].ptrStart[i] = var;
+         startArr[iii*nbrJobs + i] = var;
          SCIP_CALL(SCIPaddVar(scip,var));
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
       /* create end variables and set end pointers*/
          sprintf(buf, "endM%dJ%d", iii,i);
          SCIP_VAR* var2 = NULL;
          SCIP_CALL(SCIPcreateVarBasic(scip, &var2, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
-         endTimes.endOnMachine[iii].ptrEnd[i] = var2;
+         endArr[iii*nbrJobs + i] = var2;
          SCIP_CALL(SCIPaddVar(scip,var2));
          SCIP_CALL( SCIPreleaseVar(scip, &var2) ); 
       } 
@@ -240,7 +238,7 @@ SCIP_RETCODE runShell(
          for( ii=0; ii< mp1.lastIdx+1; ii++) {        
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1->sched[iii].mp[ii].job[i].start) );
          }
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], -1));
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, startArr[iii*nbrJobs + i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
@@ -256,7 +254,7 @@ SCIP_RETCODE runShell(
          for( ii=0; ii< mp1.lastIdx+1; ii++) {   
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1->sched[iii].mp[ii].job[i].end) );
          }
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, endArr[iii*nbrJobs + i], -1));
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, offset[iii], 1));
          SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
@@ -282,8 +280,8 @@ SCIP_RETCODE runShell(
          sprintf(buf, "interMachineM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -1e+20, 0));  
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], 1));
-         SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii+1].ptrStart[i], -1));
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, endArr[iii*nbrJobs + i], 1));
+         SCIP_CALL( SCIPaddCoefLinear(scip, cons, startArr[(iii+1)*nbrJobs + i], -1));
          SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
          SCIP_CALL(SCIPaddCons(scip,cons));
          
@@ -296,12 +294,16 @@ SCIP_RETCODE runShell(
       sprintf(buf, "makespan%d", i);
       SCIP_CONS* cons = NULL;  
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0, 1e+20));
-      SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[nbrMachines-1].ptrEnd[i], -1));
+      SCIP_CALL( SCIPaddCoefLinear(scip, cons, endArr[(nbrMachines-1)*nbrJobs + i], -1));
       SCIP_CALL( SCIPaddCoefLinear(scip, cons, ptrMakespan, 1));
       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
       SCIP_CALL(SCIPaddCons(scip,cons));
       makespanCons[i] = cons;
    }
+
+
+   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startArr, endArr, nvars, nbrMachines, nbrJobs, maxTime) );
+   SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
    SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars, maxTime,0)); 
