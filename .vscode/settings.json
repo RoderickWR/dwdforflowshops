@@ -18,7 +18,10 @@
         "unordered_map": "c",
         "initializer_list": "c",
         "branch_ryanfoster.h": "c",
-        "pub_tree.h": "c"
+        "pub_tree.h": "c",
+        "memory": "c",
+        "semaphore": "c",
+        "stop_token": "c"
     },
     "cmake.configureOnOpen": false
 }

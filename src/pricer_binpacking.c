@@ -126,6 +126,7 @@ struct SCIP_PricerData
    SCIP_VAR**            startVars;
    SCIP_VAR**            endVars;
    SCIP_VAR**            orderVars;
+   SCIP_Longint          tempNodeNbr; 
  
 };
 
@@ -669,6 +670,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_VAR** startVars;
    SCIP_VAR** endVars;
    SCIP_VAR** orderVars;
+   SCIP_NODE* cNode = SCIPgetCurrentNode(scip);
+   SCIP_Longint nodeNbr = SCIPnodeGetNumber(cNode);
    
 
    schedule* s1;
@@ -755,7 +758,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_Real* coefs;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &coefs, 2*nbrJobs*sizeof(SCIP_Real)) );
 
-   if (pricerdata->numCalls != -1) {
+
+   if (pricerdata->numCalls == 1 || pricerdata->tempNodeNbr != nodeNbr) {
       for ( i = 0; i < nbrMachines; i++ )
       {
          /* initialize SCIP */
@@ -781,8 +785,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/time", timelimit) );
          SCIP_CALL( SCIPsetRealParam(subscip[i], "limits/memory", memorylimit) );      
 
-         // enable reopt
-         //SCIP_CALL( SCIPenableReoptimization(subscip[i], TRUE));
          /* creating and initializing local pricing problem */
          SCIP_CALL( initPricing(scip, pricerdata, subscip[i], vars, startVars, endVars, orderVars, i) );
       }
@@ -797,7 +799,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    else {
       for( i = 0; i < nbrMachines; i++ ) {
          // free subproblem for reopt
-         SCIP_CALL( SCIPfreeReoptSolve(subscip[i]));
+         SCIP_CALL( SCIPfreeTransform(subscip[i]));
          /* add constraint of the branching decisions */
          SCIP_CALL( addBranchingDecisionConss(scip, subscip[i], vars, pricerdata->conshdlr, orderVars, nbrJobs,i) );
          // /* avoid to generate columns which are fixed to zero */
@@ -891,16 +893,17 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          printf("All subs are opt and no var has been added => SCIP_SUCCESS \n");
          fflush(stdout);
          // release vars of subs...[DONT RELEASE SUBSCIPS WHEN REOPT IS USED]
-         for( i = 0; i < nbrMachines; i++ ) {
-            releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs,i);  
-            /* ...free sub SCIPs... */
-            SCIP_CALL( SCIPfree(&subscip[i]) );
-         }
+         // for( i = 0; i < nbrMachines; i++ ) {
+         //    releaseVars(subscip[i], startVars, endVars, orderVars, nbrJobs,i);  
+         //    /* ...free sub SCIPs... */
+         //    SCIP_CALL( SCIPfree(&subscip[i]) );
+         // }
       }
       
    } 
    // /* free pricer MIP */
    // SCIPfreeBufferArray(scip, &vars);
+   pricerdata->tempNodeNbr = nodeNbr;
    printf("Ending DECL_PRICERREDCOST()\n");
    fflush(stdout);
    return SCIP_OKAY;
@@ -966,7 +969,7 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->lambArr = NULL;
    pricerdata->maxTime = 0.0;
    pricerdata->numCalls = -1;
-
+   pricerdata->tempNodeNbr = -1;
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
