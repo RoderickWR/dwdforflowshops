@@ -126,6 +126,7 @@ struct SCIP_PricerData
    SCIP_VAR**            startVars;
    SCIP_VAR**            endVars;
    SCIP_VAR**            orderVars;
+   SCIP_Longint          tempNodeNbr;
  
 };
 
@@ -848,11 +849,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
    
-   // create coefs array, neede for reopt
+   // create coefs array, needed for reopt
    SCIP_Real* coefs;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &coefs, 2*nbrJobs*sizeof(SCIP_Real)) );
 
-   if (pricerdata->numCalls == 1) {
+   SCIP_NODE* cNode = SCIPgetCurrentNode(scip);
+   SCIP_Longint nodeNbr = SCIPnodeGetNumber(cNode);
+   // printf("nodeNbr: %ld \n", (long int) nodeNbr);
+   // fflush(stdout);
+
+   if (pricerdata->numCalls == 1 || pricerdata->tempNodeNbr != nodeNbr) {
       for ( i = 0; i < nbrMachines; i++ )
       {
          /* initialize SCIP */
@@ -894,9 +900,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    else {
       for( i = 0; i < nbrMachines; i++ ) {
          // free subproblem for reopt
-         // SCIP_CALL( SCIPfreeReoptSolve(subscip[i]));
-         SCIPwriteOrigProblem(subscip[i], "sub_org.lp",NULL,FALSE);
-         SCIPwriteTransProblem(subscip[i], "sub_trans.lp",NULL,FALSE);
          SCIP_CALL( SCIPfreeTransform(subscip[i]));
          /* add constraint of the branching decisions */
          SCIP_CALL( addBranchingDecisionConss(scip, subscip[i], vars, pricerdata->conshdlr, orderVars, nbrJobs,i) );
@@ -907,7 +910,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIP_CALL( SCIPchgReoptObjective(subscip[i],SCIP_OBJSENSE_MINIMIZE,mergedArr[i],coefs,nbrJobs*2));
          /* solve sub SCIP */
          SCIP_CALL( SCIPsolve(subscip[i]) );
-         SCIPwriteTransProblem(subscip[i], "sub_trans_after.lp",NULL,FALSE);
+
       }
    }
 
@@ -1071,6 +1074,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    } 
    // /* free pricer MIP */
    // SCIPfreeBufferArray(scip, &vars);
+
+   pricerdata->tempNodeNbr = nodeNbr;
+
    printf("Ending DECL_PRICERREDCOST()\n");
    fflush(stdout);
    return SCIP_OKAY;
@@ -1136,7 +1142,7 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->lambArr = NULL;
    pricerdata->maxTime = 0.0;
    pricerdata->numCalls = -1;
-
+   pricerdata->tempNodeNbr = -1;
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
