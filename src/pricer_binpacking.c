@@ -605,7 +605,7 @@ void writeFinalResult(SCIP* scip, SCIP_PRICERDATA* pricerdata) {
    assert(sol != NULL);
 
    fpt = fopen("GanttRawData.csv", "w+");
-   fprintf(fpt,"Machine, Job, Start, End\n"); // define header
+   fprintf(fpt,"Machine,Job,Start,Finish\n"); // define header
 
    for (i=0; i < nbrMachines; i++) {
       for (ii=0; ii < nbrJobs; ii++) {
