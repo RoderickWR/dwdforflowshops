@@ -4,6 +4,7 @@ import subprocess
 import ctypes
 import pathlib
 import os
+import pandas as pd
 
 #%% 
 if __name__ == '__main__':
@@ -13,5 +14,7 @@ if __name__ == '__main__':
 
     command = "./binpacking"
     subprocess.run(command, shell = True)
+
+    df = pd.read_csv('GanttRawData.csv')
 
 
