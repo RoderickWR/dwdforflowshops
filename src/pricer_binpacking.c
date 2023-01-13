@@ -611,7 +611,7 @@ void writeFinalResult(SCIP* scip, SCIP_PRICERDATA* pricerdata) {
       for (ii=0; ii < nbrJobs; ii++) {
          // fprintf(fpt,"%d, %d, %f, %f\n", SCIPgetSolVal(scip, sol, startTimes.startOnMachine[i].ptrStart[ii]));    
          // fprintf(fpt,"%f\n", SCIPgetSolVal(scip, sol, startTimes.startOnMachine[i].ptrStart[ii]));    
-         fprintf(fpt,"%f\n", SCIPgetSolVal(scip, sol, startArr[i*nbrJobs + ii])); 
+         fprintf(fpt,"%d, %d, %f, %f\n", i,ii,SCIPgetSolVal(scip, sol, startArr[i*nbrJobs + ii]),SCIPgetSolVal(scip, sol, endArr[i*nbrJobs + ii])); 
       }
    }
    fclose(fpt);
