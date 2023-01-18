@@ -15,8 +15,14 @@ if __name__ == '__main__':
     # CALL OPTIMIZER
     assert(os.getcwd() == '/home/roderich/Documents/BAP/gitdir02/dwdforflowshops')
     os.chdir("./build")
-
+    # build from source
+    command = "make"
+    subprocess.run(command, shell = True)
+    # execute
     command = "./binpacking"
+    subprocess.run(command, shell = True)
+    # remove
+    command = "rm binpacking"
     subprocess.run(command, shell = True)
 
     # LOAD raw gantt data after opt
