@@ -123,6 +123,7 @@ SCIP_RETCODE runShell(
    mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
 
    writeInitSched(4, 2, 10, 1);
+   readInitSched("initSched.txt");
 
    schedule* s1; // contains a list of patterns for each machine (mp1,...mpI)
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &s1, sizeof(struct schedule)) );
