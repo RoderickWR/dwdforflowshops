@@ -28,6 +28,7 @@
 
 #include "scip/scip.h"
 
+
 /* typedefs for flowshop*/
 /* singlePattern (sPat) struct contains start and end time of one job*/
 typedef struct sPat {
@@ -37,7 +38,7 @@ typedef struct sPat {
 
 /* one pattern (pat) contains start and end time pairs of up to 5 jobs*/
 typedef struct pat {
-   sPat job[5];
+   sPat* job;
    int lastIdx;
 } pat;
 

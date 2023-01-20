@@ -22,7 +22,8 @@
         "memory": "c",
         "semaphore": "c",
         "stop_token": "c",
-        "vardata_binpacking.h": "c"
+        "vardata_binpacking.h": "c",
+        "fsgenerator.h": "c"
     },
     "cmake.configureOnOpen": false
 }

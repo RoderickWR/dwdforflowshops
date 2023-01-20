@@ -53,9 +53,6 @@ SCIP_RETCODE runShell(
    int nbrMachines = 2;
    int* nvars;
    double maxTime = 50.0;
-
-   int test;
-   test = generateFS();
    
    /*********
     * Setup *
@@ -116,21 +113,28 @@ SCIP_RETCODE runShell(
    sPat sp7 = {12.0, 14.0};
    sPat sp8 = {14.0, 17.0};
    /* ... 2 patterns */
-   pat p1 = {.job[0] = sp1, .job[1] = sp2, .job[2] = sp5, .job[3] = sp6, .lastIdx = 3}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
-   pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
+   pat p1, p2;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p2.job, nbrJobs*sizeof(struct sPat)) );
+
+   //pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
    /* ... and 2 lists à patterns*/
    mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1}; 
    mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
+
+   writeInitSched(4, 2, 10, 1);
 
    schedule* s1; // contains a list of patterns for each machine (mp1,...mpI)
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &s1, sizeof(struct schedule)) );
    (*s1).sched[0] = mp1;
    (*s1).sched[1] = mp2;
    (*s1).lastIdx = 1;
+
+   processingTimes pt1;
    
  
    /* and processing times*/
-   processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
+   //processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
 
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
