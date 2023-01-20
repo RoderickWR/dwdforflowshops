@@ -35,7 +35,7 @@
 #include "reader_bpa.h"
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
-
+#include "FSGenerator.h"
 #include "gnuplot.h" //* stattdessen csv datei schreiben und in python plotten*/
 
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
@@ -53,6 +53,9 @@ SCIP_RETCODE runShell(
    int nbrMachines = 2;
    int* nvars;
    double maxTime = 50.0;
+
+   int test;
+   test = generateFS();
    
    /*********
     * Setup *

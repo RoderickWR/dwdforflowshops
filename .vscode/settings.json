@@ -21,7 +21,8 @@
         "pub_tree.h": "c",
         "memory": "c",
         "semaphore": "c",
-        "stop_token": "c"
+        "stop_token": "c",
+        "vardata_binpacking.h": "c"
     },
     "cmake.configureOnOpen": false
 }
