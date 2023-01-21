@@ -181,19 +181,19 @@ SCIP_RETCODE probdataFree(
    assert(scip != NULL);
    assert(probdata != NULL);
 
-   /* release all variables */
-   for( ii= 0; ii < (*probdata)->nbrMachines; ++ii) {
-      for( i = 0; i < (*probdata)->nvars[ii]; ++i ) 
-      {
-      SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->lambArr[ii][i] ) ));
-      }
-      // for( iii = 0; iii< (*probdata)->nbrJobs; ++iii ) 
-      // {
-      // SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->startTimes.startOnMachine[ii].ptrStart[iii] ) ));
-      // SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->endTimes.endOnMachine[ii].ptrEnd[iii] ) ));
-      // }
+   // /* release all variables */
+   // for( ii= 0; ii < (*probdata)->nbrMachines; ++ii) {
+   //    for( i = 0; i < (*probdata)->nvars[ii]; ++i ) 
+   //    {
+   //    SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->lambArr[ii][i] ) ));
+   //    }
+   //    // for( iii = 0; iii< (*probdata)->nbrJobs; ++iii ) 
+   //    // {
+   //    // SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->startTimes.startOnMachine[ii].ptrStart[iii] ) ));
+   //    // SCIP_CALL( SCIPreleaseVar(scip, &((*probdata)->endTimes.endOnMachine[ii].ptrEnd[iii] ) ));
+   //    // }
       
-   }
+   // }
    
 
    // /* release all constraints */

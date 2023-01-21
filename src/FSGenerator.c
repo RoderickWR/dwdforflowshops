@@ -7,10 +7,11 @@
 
 
 
-processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower) {
+processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, int seed) {
     int i;
     int ii;
     processingTimes pt;
+    srand(seed);
 
     for( i = 0; i < nbrMachines; ++i ) {
         for( ii = 0; ii < nbrJobs; ++ii ) {
@@ -21,14 +22,14 @@ processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower) 
     return pt;
 }
 
-void writeInitSched(int nbrJobs, int nbrMachines, int upper, int lower) {
+void writeInitSched(int nbrJobs, int nbrMachines, int upper, int lower, int seed) {
     int i;
     int ii;
     int iii;
     FILE* fpt;
-    processingTimes pt = generatePTs(nbrJobs, nbrMachines, upper, lower);
+    processingTimes pt = generatePTs(nbrJobs, nbrMachines, upper, lower, seed);
 
-    fpt = fopen("initSched.txt", "w+");
+    fpt = fopen("initProb.txt", "w+");
 
     fprintf(fpt,"%d %d \n",nbrJobs, nbrMachines);
     for (i=0; i < nbrMachines; i++) {
