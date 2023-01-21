@@ -101,7 +101,7 @@ schedule readInitSched(SCIP* scip, char* filename) {
          
     
     }
-    s2.lastIdx = nbrMachines;        
+    s2.lastIdx = nbrMachines-1;        
     
     fclose(fpt);
 

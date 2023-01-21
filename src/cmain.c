@@ -104,24 +104,24 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetIntParam(scip,"display/freq",1) );
    
       /* initialize singlePattern*/
-   sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
-   sPat sp2 = {7.0, 8.0};
-   sPat sp5 = {8.0, 13.0};
-   sPat sp6 = {13.0, 17.0};
-   sPat sp3 = {7.0, 9.0};
-   sPat sp4 = {9.0, 12.0};
-   sPat sp7 = {12.0, 14.0};
-   sPat sp8 = {14.0, 17.0};
+   // sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
+   // sPat sp2 = {7.0, 8.0};
+   // sPat sp5 = {8.0, 13.0};
+   // sPat sp6 = {13.0, 17.0};
+   // sPat sp3 = {7.0, 9.0};
+   // sPat sp4 = {9.0, 12.0};
+   // sPat sp7 = {12.0, 14.0};
+   // sPat sp8 = {14.0, 17.0};
    /* ... 2 patterns */
-   pat p1, p2;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) );
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p2.job, nbrJobs*sizeof(struct sPat)) );
+   // pat p1, p2;
+   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) );
+   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p2.job, nbrJobs*sizeof(struct sPat)) );
 
    //pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
    /* ... and 2 lists à patterns*/
-   mPats mp1, mp2;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp1.mp, 100*sizeof(struct pat)) );
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp2.mp, 100*sizeof(struct pat)) );
+   // mPats mp1, mp2;
+   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp1.mp, 100*sizeof(struct pat)) );
+   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp2.mp, 100*sizeof(struct pat)) );
 
    // mp1.mp[0] = p1;
    // mp1.mp[1] = p2;
@@ -243,7 +243,7 @@ SCIP_RETCODE runShell(
       SCIP_CONS* cons = NULL;  
       sprintf(buf, "convM%d", iii);
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
-      for( i = 0; i < mp1.lastIdx+1; ++i ) { 
+      for( i = 0; i < s1->sched[iii].lastIdx+1; ++i ) { 
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][i], 1.0) );
       }
       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
@@ -256,7 +256,7 @@ SCIP_RETCODE runShell(
          sprintf(buf, "startTimeConstrM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-         for( ii=0; ii< mp1.lastIdx+1; ii++) {        
+         for( ii=0; ii< s1->sched[iii].lastIdx+1; ii++) {        
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1->sched[iii].mp[ii].job[i].start) );
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startArr[iii*nbrJobs + i], -1));
@@ -272,7 +272,7 @@ SCIP_RETCODE runShell(
          sprintf(buf, "endTimeConstrM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-         for( ii=0; ii< mp1.lastIdx+1; ii++) {   
+         for( ii=0; ii< s1->sched[iii].lastIdx+1; ii++) {   
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1->sched[iii].mp[ii].job[i].end) );
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endArr[iii*nbrJobs + i], -1));
