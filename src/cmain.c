@@ -119,20 +119,33 @@ SCIP_RETCODE runShell(
 
    //pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
    /* ... and 2 lists à patterns*/
-   mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1}; 
-   mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
+   mPats mp1, mp2;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp1.mp, 100*sizeof(struct pat)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp2.mp, 100*sizeof(struct pat)) );
+
+   // mp1.mp[0] = p1;
+   // mp1.mp[1] = p2;
+   // mp1.lastIdx = 1; 
+   // mp2.mp[0] = p1;
+   // mp2.mp[1] = p2;
+   // mp2.lastIdx = 1; 
+   
+
+   
+   // (*s1).sched[0] = mp1;
+   // (*s1).sched[1] = mp2;
+   // (*s1).lastIdx = 1;
+
+   schedule sTest;
+   processingTimes pt1;
 
    writeInitSched(4, 2, 10, 1);
-   readInitSched("initSched.txt");
+   sTest = readInitSched(scip, "initProb.txt");
+   pt1 = readInitPT(scip, "initProb.txt");
 
-   schedule* s1; // contains a list of patterns for each machine (mp1,...mpI)
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &s1, sizeof(struct schedule)) );
-   (*s1).sched[0] = mp1;
-   (*s1).sched[1] = mp2;
-   (*s1).lastIdx = 1;
-
-   processingTimes pt1;
-   
+   schedule* s1;
+   s1 = &sTest;
+  
  
    /* and processing times*/
    //processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
@@ -174,7 +187,7 @@ SCIP_RETCODE runShell(
    int iii = 0;
    for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
       nvars[iii] = 0; //initialize number of labmdas for each machine to zero, increment in next for loop
-      for( i = 0; i < mp1.lastIdx+1; ++i ) {
+      for( i = 0; i < s1->sched[iii].lastIdx+1; ++i ) {
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
          // SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 

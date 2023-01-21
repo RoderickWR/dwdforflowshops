@@ -44,13 +44,13 @@ typedef struct pat {
 
 /* one machine can have up to 50 patterns*/
 typedef struct mPats {
-   pat mp[100];
+   pat* mp;
    int lastIdx;
 } mPats;
 
 /* all patterns of all machines (here up to 5) are stored in allPats*/
 typedef struct schedule {
-   mPats sched[5];
+   mPats* sched;
    int lastIdx;
 } schedule;
 
