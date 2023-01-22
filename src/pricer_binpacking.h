@@ -51,7 +51,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_VAR*** lambArr,
    int* nvars,
    double maxTime,
-   int numCalls
+   int numCalls,
+   int** pMpats_sizes
 
    );
 

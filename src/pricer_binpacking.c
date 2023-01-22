@@ -127,6 +127,7 @@ struct SCIP_PricerData
    SCIP_VAR**            endVars;
    SCIP_VAR**            orderVars;
    SCIP_Longint          tempNodeNbr; 
+   int**                 pMpats_sizes;
  
 };
 
@@ -681,6 +682,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_Bool allSubsOptimal = TRUE;
    char buf[256];
    int* nvars;
+   int** pMpats_sizes;
 
    int i = 0;
 
@@ -741,6 +743,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    startVars = pricerdata->startVars;
    endVars = pricerdata->endVars;
    orderVars = pricerdata->orderVars;
+   pMpats_sizes = pricerdata->pMpats_sizes; // get the pointer to the sizes array of the lambArr
 
 
    printf("numCalls: %d \n", pricerdata->numCalls);
@@ -859,6 +862,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
             SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
 
+            // extend lambArr if needed
+            if (*(pMpats_sizes)[i] <= s1->sched[i].lastIdx) {
+               SCIPreallocBlockMemoryArray(scip, &lambArr[i], *(pMpats_sizes)[i], *(pMpats_sizes)[i]*2);
+               *(pMpats_sizes)[i] = *(pMpats_sizes)[i]*2;
+            }
+            
             lambArr[i][s1->sched[i].lastIdx] = newVar; // add the new var to the lambdas array
             SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
             nvars[i]++; // increment nvars
@@ -1008,7 +1017,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_VAR*** lambArr,
    int* nvars,
    double maxTime,
-   int numCalls
+   int numCalls,
+   int** pMpats_sizes
    
    )
 {
@@ -1037,6 +1047,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->nvars  = nvars;
    pricerdata->maxTime  = maxTime;
    pricerdata->numCalls = numCalls;
+   pricerdata->pMpats_sizes = pMpats_sizes;
 
    SCIP** subscip;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &subscip, nbrMachines*sizeof(SCIP*)) );

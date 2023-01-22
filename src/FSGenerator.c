@@ -52,15 +52,14 @@ void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int upper, int
     fclose(fpt);
 }
 
-schedule readInitSched(SCIP* scip, char* filename) {
+schedule readInitSched(SCIP* scip, char* filename, int mPats_initSize, int* mPats_sizes) {
     int i;
     int ii;
     int iii;
     int nbrJobs, nbrMachines;
     processingTimes pt;
     schedule s2; // contains a list of patterns for each machine (mp1,...mpI)
-    int mPats_initSize = 2; // initial size of mPats to store 2 patterns for a machine
-    
+        
     char str[500];
     FILE* fpt;
     fpt = fopen(filename, "r");
@@ -105,6 +104,7 @@ schedule readInitSched(SCIP* scip, char* filename) {
         s2.sched[i].mp[iterPat] = p1;  
         if (iterPat > s2.sched[i].lastIdx) {
             s2.sched[i].lastIdx = iterPat; 
+            mPats_sizes[i] = iterPat;
         }
          
     

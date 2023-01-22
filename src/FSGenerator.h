@@ -7,6 +7,6 @@ processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, 
 
 void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int upper, int lower, int seed);
 
-schedule readInitSched(SCIP* scip, char* filename);
+schedule readInitSched(SCIP* scip, char* filename, int mPats_initSize, int* mPats_sizes);
 
 processingTimes readInitPT(SCIP* scip, char* filename);

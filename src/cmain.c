@@ -135,10 +135,14 @@ SCIP_RETCODE runShell(
    // (*s1).sched[0] = mp1;
    // (*s1).sched[1] = mp2;
    // (*s1).lastIdx = 1;
+   int mPats_initSize = 2; // initial size of pattern array for each machine
+   int* mPats_sizes; // stores the sizes of lambArr
+   SCIPallocBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
+
 
    writeInitSched("initProb.txt",4, 2, 10, 1, 100);
 
-   schedule sTest = readInitSched(scip, "initProb2.txt");;
+   schedule sTest = readInitSched(scip, "initProb2.txt", mPats_initSize, mPats_sizes);;
    processingTimes pt1 = readInitPT(scip, "initProb2.txt");
 
    
@@ -160,7 +164,7 @@ SCIP_RETCODE runShell(
    SCIP_VAR*** lambArr;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr, nbrMachines*sizeof(SCIP_VAR**)) );
    for( iv = 0; iv< nbrMachines; ++iv ) {
-      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], 100*sizeof(SCIP_VAR*)) );
+      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]*sizeof(SCIP_VAR*)) );
    }
    SCIP_VAR** startArr;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) );
@@ -195,6 +199,11 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, buf, 0.0, FALSE, TRUE, vardata) );
          SCIP_CALL( SCIPaddVar(scip, var) );
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
+         // extend size of lambArr if needed
+         if (mPats_sizes[iii] <= i) {
+            SCIPreallocBlockMemoryArray(scip, &lambArr[iii], mPats_sizes[iii], mPats_sizes[iii]*2);
+            mPats_sizes[iii] = mPats_sizes[iii]*2;
+         }
          lambArr[iii][i] = var;
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
          nvars[iii]++;
@@ -327,7 +336,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars, maxTime,0)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars, maxTime,0,&mPats_sizes)); 
 
    SCIPsolve(scip);
 
