@@ -136,7 +136,7 @@ SCIP_RETCODE runShell(
    // (*s1).sched[1] = mp2;
    // (*s1).lastIdx = 1;
 
-   writeInitSched(4, 2, 10, 1, 100);
+   writeInitSched("initProb.txt",4, 2, 10, 1, 100);
 
    schedule sTest = readInitSched(scip, "initProb2.txt");;
    processingTimes pt1 = readInitPT(scip, "initProb2.txt");

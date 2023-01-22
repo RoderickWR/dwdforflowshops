@@ -22,14 +22,14 @@ processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, 
     return pt;
 }
 
-void writeInitSched(int nbrJobs, int nbrMachines, int upper, int lower, int seed) {
+void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int upper, int lower, int seed) {
     int i;
     int ii;
     int iii;
     FILE* fpt;
     processingTimes pt = generatePTs(nbrJobs, nbrMachines, upper, lower, seed);
 
-    fpt = fopen("initProb.txt", "w+");
+    fpt = fopen(filename, "w+");
 
     fprintf(fpt,"%d %d \n",nbrJobs, nbrMachines);
     for (i=0; i < nbrMachines; i++) {

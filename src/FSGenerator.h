@@ -5,7 +5,7 @@
 
 processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, int seed); 
 
-void writeInitSched(int nbrJobs, int nbrMachines, int upper, int lower, int seed);
+void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int upper, int lower, int seed);
 
 schedule readInitSched(SCIP* scip, char* filename);
 
