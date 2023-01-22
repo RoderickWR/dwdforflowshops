@@ -867,7 +867,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // modify convexity constr on machine i in master problem
             SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][s1->sched[i].lastIdx], 1.0);
             // modify start and end time constr in master problem
-            // create new pattern
+            // and create new pattern
             pat p1;
             SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
             int j;
@@ -876,6 +876,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
                p1.job[j].start = (double) SCIPgetSolVal(subscip[i], sol, startVars[j + i*nbrJobs]);
                SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], SCIPgetSolVal(subscip[i], sol, endVars[j + i*nbrJobs]));
                p1.job[j].end = (double) SCIPgetSolVal(subscip[i], sol, endVars[j + i*nbrJobs]);
+            }
+            // check if pattern array needs to be extended 
+            if (s1->sched[i].size <= s1->sched[i].lastIdx) {
+            int newsize = s1->sched[i].size * 2;
+            SCIPreallocBlockMemoryArray(scip, &(s1->sched[i].mp), s1->sched[i].size, newsize);
+            s1->sched[i].size = newsize;
             }
             s1->sched[i].mp[s1->sched[i].lastIdx] = p1;
             printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);

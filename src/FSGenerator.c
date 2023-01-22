@@ -59,18 +59,20 @@ schedule readInitSched(SCIP* scip, char* filename) {
     int nbrJobs, nbrMachines;
     processingTimes pt;
     schedule s2; // contains a list of patterns for each machine (mp1,...mpI)
+    int mPats_initSize = 2; // initial size of mPats to store 2 patterns for a machine
     
     char str[500];
     FILE* fpt;
     fpt = fopen(filename, "r");
 
-    fscanf(fpt,"%d %d \n",&nbrJobs, &nbrMachines);
+    fscanf(fpt,"%d %d",&nbrJobs, &nbrMachines);
     SCIPallocBlockMemoryArray(scip, &(s2.sched), nbrMachines*sizeof(struct mPats)) ;
 
     for (i=0; i < nbrMachines; i++) {
         mPats mp1;
-        SCIPallocBlockMemoryArray(scip, &(mp1.mp), 100*sizeof(struct pat)) ;
+        SCIPallocBlockMemoryArray(scip, &(mp1.mp), mPats_initSize*sizeof(struct pat)) ;
         mp1.lastIdx = 0;
+        mp1.size = mPats_initSize;
         s2.sched[i] = mp1;
         for (ii=0; ii < nbrJobs; ii++) {            
             fscanf(fpt,"%lf ", &pt.machine[i].m[ii]); 
@@ -94,6 +96,11 @@ schedule readInitSched(SCIP* scip, char* filename) {
             }
             
 
+        }
+        if (s2.sched[i].size <= iterPat) {
+            int newsize = s2.sched[i].size * 2;
+            SCIPreallocBlockMemoryArray(scip, &(s2.sched[i].mp), s2.sched[i].size, newsize);
+            s2.sched[i].size = newsize;
         }
         s2.sched[i].mp[iterPat] = p1;  
         if (iterPat > s2.sched[i].lastIdx) {

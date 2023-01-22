@@ -46,6 +46,7 @@ typedef struct pat {
 typedef struct mPats {
    pat* mp;
    int lastIdx;
+   int size;
 } mPats;
 
 /* all patterns of all machines (here up to 5) are stored in allPats*/
