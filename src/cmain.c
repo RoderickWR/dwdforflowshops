@@ -138,8 +138,8 @@ SCIP_RETCODE runShell(
 
    writeInitSched(4, 2, 10, 1, 100);
 
-   schedule sTest = readInitSched(scip, "initProb.txt");;
-   processingTimes pt1 = readInitPT(scip, "initProb.txt");
+   schedule sTest = readInitSched(scip, "initProb2.txt");;
+   processingTimes pt1 = readInitPT(scip, "initProb2.txt");
 
    
 
