@@ -38,6 +38,45 @@
 #include "FSGenerator.h"
 #include "gnuplot.h" //* stattdessen csv datei schreiben und in python plotten*/
 
+void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
+   SCIPfreeBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
+ 
+   SCIPfreeBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
+
+   SCIPfreeBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) ;
+
+   /* free constraint arrays*/
+   SCIPfreeBlockMemoryArray(scip, &convexityCons, nbrMachines*sizeof(SCIP_CONS*)) ;
+   SCIPfreeBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*));
+   SCIPfreeBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*));
+   SCIPfreeBlockMemoryArray(scip, &makespanCons, nbrJobs*sizeof(SCIP_CONS*)) ;
+
+   // now free the 2 dynamic arrays for patterns again
+   int iv;
+   for( iv = 0; iv< nbrMachines; ++iv ) {
+      SCIPfreeBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]*sizeof(SCIP_VAR*)) ;
+   }
+   SCIPfreeBlockMemoryArray(scip, &lambArr, nbrMachines*sizeof(SCIP_VAR**)) ;
+   SCIPfreeBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
+}
+
+void releaseConss(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
+   SCIPfreeBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
+   int i;
+   int ii;
+   for (i=0;i<nbrMachines;i++) {
+      SCIPreleaseCons(scip, &convexityCons[i]);
+      for (ii=0;ii<nbrMachines;ii++) {
+         SCIPreleaseCons(scip, &startCons[i*nbrJobs + ii]); 
+         SCIPreleaseCons(scip, &endCons[i*nbrJobs + ii]); 
+      }
+
+   }
+   for (ii=0;ii<nbrMachines;ii++) {
+      SCIPreleaseCons(scip, &makespanCons[ii]);
+   }  
+}
+
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
  *  and frees the SCIP instance
  */
@@ -306,9 +345,14 @@ SCIP_RETCODE runShell(
    //       SCIP_CALL( SCIPreleaseVar(scip, &lambArr[iii][i]) );
    //    }
    // }
-
+   releaseConss(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
+   
    SCIP_CALL( SCIPfree(&scip) );
-
+   printf("after freeing\n");
+   fflush(stdout);  
+   freeArrays(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
+   
+   
    BMScheckEmptyMemory();
 
    return SCIP_OKAY;
