@@ -103,38 +103,7 @@ SCIP_RETCODE runShell(
    // show every node in debug mode
    SCIP_CALL( SCIPsetIntParam(scip,"display/freq",1) );
    
-      /* initialize singlePattern*/
-   // sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
-   // sPat sp2 = {7.0, 8.0};
-   // sPat sp5 = {8.0, 13.0};
-   // sPat sp6 = {13.0, 17.0};
-   // sPat sp3 = {7.0, 9.0};
-   // sPat sp4 = {9.0, 12.0};
-   // sPat sp7 = {12.0, 14.0};
-   // sPat sp8 = {14.0, 17.0};
-   /* ... 2 patterns */
-   // pat p1, p2;
-   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) );
-   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &p2.job, nbrJobs*sizeof(struct sPat)) );
-
-   //pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
-   /* ... and 2 lists à patterns*/
-   // mPats mp1, mp2;
-   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp1.mp, 100*sizeof(struct pat)) );
-   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &mp2.mp, 100*sizeof(struct pat)) );
-
-   // mp1.mp[0] = p1;
-   // mp1.mp[1] = p2;
-   // mp1.lastIdx = 1; 
-   // mp2.mp[0] = p1;
-   // mp2.mp[1] = p2;
-   // mp2.lastIdx = 1; 
    
-
-   
-   // (*s1).sched[0] = mp1;
-   // (*s1).sched[1] = mp2;
-   // (*s1).lastIdx = 1;
    int mPats_initSize = 2; // initial size of pattern array for each machine
    int* mPats_sizes; // stores the sizes of lambArr
    SCIPallocBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
@@ -291,19 +260,7 @@ SCIP_RETCODE runShell(
          endCons[iii*nbrJobs + i] = cons;
       }
    }
-   // /*add processing constraint*/   
-   // for( iii = 0; iii < s1->lastIdx+1; ++iii ) { 
-   //    for( i = 0; i < nbrJobs; ++i ) {
-   //       sprintf(buf, "processingM%dJ%d", iii,i);
-   //       SCIP_CONS* cons = NULL;  
-   //       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
-   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
-   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
-   //       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
-   //       SCIP_CALL(SCIPaddCons(scip,cons));
-   //    }
-   // }
-
+   
    /*add inter machine constraint*/   
    for( iii = 0; iii < s1->lastIdx; ++iii ) { 
       for( i = 0; i < nbrJobs; ++i ) {
