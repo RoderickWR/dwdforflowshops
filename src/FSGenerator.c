@@ -22,7 +22,7 @@ processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, 
     return pt;
 }
 
-void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int upper, int lower, int seed) {
+void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int mPats_initSize, int upper, int lower, int seed) {
     int i;
     int ii;
     int iii;
@@ -40,13 +40,15 @@ void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int upper, int
     }
 
     int iterPat = 0; // we define only the first pattern per machine here
-    for (i=0; i < nbrMachines; i++) {
-        for (ii=0; ii < nbrJobs; ii++) {
-            double start = 0.0;
-            for( iii = 0; iii < ii; ++iii ) {
-                start += pt.machine[i].m[iii];
+    for (iterPat=0; iterPat < mPats_initSize; iterPat++) {
+        for (i=0; i < nbrMachines; i++) {
+            for (ii=0; ii < nbrJobs; ii++) {
+                double start = 0.0;
+                for( iii = 0; iii < ii; ++iii ) {
+                    start += pt.machine[i].m[iii];
+                }
+                fprintf(fpt,"%d %d %d %f %f\n", iterPat,i,ii,start + iterPat,start + pt.machine[i].m[ii] + iterPat); 
             }
-            fprintf(fpt,"%d %d %d %f %f\n", iterPat,i,ii,start,start + pt.machine[i].m[ii]); 
         }
     }
     fclose(fpt);

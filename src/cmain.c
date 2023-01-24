@@ -87,7 +87,7 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 4;
+   int nbrJobs = 2;
    int nbrMachines = 2;
    int* nvars;
    double maxTime = 50.0;
@@ -147,10 +147,10 @@ SCIP_RETCODE runShell(
    SCIPallocBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
 
 
-   writeInitSched("initProb.txt",4, 2, 10, 1, 100);
+   writeInitSched("initProb.txt",nbrJobs, nbrMachines, mPats_initSize, 10, 1, 700); // also pass upper lower bound for proc time and seed
 
-   schedule sTest = readInitSched(scip, "initProb2.txt", mPats_initSize, mPats_sizes);;
-   processingTimes pt1 = readInitPT(scip, "initProb2.txt");
+   schedule sTest = readInitSched(scip, "initProb.txt", mPats_initSize, mPats_sizes);;
+   processingTimes pt1 = readInitPT(scip, "initProb.txt");
 
    
 

@@ -897,8 +897,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
                      
  
          }
-         else
-            break;
       }
    }
 
