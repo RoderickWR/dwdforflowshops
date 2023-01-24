@@ -61,7 +61,6 @@ void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP
 }
 
 void releaseConss(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
-   SCIPfreeBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
    int i;
    int ii;
    for (i=0;i<nbrMachines;i++) {
@@ -346,11 +345,12 @@ SCIP_RETCODE runShell(
    //    }
    // }
    releaseConss(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
-   
+   printf("before freeing\n");
+   fflush(stdout);  
    SCIP_CALL( SCIPfree(&scip) );
    printf("after freeing\n");
    fflush(stdout);  
-   freeArrays(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
+   // freeArrays(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
    
    
    BMScheckEmptyMemory();
