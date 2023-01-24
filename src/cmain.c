@@ -87,7 +87,7 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 2;
+   int nbrJobs = 4;
    int nbrMachines = 2;
    int* nvars;
    double maxTime = 50.0;
