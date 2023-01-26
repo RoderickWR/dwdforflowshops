@@ -821,7 +821,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
          printf("Subproblem for machine %d exits that not optimal \n", i);
          fflush(stdout);
-         SCIPwriteTransProblem(subscip[i],"test2.lp",NULL,FALSE);
       }
   
       {
