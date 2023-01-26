@@ -7,19 +7,24 @@
 
 
 
-processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, int seed) {
+processingTimes* generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, int seed) {
     int i;
     int ii;
-    processingTimes pt;
+    processingTimes* ppt = (processingTimes*) malloc(sizeof(processingTimes));
+    ppt->machine = malloc(nbrMachines*sizeof(processingTimesOneMachine));
     srand(seed);
 
     for( i = 0; i < nbrMachines; ++i ) {
+        processingTimesOneMachine* pptom = (processingTimesOneMachine*) malloc(sizeof(processingTimesOneMachine));;
+        pptom->m = malloc(nbrJobs*sizeof(double));
+
         for( ii = 0; ii < nbrJobs; ++ii ) {
-            pt.machine[i].m[ii] = (rand() % (upper-lower+1)) + lower;
+            pptom->m[ii] = (rand() % (upper-lower+1)) + lower;
         }
+        ppt->machine[i] = *pptom;
     }
     
-    return pt;
+    return ppt;
 }
 
 void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int mPats_initSize, int upper, int lower, int seed) {
@@ -27,14 +32,16 @@ void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int mPats_init
     int ii;
     int iii;
     FILE* fpt;
-    processingTimes pt = generatePTs(nbrJobs, nbrMachines, upper, lower, seed);
+    processingTimes* ppt = generatePTs(nbrJobs, nbrMachines, upper, lower, seed);
+
+    
 
     fpt = fopen(filename, "w+");
 
     fprintf(fpt,"%d %d \n",nbrJobs, nbrMachines);
     for (i=0; i < nbrMachines; i++) {
         for (ii=0; ii < nbrJobs; ii++) {            
-            fprintf(fpt,"%f ", pt.machine[i].m[ii]); 
+            fprintf(fpt,"%f ", ppt->machine[i].m[ii]); 
         }
         fprintf(fpt,"\n"); 
     }
@@ -45,9 +52,9 @@ void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int mPats_init
             for (ii=0; ii < nbrJobs; ii++) {
                 double start = 0.0;
                 for( iii = 0; iii < ii; ++iii ) {
-                    start += pt.machine[i].m[iii];
+                    start += ppt->machine[i].m[iii];
                 }
-                fprintf(fpt,"%d %d %d %f %f\n", iterPat,i,ii,start + iterPat,start + pt.machine[i].m[ii] + iterPat); 
+                fprintf(fpt,"%d %d %d %f %f\n", iterPat,i,ii,start + iterPat,start + ppt->machine[i].m[ii] + iterPat); 
             }
         }
     }
@@ -59,7 +66,6 @@ schedule readInitSched(SCIP* scip, char* filename, int mPats_initSize, int* mPat
     int ii;
     int iii;
     int nbrJobs, nbrMachines;
-    processingTimes pt;
     schedule s2; // contains a list of patterns for each machine (mp1,...mpI)
         
     char str[500];
@@ -69,14 +75,17 @@ schedule readInitSched(SCIP* scip, char* filename, int mPats_initSize, int* mPat
     fscanf(fpt,"%d %d",&nbrJobs, &nbrMachines);
     SCIPallocBlockMemoryArray(scip, &(s2.sched), nbrMachines*sizeof(struct mPats)) ;
 
+    double dummy; // just needed to skip lines in the file
+
     for (i=0; i < nbrMachines; i++) {
         mPats mp1;
         SCIPallocBlockMemoryArray(scip, &(mp1.mp), mPats_initSize*sizeof(struct pat)) ;
         mp1.lastIdx = 0;
         mp1.size = mPats_initSize;
         s2.sched[i] = mp1;
+        // to skip the processing time lines in the file
         for (ii=0; ii < nbrJobs; ii++) {            
-            fscanf(fpt,"%lf ", &pt.machine[i].m[ii]); 
+            fscanf(fpt,"%lf ", &dummy); 
         }
     }
 
@@ -125,22 +134,21 @@ processingTimes readInitPT(SCIP* scip, char* filename) {
     int iii;
     int nbrJobs, nbrMachines;
     processingTimes pt;
-    schedule s2; // contains a list of patterns for each machine (mp1,...mpI)
     
     char str[500];
     FILE* fpt;
     fpt = fopen(filename, "r");
-
+    // first we need nbr Jobs and Machines
     fscanf(fpt,"%d %d \n",&nbrJobs, &nbrMachines);
-    SCIPallocBlockMemoryArray(scip, &(s2.sched), nbrMachines*sizeof(struct mPats)) ;
-
-    for (i=0; i < nbrMachines; i++) {
-        mPats mp1;
-        SCIPallocBlockMemoryArray(scip, &(mp1.mp), 100*sizeof(struct pat)) ;
-        s2.sched[i] = mp1;
+    // we allocate processing times array
+    SCIPallocBlockMemoryArray(scip, &(pt.machine), nbrMachines*sizeof(struct processingTimesOneMachine)) ;
+        for (i=0; i < nbrMachines; i++) {
+        processingTimesOneMachine pptom;
+        SCIPallocBlockMemoryArray(scip, &(pptom.m), nbrJobs*sizeof(double)) ;
         for (ii=0; ii < nbrJobs; ii++) {            
-            fscanf(fpt,"%lf ", &pt.machine[i].m[ii]); 
+            fscanf(fpt,"%lf ", &pptom.m[ii]); 
         }
+        pt.machine[i] = pptom;
     }
 
     return pt;

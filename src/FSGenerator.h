@@ -3,7 +3,7 @@
 
 
 
-processingTimes generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, int seed); 
+processingTimes* generatePTs(int nbrJobs, int nbrMachines, int upper, int lower, int seed); 
 
 void writeInitSched(char* filename, int nbrJobs,int mPats_initSize, int nbrMachines, int upper, int lower, int seed);
 

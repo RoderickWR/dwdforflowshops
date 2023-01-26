@@ -36,7 +36,7 @@ typedef struct sPat {
    double end;   
 } sPat;
 
-/* one pattern (pat) contains start and end time pairs of up to 5 jobs*/
+/* one pattern (pat) contains start and end time pairs of jobs*/
 typedef struct pat {
    sPat* job;
    int lastIdx;
@@ -56,20 +56,14 @@ typedef struct schedule {
 } schedule;
 
 typedef struct processingTimesOneMachine{
-   double m[5];
+   double* m;
 } processingTimesOneMachine;
 
 typedef struct processingTimes{
-   processingTimesOneMachine machine[5];
+   processingTimesOneMachine* machine;
 } processingTimes;
 
-typedef struct lambMi{
-   SCIP_VAR *ptrLamb[5];
-} lambMi;
 
-typedef struct lamb{
-   lambMi lambOnMachine[5];
-} lamb;
 
 struct SCIP_ProbData
 {
