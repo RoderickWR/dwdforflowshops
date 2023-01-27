@@ -58,6 +58,11 @@ void writeInitSched(char* filename, int nbrJobs, int nbrMachines, int mPats_init
             }
         }
     }
+    // free processing Times array again
+    for( i = 0; i < nbrMachines; ++i ) {       
+        free(ppt->machine[i].m);
+        //free(&(ppt->machine[i]));        
+    }
     fclose(fpt);
 }
 

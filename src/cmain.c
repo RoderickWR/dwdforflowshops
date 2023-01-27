@@ -344,6 +344,10 @@ SCIP_RETCODE runShell(
    //       SCIP_CALL( SCIPreleaseVar(scip, &lambArr[iii][i]) );
    //    }
    // }
+
+   // print statistics
+   SCIPprintStatistics(scip, NULL);
+   // release cons and vars
    releaseConss(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
    printf("before freeing\n");
    fflush(stdout);  
