@@ -8,7 +8,9 @@
             // Resolved by CMake Tools:
             "program": "${command:cmake.launchTargetPath}",
             "args": [
-                "--trackorigins= yes"
+                "--trackorigins= yes",
+                "-Wall",
+                "-Wextra"
                 
                 
             ],

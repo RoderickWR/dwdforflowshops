@@ -28,6 +28,7 @@
 
 #include "scip/scip.h"
 
+
 /* typedefs for flowshop*/
 /* singlePattern (sPat) struct contains start and end time of one job*/
 typedef struct sPat {
@@ -35,39 +36,34 @@ typedef struct sPat {
    double end;   
 } sPat;
 
-/* one pattern (pat) contains start and end time pairs of up to 5 jobs*/
+/* one pattern (pat) contains start and end time pairs of jobs*/
 typedef struct pat {
-   sPat job[5];
+   sPat* job;
    int lastIdx;
 } pat;
 
 /* one machine can have up to 50 patterns*/
 typedef struct mPats {
-   pat mp[100];
+   pat* mp;
    int lastIdx;
+   int size;
 } mPats;
 
 /* all patterns of all machines (here up to 5) are stored in allPats*/
 typedef struct schedule {
-   mPats sched[5];
+   mPats* sched;
    int lastIdx;
 } schedule;
 
 typedef struct processingTimesOneMachine{
-   double m[5];
+   double* m;
 } processingTimesOneMachine;
 
 typedef struct processingTimes{
-   processingTimesOneMachine machine[5];
+   processingTimesOneMachine* machine;
 } processingTimes;
 
-typedef struct lambMi{
-   SCIP_VAR *ptrLamb[5];
-} lambMi;
 
-typedef struct lamb{
-   lambMi lambOnMachine[5];
-} lamb;
 
 struct SCIP_ProbData
 {

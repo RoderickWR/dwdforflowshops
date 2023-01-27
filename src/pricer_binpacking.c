@@ -127,6 +127,7 @@ struct SCIP_PricerData
    SCIP_VAR**            endVars;
    SCIP_VAR**            orderVars;
    SCIP_Longint          tempNodeNbr; 
+   int**                 pMpats_sizes;
  
 };
 
@@ -681,6 +682,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_Bool allSubsOptimal = TRUE;
    char buf[256];
    int* nvars;
+   int** pMpats_sizes;
 
    int i = 0;
 
@@ -741,6 +743,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    startVars = pricerdata->startVars;
    endVars = pricerdata->endVars;
    orderVars = pricerdata->orderVars;
+   pMpats_sizes = pricerdata->pMpats_sizes; // get the pointer to the sizes array of the lambArr
 
 
    printf("numCalls: %d \n", pricerdata->numCalls);
@@ -816,7 +819,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
       if(SCIPgetStatus(subscip[i]) != SCIP_STATUS_OPTIMAL ) {
          allSubsOptimal = FALSE; // flag if a subproblem is not optimal
-         printf("Subproblem on machine %d exits not optimal", i);
+         printf("Subproblem for machine %d exits that not optimal \n", i);
          fflush(stdout);
       }
   
@@ -859,6 +862,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
             SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
 
+            // extend lambArr if needed
+            if (*(pMpats_sizes)[i] <= s1->sched[i].lastIdx) {
+               SCIPreallocBlockMemoryArray(scip, &lambArr[i], *(pMpats_sizes)[i], *(pMpats_sizes)[i]*2);
+               *(pMpats_sizes)[i] = *(pMpats_sizes)[i]*2;
+            }
+            
             lambArr[i][s1->sched[i].lastIdx] = newVar; // add the new var to the lambdas array
             SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
             nvars[i]++; // increment nvars
@@ -867,21 +876,27 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // modify convexity constr on machine i in master problem
             SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][s1->sched[i].lastIdx], 1.0);
             // modify start and end time constr in master problem
+            // and create new pattern
+            pat p1;
+            SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
             int j;
             for( j = 0; j < nbrJobs; ++j ) {
                SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], SCIPgetSolVal(subscip[i], sol, startVars[j + i*nbrJobs]));
-               s1->sched[i].mp[s1->sched[i].lastIdx].job[j].start = (double) SCIPgetSolVal(subscip[i], sol, startVars[j + i*nbrJobs]);
+               p1.job[j].start = (double) SCIPgetSolVal(subscip[i], sol, startVars[j + i*nbrJobs]);
                SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], SCIPgetSolVal(subscip[i], sol, endVars[j + i*nbrJobs]));
-               s1->sched[i].mp[s1->sched[i].lastIdx].job[j].end = (double) SCIPgetSolVal(subscip[i], sol, endVars[j + i*nbrJobs]);
-               
+               p1.job[j].end = (double) SCIPgetSolVal(subscip[i], sol, endVars[j + i*nbrJobs]);
             }
-      
+            // check if pattern array needs to be extended 
+            if (s1->sched[i].size <= s1->sched[i].lastIdx) {
+            int newsize = s1->sched[i].size * 2;
+            SCIPreallocBlockMemoryArray(scip, &(s1->sched[i].mp), s1->sched[i].size, newsize);
+            s1->sched[i].size = newsize;
+            }
+            s1->sched[i].mp[s1->sched[i].lastIdx] = p1;
             printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
                      
  
          }
-         else
-            break;
       }
    }
 
@@ -1000,7 +1015,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    SCIP_VAR*** lambArr,
    int* nvars,
    double maxTime,
-   int numCalls
+   int numCalls,
+   int** pMpats_sizes
    
    )
 {
@@ -1029,6 +1045,7 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->nvars  = nvars;
    pricerdata->maxTime  = maxTime;
    pricerdata->numCalls = numCalls;
+   pricerdata->pMpats_sizes = pMpats_sizes;
 
    SCIP** subscip;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &subscip, nbrMachines*sizeof(SCIP*)) );

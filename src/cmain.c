@@ -35,8 +35,46 @@
 #include "reader_bpa.h"
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
-
+#include "FSGenerator.h"
 #include "gnuplot.h" //* stattdessen csv datei schreiben und in python plotten*/
+
+void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
+   SCIPfreeBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
+ 
+   SCIPfreeBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
+
+   SCIPfreeBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) ;
+
+   /* free constraint arrays*/
+   SCIPfreeBlockMemoryArray(scip, &convexityCons, nbrMachines*sizeof(SCIP_CONS*)) ;
+   SCIPfreeBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*));
+   SCIPfreeBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*));
+   SCIPfreeBlockMemoryArray(scip, &makespanCons, nbrJobs*sizeof(SCIP_CONS*)) ;
+
+   // now free the 2 dynamic arrays for patterns again
+   int iv;
+   for( iv = 0; iv< nbrMachines; ++iv ) {
+      SCIPfreeBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]*sizeof(SCIP_VAR*)) ;
+   }
+   SCIPfreeBlockMemoryArray(scip, &lambArr, nbrMachines*sizeof(SCIP_VAR**)) ;
+   SCIPfreeBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
+}
+
+void releaseConss(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
+   int i;
+   int ii;
+   for (i=0;i<nbrMachines;i++) {
+      SCIPreleaseCons(scip, &convexityCons[i]);
+      for (ii=0;ii<nbrMachines;ii++) {
+         SCIPreleaseCons(scip, &startCons[i*nbrJobs + ii]); 
+         SCIPreleaseCons(scip, &endCons[i*nbrJobs + ii]); 
+      }
+
+   }
+   for (ii=0;ii<nbrMachines;ii++) {
+      SCIPreleaseCons(scip, &makespanCons[ii]);
+   }  
+}
 
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
  *  and frees the SCIP instance
@@ -103,31 +141,25 @@ SCIP_RETCODE runShell(
    // show every node in debug mode
    SCIP_CALL( SCIPsetIntParam(scip,"display/freq",1) );
    
-      /* initialize singlePattern*/
-   sPat sp1 = {0.0, 7.0}; // start time is 0 end time is 7
-   sPat sp2 = {7.0, 8.0};
-   sPat sp5 = {8.0, 13.0};
-   sPat sp6 = {13.0, 17.0};
-   sPat sp3 = {7.0, 9.0};
-   sPat sp4 = {9.0, 12.0};
-   sPat sp7 = {12.0, 14.0};
-   sPat sp8 = {14.0, 17.0};
-   /* ... 2 patterns */
-   pat p1 = {.job[0] = sp1, .job[1] = sp2, .job[2] = sp5, .job[3] = sp6, .lastIdx = 3}; // in this pattern job 0 goes from 0 to 7 and job 1 goes from 7 to 8
-   pat p2 = {.job[0] = sp3, .job[1] = sp4, .job[2] = sp7, .job[3] = sp8, .lastIdx = 3};
-   /* ... and 2 lists à patterns*/
-   mPats mp1 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1}; 
-   mPats mp2 = {.mp[0] = p1, .mp[1] = p2, .lastIdx = 1};
-
-   schedule* s1; // contains a list of patterns for each machine (mp1,...mpI)
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &s1, sizeof(struct schedule)) );
-   (*s1).sched[0] = mp1;
-   (*s1).sched[1] = mp2;
-   (*s1).lastIdx = 1;
    
+   int mPats_initSize = 2; // initial size of pattern array for each machine
+   int* mPats_sizes; // stores the sizes of lambArr
+   SCIPallocBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
+
+
+   writeInitSched("initProb.txt",nbrJobs, nbrMachines, mPats_initSize, 10, 1, 1000); // also pass upper lower bound for proc time and seed
+
+   schedule sTest = readInitSched(scip, "initProb.txt", mPats_initSize, mPats_sizes);;
+   processingTimes pt1 = readInitPT(scip, "initProb.txt");
+
+   
+
+   schedule* s1;
+   s1 = &sTest;
+  
  
    /* and processing times*/
-   processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
+   //processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
 
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
@@ -139,7 +171,7 @@ SCIP_RETCODE runShell(
    SCIP_VAR*** lambArr;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr, nbrMachines*sizeof(SCIP_VAR**)) );
    for( iv = 0; iv< nbrMachines; ++iv ) {
-      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], 100*sizeof(SCIP_VAR*)) );
+      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]*sizeof(SCIP_VAR*)) );
    }
    SCIP_VAR** startArr;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) );
@@ -166,7 +198,7 @@ SCIP_RETCODE runShell(
    int iii = 0;
    for( iii = 0; iii< s1->lastIdx+1; ++iii ) {
       nvars[iii] = 0; //initialize number of labmdas for each machine to zero, increment in next for loop
-      for( i = 0; i < mp1.lastIdx+1; ++i ) {
+      for( i = 0; i < s1->sched[iii].lastIdx+1; ++i ) {
          sprintf(buf, "lambM%dP%d", iii,i);
          SCIP_VAR* var = NULL;
          // SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 1.0, 0.0, SCIP_VARTYPE_BINARY)); 
@@ -174,6 +206,11 @@ SCIP_RETCODE runShell(
          SCIP_CALL( SCIPcreateVarBinpacking(scip, &var, buf, 0.0, FALSE, TRUE, vardata) );
          SCIP_CALL( SCIPaddVar(scip, var) );
          SCIP_CALL( SCIPchgVarUbLazy(scip, var, 1.0) ); // needed to change UB lazy => see binpacking example
+         // extend size of lambArr if needed
+         if (mPats_sizes[iii] <= i) {
+            SCIPreallocBlockMemoryArray(scip, &lambArr[iii], mPats_sizes[iii], mPats_sizes[iii]*2);
+            mPats_sizes[iii] = mPats_sizes[iii]*2;
+         }
          lambArr[iii][i] = var;
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
          nvars[iii]++;
@@ -222,7 +259,7 @@ SCIP_RETCODE runShell(
       SCIP_CONS* cons = NULL;  
       sprintf(buf, "convM%d", iii);
       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 1.0, 1.0));
-      for( i = 0; i < mp1.lastIdx+1; ++i ) { 
+      for( i = 0; i < s1->sched[iii].lastIdx+1; ++i ) { 
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][i], 1.0) );
       }
       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
@@ -235,7 +272,7 @@ SCIP_RETCODE runShell(
          sprintf(buf, "startTimeConstrM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-         for( ii=0; ii< mp1.lastIdx+1; ii++) {        
+         for( ii=0; ii< s1->sched[iii].lastIdx+1; ii++) {        
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1->sched[iii].mp[ii].job[i].start) );
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, startArr[iii*nbrJobs + i], -1));
@@ -251,7 +288,7 @@ SCIP_RETCODE runShell(
          sprintf(buf, "endTimeConstrM%dJ%d", iii,i);
          SCIP_CONS* cons = NULL;  
          SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, 0.0, 0.0));
-         for( ii=0; ii< mp1.lastIdx+1; ii++) {   
+         for( ii=0; ii< s1->sched[iii].lastIdx+1; ii++) {   
             SCIP_CALL( SCIPaddCoefLinear(scip, cons, lambArr[iii][ii], s1->sched[iii].mp[ii].job[i].end) );
          }
          SCIP_CALL( SCIPaddCoefLinear(scip, cons, endArr[iii*nbrJobs + i], -1));
@@ -261,19 +298,7 @@ SCIP_RETCODE runShell(
          endCons[iii*nbrJobs + i] = cons;
       }
    }
-   // /*add processing constraint*/   
-   // for( iii = 0; iii < s1->lastIdx+1; ++iii ) { 
-   //    for( i = 0; i < nbrJobs; ++i ) {
-   //       sprintf(buf, "processingM%dJ%d", iii,i);
-   //       SCIP_CONS* cons = NULL;  
-   //       SCIP_CALL(SCIPcreateConsBasicLinear(scip, &cons, buf, 0, NULL, NULL, -pt1.machine[iii].m[i], -pt1.machine[iii].m[i]));
-   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, endTimes.endOnMachine[iii].ptrEnd[i], -1));
-   //       SCIP_CALL( SCIPaddCoefLinear(scip, cons, startTimes.startOnMachine[iii].ptrStart[i], 1));
-   //       SCIP_CALL( SCIPsetConsModifiable(scip, cons, TRUE) );
-   //       SCIP_CALL(SCIPaddCons(scip,cons));
-   //    }
-   // }
-
+   
    /*add inter machine constraint*/   
    for( iii = 0; iii < s1->lastIdx; ++iii ) { 
       for( i = 0; i < nbrJobs; ++i ) {
@@ -306,7 +331,7 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 
-   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars, maxTime,0)); 
+   SCIP_CALL( SCIPpricerBinpackingActivate(scip,pt1,nbrMachines,nbrJobs,convexityCons, startCons, endCons, makespanCons, s1, lambArr,nvars, maxTime,0,&mPats_sizes)); 
 
    SCIPsolve(scip);
 
@@ -320,8 +345,18 @@ SCIP_RETCODE runShell(
    //    }
    // }
 
+   // print statistics
+   //SCIPprintStatistics(scip, NULL);
+   // release cons and vars
+   releaseConss(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
+   printf("before freeing\n");
+   fflush(stdout);  
    SCIP_CALL( SCIPfree(&scip) );
-
+   printf("after freeing\n");
+   fflush(stdout);  
+   // freeArrays(scip,nbrMachines,nbrJobs, mPats_sizes, lambArr,startArr, endArr,nvars,convexityCons,startCons, endCons, makespanCons);
+   
+   
    BMScheckEmptyMemory();
 
    return SCIP_OKAY;

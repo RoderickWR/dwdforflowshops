@@ -483,7 +483,6 @@ SCIP_DECL_CONSPROP(consPropSamediff)
    }
    printf("Ending SCIP_DECL_CONSPROP()\n");
    fflush(stdout);
-   SCIPwriteTransProblem(scip, "master.lp",NULL,FALSE);
    return SCIP_OKAY;
 }
 

@@ -21,6 +21,7 @@ add_executable(binpacking
    src/vardata_binpacking.c
    src/gnuplot.c
    src/printOut.c
+   src/FSGenerator.c
    )
 
 # link to math library if it is available
