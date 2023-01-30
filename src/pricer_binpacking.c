@@ -685,6 +685,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    int** pMpats_sizes;
 
    int i = 0;
+   int ii = 0;
 
    int nitems;
    SCIP_Longint capacity;
@@ -755,6 +756,34 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_CALL( SCIPgetRealParam(scip, "limits/memory", &memorylimit) );
    if( !SCIPisInfinity(scip, memorylimit) )
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
+
+   SCIP_CONS** startConss;
+   SCIP_CONS** endConss;
+   startConss = pricerdata->startCons;
+   endConss = pricerdata->endCons;
+   
+   int cmp_fnc(const void *a, const void *b) {
+      return (*(int*)a - *(int*)b);
+   }
+
+   // start heuristics
+   // create sorted list of jobs according to duals
+   // schedule in order according to pTimes
+   // create pattern
+   // compute obj for red cost criterion 
+
+   for ( i = 0; i < nbrMachines; i++ ) {
+      int duals[nbrJobs];
+      for( ii = 0; ii < nbrJobs; ii++ ) {        
+         SCIPgetDualSolVal(scip, startConss[i*nbrJobs + ii], pDual, pBoundconstr);  
+         duals[ii] = dual;
+         
+      }
+      qsort(duals,nbrJobs,sizeof(double),cmp_fnc);
+
+   }
+      
+   // end heuristics
 
    
    // create coefs array, needed for reopt
