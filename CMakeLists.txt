@@ -19,7 +19,6 @@ add_executable(binpacking
    src/probdata_binpacking.c
    src/reader_bpa.c
    src/vardata_binpacking.c
-   src/gnuplot.c
    src/printOut.c
    src/FSGenerator.c
    )

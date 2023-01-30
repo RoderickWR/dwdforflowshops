@@ -36,7 +36,7 @@
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
 #include "FSGenerator.h"
-#include "gnuplot.h" //* stattdessen csv datei schreiben und in python plotten*/
+
 
 void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
    SCIPfreeBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
