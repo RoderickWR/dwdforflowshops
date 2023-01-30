@@ -89,8 +89,12 @@ SCIP_RETCODE runShell(
    SCIP* scip = NULL;
    int nbrJobs = 4;
    int nbrMachines = 2;
-   int* nvars;
-   double maxTime = 50.0;
+   int* nvars; // stores the number of lambas for each machine, needed for constraint handler 
+   double maxTime = 50.0; // maximum time horizon for the schedule, needed for model formulation, adjust according to nbrJobs and process times
+   int mPats_initSize = 2; // initial size of pattern array for each machine
+   int pT_lb = 1; // lower bound for random processing time
+   int pT_ub = 10; // upper bound for random processing time
+   int seed = 700;
    
    /*********
     * Setup *
@@ -142,25 +146,19 @@ SCIP_RETCODE runShell(
    SCIP_CALL( SCIPsetIntParam(scip,"display/freq",1) );
    
    
-   int mPats_initSize = 2; // initial size of pattern array for each machine
-   int* mPats_sizes; // stores the sizes of lambArr
+   
+   int* mPats_sizes; // keep track of #lambdas (same as nvars), however only for purpose of memory realloc
    SCIPallocBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
 
-
-   writeInitSched("initProb.txt",nbrJobs, nbrMachines, mPats_initSize, 10, 1, 700); // also pass upper lower bound for proc time and seed
-
-   schedule sTest = readInitSched(scip, "initProb.txt", mPats_initSize, mPats_sizes);;
+   // create a random schedule, based on random process times, save it...
+   writeInitSched("initProb.txt",nbrJobs, nbrMachines, mPats_initSize, pT_ub, pT_lb, seed); // also pass upper lower bound for proc time and seed
+   // and load it again
+   schedule sched = readInitSched(scip, "initProb.txt", mPats_initSize, mPats_sizes);;
    processingTimes pt1 = readInitPT(scip, "initProb.txt");
 
-   
-
    schedule* s1;
-   s1 = &sTest;
+   s1 = &sched;
   
- 
-   /* and processing times*/
-   //processingTimes pt1 = {.machine[0].m[0] = 7, .machine[0].m[1] = 1, .machine[0].m[2] = 5, .machine[0].m[3] = 4,.machine[0].m[4] = 1, .machine[1].m[0] = 2, .machine[1].m[1] = 3, .machine[1].m[2] = 2, .machine[1].m[3] = 3}; 
-
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
    /* create structs for pointers to all variables*/
@@ -209,7 +207,7 @@ SCIP_RETCODE runShell(
          // extend size of lambArr if needed
          if (mPats_sizes[iii] <= i) {
             SCIPreallocBlockMemoryArray(scip, &lambArr[iii], mPats_sizes[iii], mPats_sizes[iii]*2);
-            mPats_sizes[iii] = mPats_sizes[iii]*2;
+            mPats_sizes[iii] = mPats_sizes[iii]*2; // always double the size if needed
          }
          lambArr[iii][i] = var;
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
@@ -234,7 +232,7 @@ SCIP_RETCODE runShell(
       for( i = 0; i < nbrJobs; ++i ) {
          sprintf(buf, "startM%dJ%d", iii,i);
          SCIP_VAR* var = NULL;
-         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS));
+         SCIP_CALL(SCIPcreateVarBasic(scip, &var, buf, 0.0, 2*maxTime, 0.0, SCIP_VARTYPE_CONTINUOUS)); //2*maxTime to avoid infeas master
          startArr[iii*nbrJobs + i] = var;
          SCIP_CALL(SCIPaddVar(scip,var));
          SCIP_CALL( SCIPreleaseVar(scip, &var) );
@@ -327,7 +325,7 @@ SCIP_RETCODE runShell(
    }
 
 
-   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startArr, endArr, nvars, nbrMachines, nbrJobs, maxTime) );
+   SCIP_CALL( probdataCreate(scip, &probdata, lambArr, startArr, endArr, nvars, nbrMachines, nbrJobs, maxTime, mPats_sizes) );
    SCIP_CALL( SCIPsetProbData(scip, probdata) );
 
    SCIP_CALL( SCIPactivatePricer(scip, pricer)); 

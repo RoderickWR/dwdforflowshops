@@ -81,6 +81,7 @@ struct SCIP_ProbData
    SCIP_VAR***           lambArr;
    SCIP_VAR**            startArr;
    SCIP_VAR**            endArr;   
+   int*                  mPats_sizes;
 };
 
 /** sets up the problem data */
@@ -103,10 +104,11 @@ SCIP_RETCODE probdataCreate(
    SCIP_VAR***              lambArr,
    SCIP_VAR**               startArr,
    SCIP_VAR**               endArr,
-   int*                   nvars,              /**< number of variables */
+   int*                    nvars,              /**< number of variables */
    int                     nbrMachines,
    int                     nbrJobs,
-   double                  maxTime
+   double                  maxTime,
+   int*                    mPats_sizes
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
    );
@@ -146,6 +148,11 @@ SCIP_VAR** SCIPprobdataGetVars(
 
 /** returns number of variables */
 int* SCIPprobdataGetNVars(
+   SCIP_PROBDATA*        probdata            /**< problem data */
+   );
+
+/** returns number of variables */
+int* SCIPprobdataGetmPats_sizes(
    SCIP_PROBDATA*        probdata            /**< problem data */
    );
 

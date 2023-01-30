@@ -129,7 +129,8 @@ SCIP_RETCODE probdataCreate(
    int*                   nvars,              /**< number of variables */
    int                     nbrMachines,
    int                     nbrJobs,
-   double                  maxTime
+   double                  maxTime,
+   int*                   mPats_sizes
    // int                   nitems,             /**< number of items */
    // SCIP_Longint          capacity            /**< bin capacity */
    )
@@ -156,6 +157,7 @@ SCIP_RETCODE probdataCreate(
    (*probdata)->startArr = startArr;
    (*probdata)->endArr = endArr;
    (*probdata)->nvars = nvars;
+   (*probdata)->mPats_sizes = mPats_sizes;
    (*probdata)->nbrMachines = nbrMachines;
    (*probdata)->nbrJobs = nbrJobs;
    (*probdata)->maxTime = maxTime;
@@ -304,7 +306,7 @@ SCIP_DECL_PROBDELORIG(probdelorigBinpacking)
 SCIP_DECL_PROBTRANS(probtransBinpacking)
 {
    /* create transform probdata */
-   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->lambArr, sourcedata->startArr, sourcedata->endArr, sourcedata->nvars, sourcedata->nbrMachines, sourcedata->nbrJobs, sourcedata->maxTime) );
+   SCIP_CALL( probdataCreate(scip, targetdata, sourcedata->lambArr, sourcedata->startArr, sourcedata->endArr, sourcedata->nvars, sourcedata->nbrMachines, sourcedata->nbrJobs, sourcedata->maxTime,sourcedata->mPats_sizes) );
 
    /* transform all constraints */
    SCIP_CALL( SCIPtransformConss(scip, (*targetdata)->nitems, (*targetdata)->conss, (*targetdata)->conss) );
@@ -496,6 +498,14 @@ int* SCIPprobdataGetNVars(
    )
 {
    return probdata->nvars;
+}
+
+/** returns number of variables in lambArr */
+int* SCIPprobdataGetmPats_sizes(
+   SCIP_PROBDATA*        probdata            /**< problem data */
+   )
+{
+   return probdata->mPats_sizes;
 }
 
 /** returns number of jobs */
