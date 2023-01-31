@@ -431,10 +431,10 @@ SCIP_RETCODE initPricing(
          if (i != ii) {
             SCIP_CONS* cons = NULL;
             sprintf(buf, "finishStart%d%d", i,ii);
-            SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -maxTime, 1e+20));
+            SCIP_CALL(SCIPcreateConsBasicLinear(subscip, &cons, buf, 0, NULL, NULL, -2*maxTime, 1e+20));
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, startVars[ii+nbrJobs*mIdx], 1.0) );
             SCIP_CALL( SCIPaddCoefLinear(subscip, cons, endVars[i+nbrJobs*mIdx], -1.0) );
-            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii + nbrJobs*nbrJobs*mIdx], -maxTime) );
+            SCIP_CALL( SCIPaddCoefLinear(subscip, cons, orderVars[i*nbrJobs + ii + nbrJobs*nbrJobs*mIdx], -2*maxTime) );
             SCIP_CALL(SCIPaddCons(subscip,cons));
             SCIP_CALL( SCIPreleaseCons(subscip, &cons) );
          }
