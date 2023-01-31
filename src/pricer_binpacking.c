@@ -782,8 +782,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    // schedule in order according to pTimes
    // create pattern
    // compute obj for red cost criterion 
+   SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
    for ( i = 0; i < nbrMachines; i++ ) {
+      branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
+
+
       job_weights weights[nbrJobs];
       for( ii = 0; ii < nbrJobs; ii++ ) {        
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
@@ -796,7 +800,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       int test = 5;
 
 
+
    }
+
+   
+
+   
       
    // end heuristics
 
