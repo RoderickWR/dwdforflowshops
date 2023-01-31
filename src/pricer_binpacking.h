@@ -30,7 +30,10 @@
 #include "scip/scip.h"
 #include "probdata_binpacking.h"
 
-
+typedef struct job_weights {
+   double val;
+   int idx;
+} job_weights;
 
 /** creates the binpacking variable pricer and includes it in SCIP */
 SCIP_RETCODE SCIPincludePricerBinpacking(

@@ -761,12 +761,14 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    SCIP_CONS** endConss;
    startConss = pricerdata->startCons;
    endConss = pricerdata->endCons;
-   
+
    int cmp_fnc(const void *a, const void *b) {
-      if (*(double*)a > *(double*)b) {
+      struct job_weights *a1 = (struct job_weights *)a;
+      struct job_weights *a2 = (struct job_weights *)b;
+      if ((*a1).val < (*a2).val) {
          return 1;
       } 
-      else if (*(double*)a < *(double*)b) {
+      else if ((*a1).val > (*a2).val) {
          return -1;
       }
       else {
@@ -782,14 +784,17 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    // compute obj for red cost criterion 
 
    for ( i = 0; i < nbrMachines; i++ ) {
-      double duals[nbrJobs];
+      job_weights weights[nbrJobs];
       for( ii = 0; ii < nbrJobs; ii++ ) {        
-         SCIPgetDualSolVal(scip, startConss[i*nbrJobs + ii], pDual, pBoundconstr);  
-         duals[ii] = (double) dual;
+         SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
+         weights[ii].idx = ii;
+         weights[ii].val = (double) (-1)*dual;
+         
          
       }
-      qsort(duals,nbrJobs,sizeof(double),cmp_fnc);
+      qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
       int test = 5;
+      
    }
       
    // end heuristics
