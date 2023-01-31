@@ -763,7 +763,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    endConss = pricerdata->endCons;
    
    int cmp_fnc(const void *a, const void *b) {
-      return (*(int*)a - *(int*)b);
+      if (*(double*)a > *(double*)b) {
+         return 1;
+      } 
+      else if (*(double*)a < *(double*)b) {
+         return -1;
+      }
+      else {
+         return 0;
+      } 
+
    }
 
    // start heuristics
@@ -773,14 +782,14 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    // compute obj for red cost criterion 
 
    for ( i = 0; i < nbrMachines; i++ ) {
-      int duals[nbrJobs];
+      double duals[nbrJobs];
       for( ii = 0; ii < nbrJobs; ii++ ) {        
          SCIPgetDualSolVal(scip, startConss[i*nbrJobs + ii], pDual, pBoundconstr);  
-         duals[ii] = dual;
+         duals[ii] = (double) dual;
          
       }
       qsort(duals,nbrJobs,sizeof(double),cmp_fnc);
-
+      int test = 5;
    }
       
    // end heuristics
