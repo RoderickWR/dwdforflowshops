@@ -788,13 +788,14 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       for( ii = 0; ii < nbrJobs; ii++ ) {        
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
          weights[ii].idx = ii;
-         weights[ii].val = (double) (-1)*dual;
+         weights[ii].val = (double) (-1)*dual/pt1.machine[i].m[ii];
          
          
       }
       qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
       int test = 5;
-      
+
+
    }
       
    // end heuristics
