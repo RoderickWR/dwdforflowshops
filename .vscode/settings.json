@@ -24,7 +24,8 @@
         "stop_token": "c",
         "vardata_binpacking.h": "c",
         "fsgenerator.h": "c",
-        "cstdlib": "c"
+        "cstdlib": "c",
+        "cons_logicor.h": "c"
     },
     "cmake.configureOnOpen": false
 }

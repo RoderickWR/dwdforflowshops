@@ -69,6 +69,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "scip/cons_knapsack.h"
 #include "scip/cons_logicor.h"
@@ -81,6 +82,7 @@
 #include "probdata_binpacking.h"
 #include "vardata_binpacking.h"
 #include "printOut.h"
+
 
 /**@name Pricer properties
  *
@@ -762,6 +764,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    startConss = pricerdata->startCons;
    endConss = pricerdata->endCons;
 
+   // helper function to compare values for quick sort
    int cmp_fnc(const void *a, const void *b) {
       struct job_weights *a1 = (struct job_weights *)a;
       struct job_weights *a2 = (struct job_weights *)b;
@@ -777,12 +780,41 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    }
 
+   // helper function to make a flat list from branchingList
+   bool inBl(branchingList bl1, int job) {
+      int i;
+      if (bl1.lastIdx == 0) {
+         return FALSE;
+      }
+      else {
+         for (i=0; i<bl1.lastIdx+1; i++) {
+            if (job == bl1.bl[i].id1) {
+               return TRUE;
+            }
+            else if (job == bl1.bl[i].id2) {
+               return TRUE;
+            }
+            else {
+               return FALSE;
+            }
+         }
+      }
+   }
+
    // start heuristics
    // create sorted list of jobs according to duals
    // schedule in order according to pTimes
    // create pattern
    // compute obj for red cost criterion 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
+
+   int *indJobs;
+   int sizeIndJobs = 0;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &indJobs, sizeIndJobs*sizeof(int)) ); // start with arr of size 0
+   int *depJobs;
+   int sizeDepJobs = 0;
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &depJobs, sizeDepJobs*sizeof(int)) ); // start with arr of size 0
+
 
    for ( i = 0; i < nbrMachines; i++ ) {
       branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
@@ -793,7 +825,17 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
          weights[ii].idx = ii;
          weights[ii].val = (double) (-1)*dual/pt1.machine[i].m[ii];
-         
+         if  (!(inBl(bl1,ii))) {
+            SCIPreallocBlockMemoryArray(scip, &indJobs, sizeIndJobs, sizeIndJobs+1); // make mem space, if we find a new independent job
+            indJobs[sizeIndJobs] = ii;
+            sizeIndJobs += 1;
+         }
+         else {
+            SCIPreallocBlockMemoryArray(scip, &depJobs, sizeIndJobs, sizeDepJobs+1); // make mem space, if we find a new independent job
+            depJobs[sizeDepJobs] = ii;
+            sizeDepJobs += 1;
+
+         }       
          
       }
       qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
