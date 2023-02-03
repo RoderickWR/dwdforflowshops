@@ -831,23 +831,25 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          if  (!(inBl(bl1,ii))) {
             indJobs[counterInd].idx = ii;
             indJobs[counterInd].val = val;
+            counterInd +=1;
             if (ii < nbrJobs -1) { // no need to increase array when last job is reached
                sizeIndJobs += 1;
-               counterInd +=1;
                indJobs = (job_weights*) realloc(indJobs,(sizeIndJobs)*sizeof(job_weights));
             }
          }
          else {
             depJobs[counterDep].idx = ii;
             depJobs[counterDep].val = val;
+            counterDep +=1;
             if (ii < nbrJobs -1) { // no need to increase array when last job is reached
-               sizeDepJobs += 1;
-               counterDep +=1;
+               sizeDepJobs += 1;              
                depJobs = (job_weights*) realloc(depJobs,(sizeDepJobs)*sizeof(job_weights));
             }       
          }
       }
       qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
+      qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
+      qsort(depJobs,counterDep,sizeof(depJobs[0]),cmp_fnc); // sort DESC
       int test = 5;
 
 
