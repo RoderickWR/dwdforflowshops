@@ -801,11 +801,27 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       }
    }
 
-   // start heuristics
-   // create sorted list of jobs according to duals
-   // schedule in order according to pTimes
-   // create pattern
-   // compute obj for red cost criterion 
+   // helper function to find largest element in job_weights array
+   job_weights findLargest(job_weights* list, int len) {
+      int i;
+      job_weights max = list[0];
+      for (i=0;i<len;i++) {
+         if (list[i].val > max.val) {
+            max = list[i];
+         }
+      }
+      return max;
+   }
+
+   // helper function to add element to job_weights array
+   job_weights* addJob(job_weights* list, int* size, job_weights job) {
+      *size +=1;
+      list = (job_weights*) realloc(list,(*size)*sizeof(job_weights));  
+      list[*size-1] = job; 
+      return list;
+   }
+
+
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
    job_weights* indJobs;
@@ -850,6 +866,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
       qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
       qsort(depJobs,counterDep,sizeof(depJobs[0]),cmp_fnc); // sort DESC
+      job_weights maxDep = findLargest(depJobs,counterDep);
+      job_weights maxInd = findLargest(indJobs,counterInd); // to test search function
+      indJobs = addJob(indJobs,&counterInd,maxInd);
+
       int test = 5;
 
 
