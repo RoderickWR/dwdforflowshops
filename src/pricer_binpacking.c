@@ -84,6 +84,7 @@
 #include "printOut.h"
 
 
+
 /**@name Pricer properties
  *
  * @{
@@ -866,9 +867,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
       qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
       qsort(depJobs,counterDep,sizeof(depJobs[0]),cmp_fnc); // sort DESC
-      job_weights maxDep = findLargest(depJobs,counterDep);
-      job_weights maxInd = findLargest(indJobs,counterInd); // to test search function
-      indJobs = addJob(indJobs,&counterInd,maxInd);
+      //now all jobs - either independent or dependent - are stored in lists, 
+
+      for (i=0; i<counterDep; i++) { // now add the dependent jobs sequentially
+         indJobs = addJob(indJobs,&counterInd,depJobs[i]);
+      }
 
       int test = 5;
 

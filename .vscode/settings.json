@@ -25,7 +25,8 @@
         "vardata_binpacking.h": "c",
         "fsgenerator.h": "c",
         "cstdlib": "c",
-        "cons_logicor.h": "c"
+        "cons_logicor.h": "c",
+        "printout.h": "c"
     },
     "cmake.configureOnOpen": false
 }
