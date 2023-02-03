@@ -808,35 +808,44 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    // compute obj for red cost criterion 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
-   int *indJobs;
-   int sizeIndJobs = 0;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &indJobs, sizeIndJobs*sizeof(int)) ); // start with arr of size 0
-   int *depJobs;
-   int sizeDepJobs = 0;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &depJobs, sizeDepJobs*sizeof(int)) ); // start with arr of size 0
-
+   job_weights* indJobs;
+   int sizeIndJobs = 1;
+   indJobs = (job_weights*) malloc(sizeof(job_weights));
+   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &indJobs, 1*sizeof(struct job_weights)) ); // start with arr of size 1
+   job_weights* depJobs;
+   int sizeDepJobs = 1;
+   depJobs = (job_weights*) malloc(sizeof(job_weights));
+   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &depJobs, 1*sizeof(struct job_weights)) ); // start with arr of size 1
+   
 
    for ( i = 0; i < nbrMachines; i++ ) {
       branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
-
-
       job_weights weights[nbrJobs];
+      int counterInd = 0;
+      int counterDep = 0;
       for( ii = 0; ii < nbrJobs; ii++ ) {        
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
          weights[ii].idx = ii;
-         weights[ii].val = (double) (-1)*dual/pt1.machine[i].m[ii];
+         double val = (double) (-1)*dual/pt1.machine[i].m[ii];
+         weights[ii].val = val;
          if  (!(inBl(bl1,ii))) {
-            SCIPreallocBlockMemoryArray(scip, &indJobs, sizeIndJobs, sizeIndJobs+1); // make mem space, if we find a new independent job
-            indJobs[sizeIndJobs] = ii;
-            sizeIndJobs += 1;
+            indJobs[counterInd].idx = ii;
+            indJobs[counterInd].val = val;
+            if (ii < nbrJobs -1) { // no need to increase array when last job is reached
+               sizeIndJobs += 1;
+               counterInd +=1;
+               indJobs = (job_weights*) realloc(indJobs,(sizeIndJobs)*sizeof(job_weights));
+            }
          }
          else {
-            SCIPreallocBlockMemoryArray(scip, &depJobs, sizeIndJobs, sizeDepJobs+1); // make mem space, if we find a new independent job
-            depJobs[sizeDepJobs] = ii;
-            sizeDepJobs += 1;
-
-         }       
-         
+            depJobs[counterDep].idx = ii;
+            depJobs[counterDep].val = val;
+            if (ii < nbrJobs -1) { // no need to increase array when last job is reached
+               sizeDepJobs += 1;
+               counterDep +=1;
+               depJobs = (job_weights*) realloc(depJobs,(sizeDepJobs)*sizeof(job_weights));
+            }       
+         }
       }
       qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
       int test = 5;
