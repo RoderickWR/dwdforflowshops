@@ -824,21 +824,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       return list;
    }
 
-   // helper function to remove element to job_weights array
-   job_weights* removeJob(job_weights* list, int* pCounterInd, int idx) {
-      printf("Remove job %d\n",idx);
-      printf("counterInd %d\n",*pCounterInd);
-      fflush(stdout);
-      assert(*pCounterInd > 0);
-      assert(idx < *pCounterInd);
-      int i;
-      for (i = idx; i< *pCounterInd -1; i++) {
-         list[i] = list[i+1];
-      }     
-      *pCounterInd -=1;
-      return list;
-   }
-
    // helper function to forget job in weights array
    job_weights* forgetJob(job_weights* list, int* pCounterInd, int idx) {
       printf("Forget job %d\n",idx);
@@ -878,18 +863,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    job_weights* indJobs;
    int sizeIndJobs = 1;
    indJobs = (job_weights*) malloc(sizeof(job_weights));
-   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &indJobs, 1*sizeof(struct job_weights)) ); // start with arr of size 1
-   job_weights* depJobs;
-   int sizeDepJobs = 1;
-   depJobs = (job_weights*) malloc(sizeof(job_weights));
-   // SCIP_CALL( SCIPallocBlockMemoryArray(scip, &depJobs, 1*sizeof(struct job_weights)) ); // start with arr of size 1
    
-
+   // populate original job list, independent job list 
    for ( i = 0; i < nbrMachines; i++ ) {
       branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
       job_weights orgJobList[nbrJobs];
       int counterInd = 0;
-      int counterDep = 0;
       for( ii = 0; ii < nbrJobs; ii++ ) {        
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
          orgJobList[ii].idx = ii;
@@ -904,23 +883,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
                indJobs = (job_weights*) realloc(indJobs,(sizeIndJobs)*sizeof(job_weights)); // always augment array by 1 slot
             }
          }
-         else {
-            depJobs[counterDep].idx = ii;
-            depJobs[counterDep].val = val;
-            counterDep +=1;
-            if (ii < nbrJobs -1) { // no need to increase array when last job is reached
-               sizeDepJobs += 1;              
-               depJobs = (job_weights*) realloc(depJobs,(sizeDepJobs)*sizeof(job_weights)); // always augment array by 1 slot
-            }       
-         }
       }
-      qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
-      qsort(depJobs,counterDep,sizeof(depJobs[0]),cmp_fnc); // sort DESC
-      //now all jobs - either independent or dependent - are stored in lists, 
-
-      // for (i=0; i<counterDep; i++) { // now add the dependent jobs sequentially
-      //    indJobs = addJob(indJobs,&counterInd,depJobs[i]);
-      // }
+      
+      // now schedule the jobs 
       job_weights scheduledJobs[nbrJobs];
       int addedIdx;
       for (i=0; i<nbrJobs; i++) { 
