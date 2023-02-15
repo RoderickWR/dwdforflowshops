@@ -785,16 +785,15 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    // helper function to make a flat list from branchingList
    bool inBl(branchingList bl1, int job) {
-      int i;
       if (bl1.lastIdx == 0) {
          return FALSE;
       }
       else {
-         for (i=0; i<bl1.lastIdx+1; i++) {
+         for (ii=0; ii<bl1.lastIdx+1; ii++) {
             // if (job == bl1.bl[i].id1) {
             //    return TRUE;
             // }
-            if (job == bl1.bl[i].id2) { //job j is dependending on i if of i<j
+            if (job == bl1.bl[ii].id2) { //job j is dependending on i if of i<j
                return TRUE;
             }
             else {
@@ -806,11 +805,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    // helper function to find largest element in job_weights array
    job_weights findLargest(job_weights* list, int len) {
-      int i;
       job_weights max = list[0];
-      for (i=0;i<len;i++) {
-         if (list[i].val > max.val) {
-            max = list[i];
+      for (ii=0;ii<len;ii++) {
+         if (list[ii].val > max.val) {
+            max = list[ii];
          }
       }
       return max;
@@ -830,10 +828,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       printf("counterInd %d\n",*pCounterInd);
       fflush(stdout);
       assert(*pCounterInd > 0);
-      int i;
-      for (i = 0; i< *pCounterInd; i++) {
-         if (list[i].idx == idx) {
-            list[i].val = -1; // set weight value to negative, so that job will not be scheduled according to Smith rule
+      for (ii = 0; ii< *pCounterInd; ii++) {
+         if (list[ii].idx == idx) {
+            list[ii].val = -1; // set weight value to negative, so that job will not be scheduled according to Smith rule
          }
       }     
       //*pCounterInd -=1;
@@ -845,11 +842,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       if (bl1.lastIdx == 0) {
          return indJobs; // if no branching constraints exist, indJob remains unchanged
       }
-      int i;
+      int ii;
       int idxGotInd = -1;
-      for (i=0; i<bl1.lastIdx+1; i++) {
-         if (bl1.bl[i].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
-            idxGotInd = bl1.bl[i].id2;
+      for (ii=0; i<bl1.lastIdx+1; ii++) {
+         if (bl1.bl[ii].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
+            idxGotInd = bl1.bl[ii].id2;
          }
       }
       if (idxGotInd != -1) {
@@ -885,21 +882,28 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          }
       }
       
-      // now schedule the jobs 
+      // now order the jobs 
       job_weights scheduledJobs[nbrJobs];
       int addedIdx;
-      for (i=0; i<nbrJobs; i++) { 
+      for (ii=0; ii<nbrJobs; ii++) { 
          qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
-         scheduledJobs[i].idx = indJobs[0].idx; //we add the most important indepent job as the first job in the list
-         scheduledJobs[i].val = indJobs[0].val; 
+         scheduledJobs[ii].idx = indJobs[0].idx; //we add the most important indepent job as the first job in the list
+         scheduledJobs[ii].val = indJobs[0].val; 
          addedIdx = indJobs[0].idx; // we save the index of the job just added
          indJobs = forgetJob(indJobs,&counterInd,addedIdx); // and forget this job in the independent job list
          indJobs = addDepJob(indJobs, &counterInd, orgJobList, bl1, addedIdx); // and add any newly independent job to the list
       }
 
-      int test = 5;
-
-
+      // now schedule jobs with start and end times
+      pat p1;
+      SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
+      double sum = 0;
+      for( ii = 0; ii < nbrJobs; ii++ ) {
+         p1.job[ii].start = sum;
+         p1.job[ii].end = p1.job[ii].start + pt1.machine[i].m[ii];
+         sum += pt1.machine[i].m[ii];
+      }
+      int p = 5;
 
    }
 
