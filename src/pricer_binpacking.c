@@ -760,6 +760,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    if( !SCIPisInfinity(scip, memorylimit) )
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
+   // start heuristics 
+
    SCIP_CONS** startConss;
    SCIP_CONS** endConss;
    startConss = pricerdata->startCons;
@@ -789,10 +791,10 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       }
       else {
          for (i=0; i<bl1.lastIdx+1; i++) {
-            if (job == bl1.bl[i].id1) {
-               return TRUE;
-            }
-            else if (job == bl1.bl[i].id2) {
+            // if (job == bl1.bl[i].id1) {
+            //    return TRUE;
+            // }
+            if (job == bl1.bl[i].id2) { //job j is dependending on i if of i<j
                return TRUE;
             }
             else {
@@ -822,6 +824,54 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       return list;
    }
 
+   // helper function to remove element to job_weights array
+   job_weights* removeJob(job_weights* list, int* pCounterInd, int idx) {
+      printf("Remove job %d\n",idx);
+      printf("counterInd %d\n",*pCounterInd);
+      fflush(stdout);
+      assert(*pCounterInd > 0);
+      assert(idx < *pCounterInd);
+      int i;
+      for (i = idx; i< *pCounterInd -1; i++) {
+         list[i] = list[i+1];
+      }     
+      *pCounterInd -=1;
+      return list;
+   }
+
+   // helper function to forget job in weights array
+   job_weights* forgetJob(job_weights* list, int* pCounterInd, int idx) {
+      printf("Forget job %d\n",idx);
+      printf("counterInd %d\n",*pCounterInd);
+      fflush(stdout);
+      assert(*pCounterInd > 0);
+      int i;
+      for (i = 0; i< *pCounterInd; i++) {
+         if (list[i].idx == idx) {
+            list[i].val = -1; // set weight value to negative, so that job will not be scheduled according to Smith rule
+         }
+      }     
+      //*pCounterInd -=1;
+      return list;
+   }
+
+   // helper function to remove element to job_weights array
+   job_weights* addDepJob(job_weights* indJobs, int* pCounterInd, job_weights* orgJobList, branchingList bl1, int addedIdx) {
+      if (bl1.lastIdx == 0) {
+         return indJobs; // if no branching constraints exist, indJob remains unchanged
+      }
+      int i;
+      int idxGotInd = -1;
+      for (i=0; i<bl1.lastIdx+1; i++) {
+         if (bl1.bl[i].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
+            idxGotInd = bl1.bl[i].id2;
+         }
+      }
+      if (idxGotInd != -1) {
+         indJobs = addJob(indJobs,pCounterInd, orgJobList[idxGotInd]);
+      }
+      return indJobs;
+   }
 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
@@ -837,21 +887,21 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    for ( i = 0; i < nbrMachines; i++ ) {
       branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
-      job_weights weights[nbrJobs];
+      job_weights orgJobList[nbrJobs];
       int counterInd = 0;
       int counterDep = 0;
       for( ii = 0; ii < nbrJobs; ii++ ) {        
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
-         weights[ii].idx = ii;
+         orgJobList[ii].idx = ii;
          double val = (double) (-1)*dual/pt1.machine[i].m[ii];
-         weights[ii].val = val;
+         orgJobList[ii].val = val;
          if  (!(inBl(bl1,ii))) {
             indJobs[counterInd].idx = ii;
             indJobs[counterInd].val = val;
             counterInd +=1;
             if (ii < nbrJobs -1) { // no need to increase array when last job is reached
                sizeIndJobs += 1;
-               indJobs = (job_weights*) realloc(indJobs,(sizeIndJobs)*sizeof(job_weights));
+               indJobs = (job_weights*) realloc(indJobs,(sizeIndJobs)*sizeof(job_weights)); // always augment array by 1 slot
             }
          }
          else {
@@ -860,17 +910,26 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             counterDep +=1;
             if (ii < nbrJobs -1) { // no need to increase array when last job is reached
                sizeDepJobs += 1;              
-               depJobs = (job_weights*) realloc(depJobs,(sizeDepJobs)*sizeof(job_weights));
+               depJobs = (job_weights*) realloc(depJobs,(sizeDepJobs)*sizeof(job_weights)); // always augment array by 1 slot
             }       
          }
       }
-      qsort(weights,nbrJobs,sizeof(weights[0]),cmp_fnc); // sort DESC
       qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
       qsort(depJobs,counterDep,sizeof(depJobs[0]),cmp_fnc); // sort DESC
       //now all jobs - either independent or dependent - are stored in lists, 
 
-      for (i=0; i<counterDep; i++) { // now add the dependent jobs sequentially
-         indJobs = addJob(indJobs,&counterInd,depJobs[i]);
+      // for (i=0; i<counterDep; i++) { // now add the dependent jobs sequentially
+      //    indJobs = addJob(indJobs,&counterInd,depJobs[i]);
+      // }
+      job_weights scheduledJobs[nbrJobs];
+      int addedIdx;
+      for (i=0; i<nbrJobs; i++) { 
+         qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
+         scheduledJobs[i].idx = indJobs[0].idx; //we add the most important indepent job as the first job in the list
+         scheduledJobs[i].val = indJobs[0].val; 
+         addedIdx = indJobs[0].idx; // we save the index of the job just added
+         indJobs = forgetJob(indJobs,&counterInd,addedIdx); // and forget this job in the independent job list
+         indJobs = addDepJob(indJobs, &counterInd, orgJobList, bl1, addedIdx); // and add any newly independent job to the list
       }
 
       int test = 5;
