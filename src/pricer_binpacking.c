@@ -974,14 +974,15 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          printf("objVal %lf \n" , objVal);
          fflush(stdout);  
          if( objVal - dual < (double) -1e-5) {
-            int test = 5;
             addHeurPat(p1, i);
-            SCIPwriteTransProblem(scip, "heuristic_test.lp",NULL,FALSE);
-            // added pattern = true
          }
    }
-   // if added pattern for all machines = False
-   // then do MIP search
+   if (addvar) {
+      printf("Ending DECL_PRICERREDCOST() by heuristic\n");
+      fflush(stdout);
+      return SCIP_OKAY;
+   }
+   
 
    
 
