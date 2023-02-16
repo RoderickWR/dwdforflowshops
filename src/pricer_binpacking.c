@@ -855,8 +855,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    }
 
    // helper function to compute the objective value given the schedule
-   bool computeObj(job_weights* scheduledJobs) {
-      return TRUE;
+   double computeObj(job_weights* scheduledJobs) {
+      double sum = 0.0;
+      for (iii=0; iii < nbrJobs; iii++) {
+         sum += scheduledJobs[iii].objCoef*scheduledJobs[iii].end;
+      }
+      return sum;
    }
 
    // start heuristics 
@@ -920,9 +924,13 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       // this ends the heuristics part
       /* now check if the solution indicates that a new pattern should be added */         
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
+         double objVal;
+         objVal = computeObj(scheduledJobs);
          printf("dual %lf \n" , ( dual));
+         printf("objVal %lf \n" , objVal);
          fflush(stdout);  
-         if( computeObj(scheduledJobs) - dual < (double) -1e-5) {
+         if( objVal - dual < (double) -1e-5) {
+            int test = 5;
             // then add p1
             // added pattern = true
          }
