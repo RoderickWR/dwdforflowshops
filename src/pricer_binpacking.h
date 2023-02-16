@@ -33,6 +33,9 @@
 typedef struct job_weights {
    double val;
    int idx;
+   double objCoef;
+   double start;
+   double end;
 } job_weights;
 
 /** creates the binpacking variable pricer and includes it in SCIP */

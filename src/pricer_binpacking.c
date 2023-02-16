@@ -876,10 +876,13 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
          orgJobList[ii].idx = ii;
          double val = (double) (-1)*dual/pt1.machine[i].m[ii];
+         double objCoef = (-1)*dual;
          orgJobList[ii].val = val;
+         orgJobList[ii].objCoef = objCoef;
          if  (!(inBl(bl1,ii))) {
             indJobs[counterInd].idx = ii;
             indJobs[counterInd].val = val;
+            indJobs[counterInd].objCoef = objCoef;
             counterInd +=1;
             if (ii < nbrJobs -1) { // no need to increase array when last job is reached
                sizeIndJobs += 1;
@@ -895,6 +898,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
          scheduledJobs[ii].idx = indJobs[0].idx; //we add the most important indepent job as the first job in the list
          scheduledJobs[ii].val = indJobs[0].val; 
+         scheduledJobs[ii].objCoef = indJobs[0].objCoef; 
          addedIdx = indJobs[0].idx; // we save the index of the job just added
          indJobs = forgetJob(indJobs,&counterInd,addedIdx); // and forget this job in the independent job list
          indJobs = addDepJob(indJobs, &counterInd, orgJobList, bl1, addedIdx); // and add any newly independent job to the list
@@ -908,11 +912,13 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       for( ii = 0; ii < nbrJobs; ii++ ) {
          nextJobIdx = scheduledJobs[ii].idx; // look up which job is scheduled next using the scheduledJobs list
          p1.job[nextJobIdx].start = sum;
+         scheduledJobs[ii].start = p1.job[nextJobIdx].start;
          p1.job[nextJobIdx].end = p1.job[nextJobIdx].start + pt1.machine[i].m[nextJobIdx];
+         scheduledJobs[ii].end = p1.job[nextJobIdx].end;
          sum += pt1.machine[i].m[nextJobIdx];
       }
-      // end heuristics
-      /* check if the solution indicates that a new pattern should be added */         
+      // this ends the heuristics part
+      /* now check if the solution indicates that a new pattern should be added */         
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
          printf("dual %lf \n" , ( dual));
          fflush(stdout);  
