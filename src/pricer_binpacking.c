@@ -854,6 +854,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       return indJobs;
    }
 
+   // helper function to compute the objective value given the schedule
+   bool computeObj(job_weights* scheduledJobs) {
+      return TRUE;
+   }
+
    // start heuristics 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
@@ -901,14 +906,23 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       double sum = 0;
       int nextJobIdx = -1;
       for( ii = 0; ii < nbrJobs; ii++ ) {
-         nextJobIdx = scheduledJobs[ii].idx; // look up which job is scheduled next
+         nextJobIdx = scheduledJobs[ii].idx; // look up which job is scheduled next using the scheduledJobs list
          p1.job[nextJobIdx].start = sum;
          p1.job[nextJobIdx].end = p1.job[nextJobIdx].start + pt1.machine[i].m[nextJobIdx];
          sum += pt1.machine[i].m[nextJobIdx];
       }
       // end heuristics
-      int test = 5;
+      /* check if the solution indicates that a new pattern should be added */         
+         SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
+         printf("dual %lf \n" , ( dual));
+         fflush(stdout);  
+         if( computeObj(scheduledJobs) - dual < (double) -1e-5) {
+            // then add p1
+            // added pattern = true
+         }
    }
+   // if added pattern for all machines = False
+   // then do MIP search
 
    
 
