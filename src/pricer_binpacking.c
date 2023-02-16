@@ -863,6 +863,50 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       return sum;
    }
 
+   //helper function to add heuristic generated pattern
+   void addHeurPat(pat p1, int i) {
+      SCIP_VARDATA* vardata;
+      s1 = pricerdata->s1;
+      SCIPdebug( SCIP_CALL( SCIPprintSol(subscip[i], sol, NULL, FALSE) ) );     
+      
+      SCIP_VAR* newVar = NULL;
+      s1->sched[i].lastIdx = s1->sched[i].lastIdx + 1; // count up the pattern counter in s1
+      SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx) ); 
+
+      sprintf(buf, "lambM%dP%d", i,s1->sched[i].lastIdx); // create name of new pattern var
+      
+      SCIP_CALL( SCIPcreateVarBinpacking(scip, &newVar, buf, 0.0, FALSE, TRUE, vardata) );
+      SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
+      SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
+      // extend lambArr if needed
+      if (*(pMpats_sizes)[i] <= s1->sched[i].lastIdx) {
+         SCIPreallocBlockMemoryArray(scip, &lambArr[i], *(pMpats_sizes)[i], *(pMpats_sizes)[i]*2);
+         *(pMpats_sizes)[i] = *(pMpats_sizes)[i]*2;
+      }
+      
+      lambArr[i][s1->sched[i].lastIdx] = newVar; // add the new var to the lambdas array
+      SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
+      nvars[i]++; // increment nvars
+      addvar = TRUE;
+
+      // modify convexity constr on machine i in master problem
+      SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][s1->sched[i].lastIdx], 1.0);
+      // modify start and end time constr in master problem
+      int j;
+      for( j = 0; j < nbrJobs; ++j ) {
+         SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], p1.job[j].start);
+         SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], p1.job[j].end);
+      }
+      // check if pattern array needs to be extended 
+      if (s1->sched[i].size <= s1->sched[i].lastIdx) {
+      int newsize = s1->sched[i].size * 2;
+      SCIPreallocBlockMemoryArray(scip, &(s1->sched[i].mp), s1->sched[i].size, newsize);
+      s1->sched[i].size = newsize;
+      }
+      s1->sched[i].mp[s1->sched[i].lastIdx] = p1;
+      printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
+   }
+
    // start heuristics 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
@@ -931,7 +975,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          fflush(stdout);  
          if( objVal - dual < (double) -1e-5) {
             int test = 5;
-            // then add p1
+            addHeurPat(p1, i);
+            SCIPwriteTransProblem(scip, "heuristic_test.lp",NULL,FALSE);
             // added pattern = true
          }
    }
