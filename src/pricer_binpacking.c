@@ -689,6 +689,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    int i = 0;
    int ii = 0;
+   int iii = 0;
 
    int nitems;
    SCIP_Longint capacity;
@@ -760,8 +761,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    if( !SCIPisInfinity(scip, memorylimit) )
       memorylimit -= SCIPgetMemUsed(scip)/1048576.0;
 
-   // start heuristics 
-
+ 
    SCIP_CONS** startConss;
    SCIP_CONS** endConss;
    startConss = pricerdata->startCons;
@@ -789,11 +789,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          return FALSE;
       }
       else {
-         for (ii=0; ii<bl1.lastIdx+1; ii++) {
+         for (iii=0; iii<bl1.lastIdx+1; iii++) {
             // if (job == bl1.bl[i].id1) {
             //    return TRUE;
             // }
-            if (job == bl1.bl[ii].id2) { //job j is dependending on i if of i<j
+            if (job == bl1.bl[iii].id2) { //job j is dependending on i if of i<j
                return TRUE;
             }
             else {
@@ -806,9 +806,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    // helper function to find largest element in job_weights array
    job_weights findLargest(job_weights* list, int len) {
       job_weights max = list[0];
-      for (ii=0;ii<len;ii++) {
-         if (list[ii].val > max.val) {
-            max = list[ii];
+      for (iii=0;iii<len;iii++) {
+         if (list[iii].val > max.val) {
+            max = list[iii];
          }
       }
       return max;
@@ -825,12 +825,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    // helper function to forget job in weights array
    job_weights* forgetJob(job_weights* list, int* pCounterInd, int idx) {
       printf("Forget job %d\n",idx);
-      printf("counterInd %d\n",*pCounterInd);
       fflush(stdout);
       assert(*pCounterInd > 0);
-      for (ii = 0; ii< *pCounterInd; ii++) {
-         if (list[ii].idx == idx) {
-            list[ii].val = -1; // set weight value to negative, so that job will not be scheduled according to Smith rule
+      for (iii = 0; iii< *pCounterInd; iii++) {
+         if (list[iii].idx == idx) {
+            list[iii].val = -1; // set weight value to negative, so that job will not be scheduled according to Smith rule
          }
       }     
       //*pCounterInd -=1;
@@ -842,11 +841,11 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       if (bl1.lastIdx == 0) {
          return indJobs; // if no branching constraints exist, indJob remains unchanged
       }
-      int ii;
+      int iii;
       int idxGotInd = -1;
-      for (ii=0; i<bl1.lastIdx+1; ii++) {
-         if (bl1.bl[ii].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
-            idxGotInd = bl1.bl[ii].id2;
+      for (iii=0; i<bl1.lastIdx+1; iii++) {
+         if (bl1.bl[iii].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
+            idxGotInd = bl1.bl[iii].id2;
          }
       }
       if (idxGotInd != -1) {
@@ -855,14 +854,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       return indJobs;
    }
 
+   // start heuristics 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
    job_weights* indJobs;
    int sizeIndJobs = 1;
    indJobs = (job_weights*) malloc(sizeof(job_weights));
    
-   // populate original job list, independent job list 
+   // heuristic computation of new schedules for each machine
    for ( i = 0; i < nbrMachines; i++ ) {
+      // populate original job list, independent job list 
       branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
       job_weights orgJobList[nbrJobs];
       int counterInd = 0;
@@ -898,20 +899,22 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       pat p1;
       SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
       double sum = 0;
+      int nextJobIdx = -1;
       for( ii = 0; ii < nbrJobs; ii++ ) {
-         p1.job[ii].start = sum;
-         p1.job[ii].end = p1.job[ii].start + pt1.machine[i].m[ii];
-         sum += pt1.machine[i].m[ii];
+         nextJobIdx = scheduledJobs[ii].idx; // look up which job is scheduled next
+         p1.job[nextJobIdx].start = sum;
+         p1.job[nextJobIdx].end = p1.job[nextJobIdx].start + pt1.machine[i].m[nextJobIdx];
+         sum += pt1.machine[i].m[nextJobIdx];
       }
-      int p = 5;
-
+      // end heuristics
+      int test = 5;
    }
 
    
 
    
       
-   // end heuristics
+   
 
    
    // create coefs array, needed for reopt
