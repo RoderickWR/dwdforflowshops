@@ -843,7 +843,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       }
       int iii;
       int idxGotInd = -1;
-      for (iii=0; i<bl1.lastIdx+1; iii++) {
+      for (iii=0; iii<bl1.lastIdx+1; iii++) {
          if (bl1.bl[iii].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
             idxGotInd = bl1.bl[iii].id2;
          }
@@ -904,6 +904,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       s1->sched[i].size = newsize;
       }
       s1->sched[i].mp[s1->sched[i].lastIdx] = p1;
+      printf("By heuristic ");
       printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
    }
 
