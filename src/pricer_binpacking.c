@@ -789,7 +789,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          return FALSE;
       }
       else {
-         for (iii=0; iii<bl1.lastIdx+1; iii++) {
+         for (iii=0; iii<bl1.lastIdx; iii++) {
             // if (job == bl1.bl[i].id1) {
             //    return TRUE;
             // }
@@ -841,7 +841,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       }
       int iii;
       int idxGotInd = -1;
-      for (iii=0; iii<bl1.lastIdx+1; iii++) {
+      for (iii=0; iii<bl1.lastIdx; iii++) {
          if (bl1.bl[iii].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
             idxGotInd = bl1.bl[iii].id2;
          }
