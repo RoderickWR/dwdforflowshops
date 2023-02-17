@@ -824,8 +824,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    // helper function to forget job in weights array
    job_weights* forgetJob(job_weights* list, int* pCounterInd, int idx) {
-      printf("Forget job %d\n",idx);
-      fflush(stdout);
       assert(*pCounterInd > 0);
       for (iii = 0; iii< *pCounterInd; iii++) {
          if (list[iii].idx == idx) {
@@ -971,8 +969,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
          double objVal;
          objVal = computeObj(scheduledJobs);
-         printf("dual %lf \n" , ( dual));
-         printf("objVal %lf \n" , objVal);
+         printf("by heuristic dual %lf \n" , ( dual));
+         printf("by heuristic objVal %lf \n" , objVal);
          fflush(stdout);  
          if( objVal - dual < (double) -1e-5) {
             addHeurPat(p1, i);
