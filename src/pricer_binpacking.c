@@ -783,24 +783,19 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    }
 
-   // helper function to make a flat list from branchingList
+   // helper function to check whether job is on RHS of branching list
    bool inBl(branchingList bl1, int job) {
+      bool isInBl = FALSE;
       if (bl1.lastIdx == 0) {
-         return FALSE;
+         return isInBl;
       }
-      else {
-         for (iii=0; iii<bl1.lastIdx; iii++) {
-            // if (job == bl1.bl[i].id1) {
-            //    return TRUE;
-            // }
-            if (job == bl1.bl[iii].id2) { //job j is dependending on i if of i<j
-               return TRUE;
-            }
-            else {
-               return FALSE;
-            }
+      int iter;
+      for (iter=0; iter<bl1.lastIdx; iter++) {
+         if (job == bl1.bl[iter].id2) { //job j is dependending on i if of i<j
+            isInBl = TRUE;
          }
       }
+      return isInBl;
    }
 
    // helper function to find largest element in job_weights array
@@ -867,6 +862,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             idxGetInd = bl1.bl[iii].id2; //this job might have gotten independent
             bool gotInd = checkInd(idxGetInd, addedIdx, bl1, scheduledJobs, scheduledJobsSize);
             if (gotInd) { // if the candidate idx really got independent add the job
+               if (*pCounterDep == 0) {
+                  int test = 5;
+               }
                jobPool = addJob(jobPool,nbrJobs- (*pCounterDep), orgJobList[idxGetInd]);
                *pCounterInd += 1;
                *pCounterDep -= 1;
@@ -932,15 +930,13 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
    // start heuristics 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
-
-   job_weights* jobPool;
-   jobPool = (job_weights*) malloc(nbrJobs*sizeof(job_weights));
-   int counterDep = 0;
-   int counterInd = 0;
    
    // heuristic computation of new schedules for each machine
    for ( i = 0; i < nbrMachines; i++ ) {
-      // populate original job list, independent job list 
+      job_weights* jobPool; // pool in which jobs are ordered and removed from to go into schedule 
+      jobPool = (job_weights*) malloc(nbrJobs*sizeof(job_weights));
+      int counterDep = 0;
+      int counterInd = 0;
       branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
       job_weights orgJobList[nbrJobs];
       for( ii = 0; ii < nbrJobs; ii++ ) {        
@@ -955,15 +951,19 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             jobPool[ii].val = val;
             jobPool[ii].objCoef = objCoef;
             counterInd += 1;
+            printf("ind index was: %d \n", ii);
+            fflush(stdout);
          }
          else {
             jobPool[ii].idx = ii;
             jobPool[ii].val = -1.0; // add dependent jobs with -1 value 
             jobPool[ii].objCoef = -1.0;   
             counterDep += 1;
+            printf("dep index was: %d \n", ii);
+            fflush(stdout);
          }
       }
-      
+      fflush(stdout);
       // now order the jobs 
       job_weights scheduledJobs[nbrJobs];
       int addedIdx;
