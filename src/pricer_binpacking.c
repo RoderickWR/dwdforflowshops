@@ -815,41 +815,42 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    }
 
    // helper function to add element to job_weights array
-   job_weights* addJob(job_weights* list, int* size, job_weights job) {
-      *size +=1;
-      list = (job_weights*) realloc(list,(*size)*sizeof(job_weights));  
-      list[*size-1] = job; 
-      return list;
+   job_weights* addJob(job_weights* jobPool, int pos, job_weights job) {
+      jobPool[pos] = job; //add job at the end since last job of jobPool will be occupied by a newly forgotten job
+      return jobPool;
    }
 
    // helper function to forget job in weights array
-   job_weights* forgetJob(job_weights* list, int* pCounterInd, int idx) {
-      assert(*pCounterInd > 0);
-      for (iii = 0; iii< *pCounterInd; iii++) {
-         if (list[iii].idx == idx) {
-            list[iii].val = -1; // set weight value to negative, so that job will not be scheduled according to Smith rule
+   job_weights* forgetJob(job_weights* jobPool,int idx, int* pCounterInd) {
+      for (iii = 0; iii< nbrJobs; iii++) {
+         if (jobPool[iii].idx == idx) {
+            jobPool[iii].val = -1.0; // set weight value to negative, so that job will not be scheduled according to Smith rule
+            *pCounterInd -= 1;
          }
       }     
-      //*pCounterInd -=1;
-      return list;
+      return jobPool;
    }
 
-   // helper function to remove element to job_weights array
-   job_weights* addDepJob(job_weights* indJobs, int* pCounterInd, job_weights* orgJobList, branchingList bl1, int addedIdx) {
+   // helper function to add dependent job to jobPool
+   job_weights* addDepJob(job_weights* jobPool, job_weights* orgJobList, branchingList bl1, int addedIdx, int nbrJobs, int* pCounterInd, int* pCounterDep) {
       if (bl1.lastIdx == 0) {
-         return indJobs; // if no branching constraints exist, indJob remains unchanged
+         assert(*pCounterDep == 0);
+         return jobPool; // if no branching constraints exist, jobPool remains unchanged as no job could have become independent
       }
       int iii;
       int idxGotInd = -1;
-      for (iii=0; iii<bl1.lastIdx; iii++) {
-         if (bl1.bl[iii].id1 == addedIdx) { //found a job that became independent by adding the job addedIdx to the schedule
+      for (iii=0; iii<bl1.lastIdx; iii++) { // now find all jobs that got independent
+         if (bl1.bl[iii].id1 == addedIdx) { //found a job that became independent by adding the job <addedIdx> to the schedule
             idxGotInd = bl1.bl[iii].id2;
+            if(*pCounterDep == 0) {
+               int test = 5;
+            }
+            jobPool = addJob(jobPool,nbrJobs- (*pCounterDep), orgJobList[idxGotInd]);
+            *pCounterInd += 1;
+            *pCounterDep -= 1;
          }
       }
-      if (idxGotInd != -1) {
-         indJobs = addJob(indJobs,pCounterInd, orgJobList[idxGotInd]);
-      }
-      return indJobs;
+      return jobPool;
    }
 
    // helper function to compute the objective value given the schedule
@@ -862,63 +863,63 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    }
 
    //helper function to add heuristic generated pattern
-   void addHeurPat(pat p1, int i) {
+   void addHeurPat(pat p1, int mIdx) {
       SCIP_VARDATA* vardata;
       s1 = pricerdata->s1;
-      SCIPdebug( SCIP_CALL( SCIPprintSol(subscip[i], sol, NULL, FALSE) ) );     
+      SCIPdebug( SCIP_CALL( SCIPprintSol(subscip[mIdx], sol, NULL, FALSE) ) );     
       
       SCIP_VAR* newVar = NULL;
-      s1->sched[i].lastIdx = s1->sched[i].lastIdx + 1; // count up the pattern counter in s1
-      SCIP_CALL( SCIPvardataCreateBinpacking(scip, &vardata, i, s1, s1->sched[i].lastIdx) ); 
+      s1->sched[mIdx].lastIdx = s1->sched[mIdx].lastIdx + 1; // count up the pattern counter in s1
+      SCIPvardataCreateBinpacking(scip, &vardata, mIdx, s1, s1->sched[mIdx].lastIdx); 
 
-      sprintf(buf, "lambM%dP%d", i,s1->sched[i].lastIdx); // create name of new pattern var
+      sprintf(buf, "lambM%dP%d", i,s1->sched[mIdx].lastIdx); // create name of new pattern var
       
-      SCIP_CALL( SCIPcreateVarBinpacking(scip, &newVar, buf, 0.0, FALSE, TRUE, vardata) );
-      SCIP_CALL( SCIPaddPricedVar(scip, newVar, 1.0) ); /* add the new variable to the pricer store */
-      SCIP_CALL( SCIPchgVarUbLazy(scip, newVar, 1.0) );
+      SCIPcreateVarBinpacking(scip, &newVar, buf, 0.0, FALSE, TRUE, vardata);
+      SCIPaddPricedVar(scip, newVar, 1.0) ; /* add the new variable to the pricer store */
+      SCIPchgVarUbLazy(scip, newVar, 1.0) ;
       // extend lambArr if needed
-      if (*(pMpats_sizes)[i] <= s1->sched[i].lastIdx) {
-         SCIPreallocBlockMemoryArray(scip, &lambArr[i], *(pMpats_sizes)[i], *(pMpats_sizes)[i]*2);
-         *(pMpats_sizes)[i] = *(pMpats_sizes)[i]*2;
+      if (*(pMpats_sizes)[mIdx] <= s1->sched[mIdx].lastIdx) {
+         SCIPreallocBlockMemoryArray(scip, &lambArr[mIdx], *(pMpats_sizes)[mIdx], *(pMpats_sizes)[mIdx]*2);
+         *(pMpats_sizes)[mIdx] = *(pMpats_sizes)[mIdx]*2;
       }
       
-      lambArr[i][s1->sched[i].lastIdx] = newVar; // add the new var to the lambdas array
-      SCIP_CALL( SCIPreleaseVar(scip, &newVar) );
-      nvars[i]++; // increment nvars
+      lambArr[mIdx][s1->sched[mIdx].lastIdx] = newVar; // add the new var to the lambdas array
+      SCIPreleaseVar(scip, &newVar) ;
+      nvars[mIdx]++; // increment nvars
       addvar = TRUE;
 
       // modify convexity constr on machine i in master problem
-      SCIPaddCoefLinear(scip, convexityCons[i], lambArr[i][s1->sched[i].lastIdx], 1.0);
+      SCIPaddCoefLinear(scip, convexityCons[mIdx], lambArr[mIdx][s1->sched[mIdx].lastIdx], 1.0);
       // modify start and end time constr in master problem
       int j;
       for( j = 0; j < nbrJobs; ++j ) {
-         SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], p1.job[j].start);
-         SCIPaddCoefLinear(scip, endCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], p1.job[j].end);
+         SCIPaddCoefLinear(scip, startCons[mIdx*nbrJobs + j], lambArr[mIdx][s1->sched[mIdx].lastIdx], p1.job[j].start);
+         SCIPaddCoefLinear(scip, endCons[mIdx*nbrJobs + j], lambArr[mIdx][s1->sched[mIdx].lastIdx], p1.job[j].end);
       }
       // check if pattern array needs to be extended 
-      if (s1->sched[i].size <= s1->sched[i].lastIdx) {
-      int newsize = s1->sched[i].size * 2;
-      SCIPreallocBlockMemoryArray(scip, &(s1->sched[i].mp), s1->sched[i].size, newsize);
-      s1->sched[i].size = newsize;
+      if (s1->sched[mIdx].size <= s1->sched[mIdx].lastIdx) {
+         int newsize = s1->sched[mIdx].size * 2;
+         SCIPreallocBlockMemoryArray(scip, &(s1->sched[mIdx].mp), s1->sched[mIdx].size, newsize);
+         s1->sched[mIdx].size = newsize;
       }
-      s1->sched[i].mp[s1->sched[i].lastIdx] = p1;
+      s1->sched[mIdx].mp[s1->sched[mIdx].lastIdx] = p1;
       printf("By heuristic ");
-      printOutPattern(s1->sched[i].mp[s1->sched[i].lastIdx], nbrJobs);
+      printOutPattern(s1->sched[mIdx].mp[s1->sched[mIdx].lastIdx], nbrJobs);
    }
 
    // start heuristics 
    SCIP_NODE* iterNode = SCIPgetCurrentNode(scip);
 
-   job_weights* indJobs;
-   int sizeIndJobs = 1;
-   indJobs = (job_weights*) malloc(sizeof(job_weights));
+   job_weights* jobPool;
+   jobPool = (job_weights*) malloc(nbrJobs*sizeof(job_weights));
+   int counterDep = 0;
+   int counterInd = 0;
    
    // heuristic computation of new schedules for each machine
    for ( i = 0; i < nbrMachines; i++ ) {
       // populate original job list, independent job list 
       branchingList bl1 = createBL(iterNode, i); // we need the already branched orders
       job_weights orgJobList[nbrJobs];
-      int counterInd = 0;
       for( ii = 0; ii < nbrJobs; ii++ ) {        
          SCIPgetDualSolVal(scip, endConss[i*nbrJobs + ii], pDual, pBoundconstr);  
          orgJobList[ii].idx = ii;
@@ -927,14 +928,16 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          orgJobList[ii].val = val;
          orgJobList[ii].objCoef = objCoef;
          if  (!(inBl(bl1,ii))) {
-            indJobs[counterInd].idx = ii;
-            indJobs[counterInd].val = val;
-            indJobs[counterInd].objCoef = objCoef;
-            counterInd +=1;
-            if (ii < nbrJobs -1) { // no need to increase array when last job is reached
-               sizeIndJobs += 1;
-               indJobs = (job_weights*) realloc(indJobs,(sizeIndJobs)*sizeof(job_weights)); // always augment array by 1 slot
-            }
+            jobPool[ii].idx = ii;
+            jobPool[ii].val = val;
+            jobPool[ii].objCoef = objCoef;
+            counterInd += 1;
+         }
+         else {
+            jobPool[ii].idx = ii;
+            jobPool[ii].val = -1.0; // add dependent jobs with -1 value 
+            jobPool[ii].objCoef = -1.0;   
+            counterDep += 1;
          }
       }
       
@@ -942,16 +945,22 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       job_weights scheduledJobs[nbrJobs];
       int addedIdx;
       for (ii=0; ii<nbrJobs; ii++) { 
-         qsort(indJobs,counterInd,sizeof(indJobs[0]),cmp_fnc); // sort DESC
-         scheduledJobs[ii].idx = indJobs[0].idx; //we add the most important indepent job as the first job in the list
-         scheduledJobs[ii].val = indJobs[0].val; 
-         scheduledJobs[ii].objCoef = indJobs[0].objCoef; 
-         addedIdx = indJobs[0].idx; // we save the index of the job just added
-         indJobs = forgetJob(indJobs,&counterInd,addedIdx); // and forget this job in the independent job list
-         indJobs = addDepJob(indJobs, &counterInd, orgJobList, bl1, addedIdx); // and add any newly independent job to the list
+         printf("counterSched: %d \n", ii);
+         printf("counterInd: %d \n", counterInd);
+         printf("counterDep: %d \n", counterDep);
+         fflush(stdout);
+         qsort(jobPool,nbrJobs,sizeof(jobPool[0]),cmp_fnc); // sort DESC
+         scheduledJobs[ii].idx = jobPool[0].idx; //we add the most important indepent job as the first job in the list
+         scheduledJobs[ii].val = jobPool[0].val; 
+         scheduledJobs[ii].objCoef = jobPool[0].objCoef; 
+         addedIdx = jobPool[0].idx; // we save the index of the job just added
+         jobPool = forgetJob(jobPool, addedIdx, &counterInd); // and forget this job in the jobPool
+         qsort(jobPool,nbrJobs,sizeof(jobPool[0]),cmp_fnc); // push newly forgotten job to the end
+         jobPool = addDepJob(jobPool, orgJobList, bl1, addedIdx, nbrJobs, &counterInd, &counterDep); // and add any newly independent job to the end of the list
       }
 
       // now schedule jobs with start and end times
+      assert(counterInd == 0 && counterDep == 0);
       pat p1;
       SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
       double sum = 0;
@@ -964,17 +973,18 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          scheduledJobs[ii].end = p1.job[nextJobIdx].end;
          sum += pt1.machine[i].m[nextJobIdx];
       }
+
       // this ends the heuristics part
       /* now check if the solution indicates that a new pattern should be added */         
-         SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-         double objVal;
-         objVal = computeObj(scheduledJobs);
-         printf("by heuristic dual %lf \n" , ( dual));
-         printf("by heuristic objVal %lf \n" , objVal);
-         fflush(stdout);  
-         if( objVal - dual < (double) -1e-5) {
-            addHeurPat(p1, i);
-         }
+      SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
+      double objVal;
+      objVal = computeObj(scheduledJobs);
+      printf("by heuristic dual %lf \n" , ( dual));
+      printf("by heuristic objVal %lf \n" , objVal);
+      fflush(stdout);  
+      if( objVal - dual < (double) -1e-5) {
+         addHeurPat(p1, i);
+      }
    }
    if (addvar) {
       printf("Ending DECL_PRICERREDCOST() by heuristic\n");
