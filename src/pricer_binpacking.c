@@ -831,23 +831,46 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       return jobPool;
    }
 
+   // helper helper helper function to check if a job index has already been scheduled
+   bool inScheduledJobs(int idx, job_weights* scheduledJobs, int scheduledJobsSize) {
+      int iii;
+      for (iii=0; iii < scheduledJobsSize; iii++) {
+         if (scheduledJobs[iii].idx == idx) {
+            return TRUE;
+         }
+      }
+      return FALSE;   
+   }
+
+   // helper helper function to check if a candidate independent job really is independent
+   bool checkInd(int idxGetInd, int addedIdx, branchingList bl1, job_weights* scheduledJobs, int scheduledJobsSize) {
+      int iii;
+      for (iii=0; iii<bl1.lastIdx; iii++) {
+         bool inSJ = inScheduledJobs(bl1.bl[iii].id1, scheduledJobs, scheduledJobsSize);
+         if (bl1.bl[iii].id2 == idxGetInd && bl1.bl[iii].id1 != addedIdx && !inSJ) {
+            return FALSE;   
+         }
+      }
+      return TRUE;
+    }
+
    // helper function to add dependent job to jobPool
-   job_weights* addDepJob(job_weights* jobPool, job_weights* orgJobList, branchingList bl1, int addedIdx, int nbrJobs, int* pCounterInd, int* pCounterDep) {
+   job_weights* addDepJob(job_weights* scheduledJobs, int scheduledJobsSize, job_weights* jobPool, job_weights* orgJobList, branchingList bl1, int addedIdx, int nbrJobs, int* pCounterInd, int* pCounterDep) {
       if (bl1.lastIdx == 0) {
          assert(*pCounterDep == 0);
          return jobPool; // if no branching constraints exist, jobPool remains unchanged as no job could have become independent
       }
       int iii;
-      int idxGotInd = -1;
+      int idxGetInd = -1;
       for (iii=0; iii<bl1.lastIdx; iii++) { // now find all jobs that got independent
          if (bl1.bl[iii].id1 == addedIdx) { //found a job that became independent by adding the job <addedIdx> to the schedule
-            idxGotInd = bl1.bl[iii].id2;
-            if(*pCounterDep == 0) {
-               int test = 5;
+            idxGetInd = bl1.bl[iii].id2; //this job might have gotten independent
+            bool gotInd = checkInd(idxGetInd, addedIdx, bl1, scheduledJobs, scheduledJobsSize);
+            if (gotInd) { // if the candidate idx really got independent add the job
+               jobPool = addJob(jobPool,nbrJobs- (*pCounterDep), orgJobList[idxGetInd]);
+               *pCounterInd += 1;
+               *pCounterDep -= 1;
             }
-            jobPool = addJob(jobPool,nbrJobs- (*pCounterDep), orgJobList[idxGotInd]);
-            *pCounterInd += 1;
-            *pCounterDep -= 1;
          }
       }
       return jobPool;
@@ -956,7 +979,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          addedIdx = jobPool[0].idx; // we save the index of the job just added
          jobPool = forgetJob(jobPool, addedIdx, &counterInd); // and forget this job in the jobPool
          qsort(jobPool,nbrJobs,sizeof(jobPool[0]),cmp_fnc); // push newly forgotten job to the end
-         jobPool = addDepJob(jobPool, orgJobList, bl1, addedIdx, nbrJobs, &counterInd, &counterDep); // and add any newly independent job to the end of the list
+         jobPool = addDepJob(scheduledJobs, ii, jobPool, orgJobList, bl1, addedIdx, nbrJobs, &counterInd, &counterDep); // and add any newly independent job to the end of the list
       }
 
       // now schedule jobs with start and end times
