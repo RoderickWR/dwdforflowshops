@@ -821,8 +821,13 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    }
 
    // helper function to add element to job_weights array
-   job_weights* addJob(job_weights* jobPool, int pos, job_weights job) {
-      jobPool[pos] = job; //add job at the end since last job of jobPool will be occupied by a newly forgotten job
+   job_weights* addJob(job_weights* jobPool, int idxGetInd, job_weights job) {
+      for (iii = 0; iii< nbrJobs; iii++) {
+         if (jobPool[iii].idx == idxGetInd) {
+            jobPool[iii].val = job.val; // set weight value to original value
+            jobPool[iii].objCoef = job.objCoef; // set obj Coef to original value
+         }
+      }  
       return jobPool;
    }
 
@@ -875,11 +880,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             bool gotInd = checkInd(idxGetInd, addedIdx, bl1, scheduledJobs, scheduledJobsSize);
             if (gotInd) { // if the candidate idx really got independent add the job
                assert(*pCounterDep > 0);
-               bool inList = inJobList(idxGetInd, jobPool, nbrJobs);
-               if(inList) {
-                  int test3 = 5;
-               }
-               jobPool = addJob(jobPool,nbrJobs- (*pCounterDep), orgJobList[idxGetInd]);
+               jobPool = addJob(jobPool, idxGetInd, orgJobList[idxGetInd]); 
                *pCounterInd += 1;
                *pCounterDep -= 1;
             }
