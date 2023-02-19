@@ -809,6 +809,17 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       return max;
    }
 
+   // helper helper helper function to check if a job index has already been scheduled
+   bool inJobList(int idx, job_weights* jobList, int jobListSize) {
+      int iii;
+      for (iii=0; iii < jobListSize; iii++) {
+         if (jobList[iii].idx == idx) {
+            return TRUE;
+         }
+      }
+      return FALSE;   
+   }
+
    // helper function to add element to job_weights array
    job_weights* addJob(job_weights* jobPool, int pos, job_weights job) {
       jobPool[pos] = job; //add job at the end since last job of jobPool will be occupied by a newly forgotten job
@@ -821,27 +832,28 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          if (jobPool[iii].idx == idx) {
             jobPool[iii].val = -1.0; // set weight value to negative, so that job will not be scheduled according to Smith rule
             *pCounterInd -= 1;
+            printf("Just forgot the index: %d \n", idx);
+            fflush(stdout);
          }
       }     
       return jobPool;
    }
 
-   // helper helper helper function to check if a job index has already been scheduled
-   bool inScheduledJobs(int idx, job_weights* scheduledJobs, int scheduledJobsSize) {
+   // helper function to print joblist
+   void printJobList(job_weights* jobList, int jobListSize) {
       int iii;
-      for (iii=0; iii < scheduledJobsSize; iii++) {
-         if (scheduledJobs[iii].idx == idx) {
-            return TRUE;
-         }
+      printf(" Current joblist: \n");
+      for (iii=0; iii < jobListSize; iii++) {
+         printf(" Job %d \n", jobList[iii].idx);
       }
-      return FALSE;   
+      fflush(stdout);
    }
 
    // helper helper function to check if a candidate independent job really is independent
    bool checkInd(int idxGetInd, int addedIdx, branchingList bl1, job_weights* scheduledJobs, int scheduledJobsSize) {
       int iii;
       for (iii=0; iii<bl1.lastIdx; iii++) {
-         bool inSJ = inScheduledJobs(bl1.bl[iii].id1, scheduledJobs, scheduledJobsSize);
+         bool inSJ = inJobList(bl1.bl[iii].id1, scheduledJobs, scheduledJobsSize);
          if (bl1.bl[iii].id2 == idxGetInd && bl1.bl[iii].id1 != addedIdx && !inSJ) {
             return FALSE;   
          }
@@ -858,12 +870,14 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       int iii;
       int idxGetInd = -1;
       for (iii=0; iii<bl1.lastIdx; iii++) { // now find all jobs that got independent
-         if (bl1.bl[iii].id1 == addedIdx) { //found a job that became independent by adding the job <addedIdx> to the schedule
+         if (bl1.bl[iii].id1 == addedIdx) { //look for jobs that might become independent by adding the job <addedIdx> to the schedule
             idxGetInd = bl1.bl[iii].id2; //this job might have gotten independent
             bool gotInd = checkInd(idxGetInd, addedIdx, bl1, scheduledJobs, scheduledJobsSize);
             if (gotInd) { // if the candidate idx really got independent add the job
-               if (*pCounterDep == 0) {
-                  int test = 5;
+               assert(*pCounterDep > 0);
+               bool inList = inJobList(idxGetInd, jobPool, nbrJobs);
+               if(inList) {
+                  int test3 = 5;
                }
                jobPool = addJob(jobPool,nbrJobs- (*pCounterDep), orgJobList[idxGetInd]);
                *pCounterInd += 1;
@@ -980,9 +994,17 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          jobPool = forgetJob(jobPool, addedIdx, &counterInd); // and forget this job in the jobPool
          qsort(jobPool,nbrJobs,sizeof(jobPool[0]),cmp_fnc); // push newly forgotten job to the end
          jobPool = addDepJob(scheduledJobs, ii, jobPool, orgJobList, bl1, addedIdx, nbrJobs, &counterInd, &counterDep); // and add any newly independent job to the end of the list
+         printJobList(jobPool, nbrJobs);
       }
 
       // now schedule jobs with start and end times
+      printf("BcounterInd: %d \n", counterInd);
+      printf("BcounterDep: %d \n", counterDep);
+      fflush(stdout);
+      if (counterInd < 0) {
+         printJobList(jobPool, nbrJobs);
+         int test2 = 5;
+      }
       assert(counterInd == 0 && counterDep == 0);
       pat p1;
       SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
