@@ -837,8 +837,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          if (jobPool[iii].idx == idx) {
             jobPool[iii].val = -1.0; // set weight value to negative, so that job will not be scheduled according to Smith rule
             *pCounterInd -= 1;
-            printf("Just forgot the index: %d \n", idx);
-            fflush(stdout);
          }
       }     
       return jobPool;
@@ -966,16 +964,12 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             jobPool[ii].val = val;
             jobPool[ii].objCoef = objCoef;
             counterInd += 1;
-            printf("ind index was: %d \n", ii);
-            fflush(stdout);
          }
          else {
             jobPool[ii].idx = ii;
             jobPool[ii].val = -1.0; // add dependent jobs with -1 value 
             jobPool[ii].objCoef = -1.0;   
             counterDep += 1;
-            printf("dep index was: %d \n", ii);
-            fflush(stdout);
          }
       }
       fflush(stdout);
@@ -983,10 +977,6 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       job_weights scheduledJobs[nbrJobs];
       int addedIdx;
       for (ii=0; ii<nbrJobs; ii++) { 
-         printf("counterSched: %d \n", ii);
-         printf("counterInd: %d \n", counterInd);
-         printf("counterDep: %d \n", counterDep);
-         fflush(stdout);
          qsort(jobPool,nbrJobs,sizeof(jobPool[0]),cmp_fnc); // sort DESC
          scheduledJobs[ii].idx = jobPool[0].idx; //we add the most important indepent job as the first job in the list
          scheduledJobs[ii].val = jobPool[0].val; 
@@ -995,17 +985,9 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          jobPool = forgetJob(jobPool, addedIdx, &counterInd); // and forget this job in the jobPool
          qsort(jobPool,nbrJobs,sizeof(jobPool[0]),cmp_fnc); // push newly forgotten job to the end
          jobPool = addDepJob(scheduledJobs, ii, jobPool, orgJobList, bl1, addedIdx, nbrJobs, &counterInd, &counterDep); // and add any newly independent job to the end of the list
-         printJobList(jobPool, nbrJobs);
       }
 
       // now schedule jobs with start and end times
-      printf("BcounterInd: %d \n", counterInd);
-      printf("BcounterDep: %d \n", counterDep);
-      fflush(stdout);
-      if (counterInd < 0) {
-         printJobList(jobPool, nbrJobs);
-         int test2 = 5;
-      }
       assert(counterInd == 0 && counterDep == 0);
       pat p1;
       SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
