@@ -78,7 +78,7 @@ void releaseConss(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SC
 
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
  *  and frees the SCIP instance
- */
+ */  
 static
 SCIP_RETCODE runShell(
    int                   argc,               /**< number of shell parameters */
@@ -94,7 +94,7 @@ SCIP_RETCODE runShell(
    int mPats_initSize = 2; // initial size of pattern array for each machine
    int pT_lb = 1; // lower bound for random processing time
    int pT_ub = 10; // upper bound for random processing time
-   int seed = 700;
+   int seed = 800;
    
    /*********
     * Setup *
