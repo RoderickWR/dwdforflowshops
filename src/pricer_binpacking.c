@@ -124,6 +124,8 @@ struct SCIP_PricerData
    int* nvars;
    double maxTime;
    int numCalls;
+   int numPatternsGenByMIP;
+   int numPatternsGenByHeur;
    SCIP**                subscip;
    SCIP_VAR***           mergedArr;
    SCIP_VAR**            startVars;
@@ -742,6 +744,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    lambArr = pricerdata->lambArr;
    assert(pricerdata->numCalls != -1);
    pricerdata->numCalls = pricerdata->numCalls + 1;
+
    // use pointers stored in pricerdata 
    subscip = pricerdata->subscip;
    mergedArr = pricerdata->mergedArr;
@@ -752,6 +755,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
 
    printf("numCalls: %d \n", pricerdata->numCalls);
+   printf("numPatternsGenByMIP: %d \n", pricerdata->numPatternsGenByMIP);
+   printf("numPatternsGenByHeur: %d \n", pricerdata->numPatternsGenByHeur);
    fflush(stdout);
    /* get the remaining time and memory limit */
    SCIP_CALL( SCIPgetRealParam(scip, "limits/time", &timelimit) );
@@ -1011,6 +1016,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       printf("by heuristic objVal %lf \n" , objVal);
       fflush(stdout);  
       if( objVal - dual < (double) -1e-5) {
+         pricerdata->numPatternsGenByHeur += 1; 
          addHeurPat(p1, i);
       }
    }
@@ -1118,7 +1124,8 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
          printf("dual %lf \n" , ( dual));
          fflush(stdout);  
          if( SCIPgetSolOrigObj(subscip[i], sol) - dual < (double) -1e-5)
-         {          
+         {     
+            pricerdata->numPatternsGenByMIP += 1;     
             SCIP_VAR* var;
             SCIP_VARDATA* vardata;
             s1 = pricerdata->s1;
@@ -1258,6 +1265,8 @@ SCIP_RETCODE SCIPincludePricerBinpacking(
    pricerdata->maxTime = 0.0;
    pricerdata->numCalls = -1;
    pricerdata->tempNodeNbr = -1;
+   pricerdata->numPatternsGenByMIP = 0;
+   pricerdata->numPatternsGenByHeur = 0;
 
    /* include variable pricer */
    SCIP_CALL( SCIPincludePricerBasic(scip, &pricer, PRICER_NAME, PRICER_DESC, PRICER_PRIORITY, PRICER_DELAY,
@@ -1318,6 +1327,8 @@ SCIP_RETCODE SCIPpricerBinpackingActivate(
    pricerdata->nvars  = nvars;
    pricerdata->maxTime  = maxTime;
    pricerdata->numCalls = numCalls;
+   pricerdata->numPatternsGenByMIP = 0;
+   pricerdata->numPatternsGenByHeur = 0;
    pricerdata->pMpats_sizes = pMpats_sizes;
 
    SCIP** subscip;
