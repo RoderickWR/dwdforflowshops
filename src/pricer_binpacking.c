@@ -994,31 +994,42 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
 
       // now schedule jobs with start and end times
       assert(counterInd == 0 && counterDep == 0);
-      pat p1;
-      SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
-      double sum = 0;
-      int nextJobIdx = -1;
-      for( ii = 0; ii < nbrJobs; ii++ ) {
-         nextJobIdx = scheduledJobs[ii].idx; // look up which job is scheduled next using the scheduledJobs list
-         p1.job[nextJobIdx].start = sum;
-         scheduledJobs[ii].start = p1.job[nextJobIdx].start;
-         p1.job[nextJobIdx].end = p1.job[nextJobIdx].start + pt1.machine[i].m[nextJobIdx];
-         scheduledJobs[ii].end = p1.job[nextJobIdx].end;
-         sum += pt1.machine[i].m[nextJobIdx];
-      }
+      // add #nbrJobs patterns each with offset for different jobs i,j
+      int iv = 0;
+      for (iv=0; iv < nbrJobs; iv++) {
+         pat p1;
+         SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
+         double sum = 0;
+         int nextJobIdx = -1;
+         for( ii = 0; ii < nbrJobs; ii++ ) {
+            nextJobIdx = scheduledJobs[ii].idx; // look up which job is scheduled next using the scheduledJobs list
+            p1.job[nextJobIdx].start = sum;
+            scheduledJobs[ii].start = p1.job[nextJobIdx].start;
+            p1.job[nextJobIdx].end = p1.job[nextJobIdx].start + pt1.machine[i].m[nextJobIdx];
+            scheduledJobs[ii].end = p1.job[nextJobIdx].end;
+            if (ii == iv) {
+               sum = p1.job[nextJobIdx].end + 10.0;
+            }
+            else {
+               sum = p1.job[nextJobIdx].end;
+            }
+            
+         }
+         printOutPattern(p1,nbrJobs);
 
-      // this ends the heuristics part
-      /* now check if the solution indicates that a new pattern should be added */         
-      SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
-      double objVal;
-      objVal = computeObj(scheduledJobs);
-      printf("by heuristic dual %lf \n" , ( dual));
-      printf("by heuristic objVal %lf \n" , objVal);
-      fflush(stdout);  
-      if( objVal - dual < (double) -1e-5) {
-         pricerdata->numPatternsGenByHeur += 1; 
-         addHeurPat(p1, i);
-      }
+         // this ends the heuristics part
+         /* now check if the solution indicates that a new pattern should be added */         
+         SCIPgetDualSolVal(scip, convexityCons[i], pDual, pBoundconstr);
+         double objVal;
+         objVal = computeObj(scheduledJobs);
+         printf("by heuristic dual %lf \n" , ( dual));
+         printf("by heuristic objVal %lf \n" , objVal);
+         fflush(stdout);  
+         if( objVal - dual < (double) -1e-5) {
+            pricerdata->numPatternsGenByHeur += 1; 
+            addHeurPat(p1, i);
+         }
+      }  
    }
    if (addvar) {
       printf("Ending DECL_PRICERREDCOST() by heuristic\n");

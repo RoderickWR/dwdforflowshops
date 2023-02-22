@@ -87,7 +87,7 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 5;
+   int nbrJobs = 4;
    int nbrMachines = 2;
    int* nvars; // stores the number of lambas for each machine, needed for constraint handler 
    double maxTime = 50.0; // maximum time horizon for the schedule, needed for model formulation, adjust according to nbrJobs and process times
@@ -137,6 +137,7 @@ SCIP_RETCODE runShell(
    /* for column generation instances, disable restarts */
    SCIP_CALL( SCIPsetIntParam(scip,"presolving/maxrestarts",0) );
    SCIP_CALL( SCIPsetIntParam(scip,"presolving/maxrounds",0) );
+   //SCIP_CALL( SCIPsetRealParam(scip,"limits/gap",0.05) );
 
    /* turn off all separation algorithms */
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );
