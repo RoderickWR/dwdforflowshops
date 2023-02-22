@@ -87,7 +87,7 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 4;
+   int nbrJobs = 5;
    int nbrMachines = 2;
    int* nvars; // stores the number of lambas for each machine, needed for constraint handler 
    double maxTime = 50.0; // maximum time horizon for the schedule, needed for model formulation, adjust according to nbrJobs and process times
