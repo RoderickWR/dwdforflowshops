@@ -39,9 +39,9 @@
 
 
 void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
-   SCIPfreeBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
+   SCIPfreeBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs) ;
  
-   SCIPfreeBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) ;
+   SCIPfreeBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs) ;
 
    SCIPfreeBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) ;
 
@@ -173,9 +173,9 @@ SCIP_RETCODE runShell(
       SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]) );
    }
    SCIP_VAR** startArr;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs) );
    SCIP_VAR** endArr;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs) );
 
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) );
 
