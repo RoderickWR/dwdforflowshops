@@ -78,7 +78,7 @@ void releaseConss(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SC
 
 /** creates a SCIP instance with default plugins, evaluates command line parameters, runs SCIP appropriately,
  *  and frees the SCIP instance
- */
+ */  
 static
 SCIP_RETCODE runShell(
    int                   argc,               /**< number of shell parameters */
@@ -87,14 +87,14 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 4;
+   int nbrJobs = 5;
    int nbrMachines = 2;
    int* nvars; // stores the number of lambas for each machine, needed for constraint handler 
    double maxTime = 50.0; // maximum time horizon for the schedule, needed for model formulation, adjust according to nbrJobs and process times
    int mPats_initSize = 2; // initial size of pattern array for each machine
    int pT_lb = 1; // lower bound for random processing time
    int pT_ub = 10; // upper bound for random processing time
-   int seed = 700;
+   int seed = 1000;
    
    /*********
     * Setup *
@@ -137,6 +137,7 @@ SCIP_RETCODE runShell(
    /* for column generation instances, disable restarts */
    SCIP_CALL( SCIPsetIntParam(scip,"presolving/maxrestarts",0) );
    SCIP_CALL( SCIPsetIntParam(scip,"presolving/maxrounds",0) );
+   //SCIP_CALL( SCIPsetRealParam(scip,"limits/gap",0.05) );
 
    /* turn off all separation algorithms */
    SCIP_CALL( SCIPsetSeparating(scip, SCIP_PARAMSETTING_OFF, TRUE) );

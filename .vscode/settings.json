@@ -23,7 +23,11 @@
         "semaphore": "c",
         "stop_token": "c",
         "vardata_binpacking.h": "c",
-        "fsgenerator.h": "c"
+        "fsgenerator.h": "c",
+        "cstdlib": "c",
+        "cons_logicor.h": "c",
+        "printout.h": "c",
+        "utility": "c"
     },
     "cmake.configureOnOpen": false
 }
