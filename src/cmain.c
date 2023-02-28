@@ -87,7 +87,7 @@ SCIP_RETCODE runShell(
    )
 {
    SCIP* scip = NULL;
-   int nbrJobs = 5;
+   int nbrJobs = 4;
    int nbrMachines = 2;
    int* nvars; // stores the number of lambas for each machine, needed for constraint handler 
    double maxTime = 50.0; // maximum time horizon for the schedule, needed for model formulation, adjust according to nbrJobs and process times
@@ -149,7 +149,7 @@ SCIP_RETCODE runShell(
    
    
    int* mPats_sizes; // keep track of #lambdas (same as nvars), however only for purpose of memory realloc
-   SCIPallocBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
+   SCIPallocBlockMemoryArray(scip, &mPats_sizes, nbrMachines);
 
    // create a random schedule, based on random process times, save it...
    writeInitSched("initProb.txt",nbrJobs, nbrMachines, mPats_initSize, pT_ub, pT_lb, seed); // also pass upper lower bound for proc time and seed
