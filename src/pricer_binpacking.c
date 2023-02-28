@@ -1047,7 +1047,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
    
    // create coefs array, needed for reopt
    SCIP_Real* coefs;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &coefs, 2*nbrJobs*sizeof(SCIP_Real)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &coefs, 2*nbrJobs) );
 
 
    if (pricerdata->numCalls == 1 || pricerdata->tempNodeNbr != nodeNbr) {
