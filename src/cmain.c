@@ -46,10 +46,10 @@ void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP
    SCIPfreeBlockMemoryArray(scip, &nvars, nbrMachines) ;
 
    /* free constraint arrays*/
-   SCIPfreeBlockMemoryArray(scip, &convexityCons, nbrMachines*sizeof(SCIP_CONS*)) ;
-   SCIPfreeBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*));
-   SCIPfreeBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*));
-   SCIPfreeBlockMemoryArray(scip, &makespanCons, nbrJobs*sizeof(SCIP_CONS*)) ;
+   SCIPfreeBlockMemoryArray(scip, &convexityCons, nbrMachines) ;
+   SCIPfreeBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs);
+   SCIPfreeBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs);
+   SCIPfreeBlockMemoryArray(scip, &makespanCons, nbrJobs) ;
 
    // now free the 2 dynamic arrays for patterns again
    int iv;
@@ -181,13 +181,13 @@ SCIP_RETCODE runShell(
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &convexityCons, nbrMachines*sizeof(SCIP_CONS*)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &convexityCons, nbrMachines) );
    SCIP_CONS** startCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startCons, nbrMachines*nbrJobs) );
    SCIP_CONS** endCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs*sizeof(SCIP_CONS*)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endCons, nbrMachines*nbrJobs) );
    SCIP_CONS** makespanCons;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &makespanCons, nbrJobs*sizeof(SCIP_CONS*)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &makespanCons, nbrJobs) );
 
    /* create lambda variables and set lambda pointers*/
    char buf[256];
