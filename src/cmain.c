@@ -54,10 +54,10 @@ void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP
    // now free the 2 dynamic arrays for patterns again
    int iv;
    for( iv = 0; iv< nbrMachines; ++iv ) {
-      SCIPfreeBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]*sizeof(SCIP_VAR*)) ;
+      SCIPfreeBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]) ;
    }
-   SCIPfreeBlockMemoryArray(scip, &lambArr, nbrMachines*sizeof(SCIP_VAR**)) ;
-   SCIPfreeBlockMemoryArray(scip, &mPats_sizes, nbrMachines*sizeof(int));
+   SCIPfreeBlockMemoryArray(scip, &lambArr, nbrMachines) ;
+   SCIPfreeBlockMemoryArray(scip, &mPats_sizes, nbrMachines);
 }
 
 void releaseConss(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP_VAR*** lambArr, SCIP_VAR** startArr, SCIP_VAR** endArr, int* nvars, SCIP_CONS** convexityCons, SCIP_CONS** startCons, SCIP_CONS** endCons, SCIP_CONS** makespanCons) {
@@ -168,9 +168,9 @@ SCIP_RETCODE runShell(
    SCIP_VARDATA*        vardata;
    int iv;
    SCIP_VAR*** lambArr;
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr, nbrMachines*sizeof(SCIP_VAR**)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr, nbrMachines) );
    for( iv = 0; iv< nbrMachines; ++iv ) {
-      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]*sizeof(SCIP_VAR*)) );
+      SCIP_CALL( SCIPallocBlockMemoryArray(scip, &lambArr[iv], mPats_sizes[iv]) );
    }
    SCIP_VAR** startArr;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &startArr, nbrMachines*nbrJobs*sizeof(SCIP_VAR*)) );
