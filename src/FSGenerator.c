@@ -78,13 +78,13 @@ schedule readInitSched(SCIP* scip, char* filename, int mPats_initSize, int* mPat
     fpt = fopen(filename, "r");
 
     fscanf(fpt,"%d %d",&nbrJobs, &nbrMachines);
-    SCIPallocBlockMemoryArray(scip, &(s2.sched), nbrMachines*sizeof(struct mPats)) ;
+    SCIPallocBlockMemoryArray(scip, &(s2.sched), nbrMachines) ;
 
     double dummy; // just needed to skip lines in the file
 
     for (i=0; i < nbrMachines; i++) {
         mPats mp1;
-        SCIPallocBlockMemoryArray(scip, &(mp1.mp), mPats_initSize*sizeof(struct pat)) ;
+        SCIPallocBlockMemoryArray(scip, &(mp1.mp), mPats_initSize) ;
         mp1.lastIdx = 0;
         mp1.size = mPats_initSize;
         s2.sched[i] = mp1;
@@ -99,7 +99,7 @@ schedule readInitSched(SCIP* scip, char* filename, int mPats_initSize, int* mPat
     double end;
     while (fgets(str,500,fpt)) {
         pat p1;
-        SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
+        SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs) ;
         // now parse the pattern
         for (iii=0; iii < nbrJobs; iii++) {
             sscanf(str,"%d %d %d %lf %lf", &iterPat, &i, &ii, &start, &end);
@@ -146,10 +146,10 @@ processingTimes readInitPT(SCIP* scip, char* filename) {
     // first we need nbr Jobs and Machines
     fscanf(fpt,"%d %d \n",&nbrJobs, &nbrMachines);
     // we allocate processing times array
-    SCIPallocBlockMemoryArray(scip, &(pt.machine), nbrMachines*sizeof(struct processingTimesOneMachine)) ;
+    SCIPallocBlockMemoryArray(scip, &(pt.machine), nbrMachines) ;
         for (i=0; i < nbrMachines; i++) {
         processingTimesOneMachine pptom;
-        SCIPallocBlockMemoryArray(scip, &(pptom.m), nbrJobs*sizeof(double)) ;
+        SCIPallocBlockMemoryArray(scip, &(pptom.m), nbrJobs) ;
         for (ii=0; ii < nbrJobs; ii++) {            
             fscanf(fpt,"%lf ", &pptom.m[ii]); 
         }

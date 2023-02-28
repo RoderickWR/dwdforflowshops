@@ -269,15 +269,6 @@ SCIP_DECL_BRANCHEXECLP(branchExeclpRyanFoster)
    assert(probdata != NULL);
    nbrJobs = SCIPprobdataGetnbrJobs(probdata);
 
-   // nitems = SCIPprobdataGetNItems(probdata);
-
-   // /* allocate memory for triangle matrix */
-   // SCIP_CALL( SCIPallocBufferArray(scip, &pairweights, nitems) );
-   // for( i = 0; i < nitems; ++i )
-   // {
-   //    SCIP_CALL( SCIPallocClearBufferArray(scip, &pairweights[i], i+1) ); /*lint !e866 */
-   // }
-
    /* get fractional LP candidates */
    SCIP_CALL( SCIPgetLPBranchCands(scip, &lpcands, NULL, &lpcandsfrac, NULL, &nlpcands, NULL) );
    assert(nlpcands > 0);
