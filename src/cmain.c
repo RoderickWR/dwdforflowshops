@@ -43,7 +43,7 @@ void freeArrays(SCIP* scip, int nbrMachines, int nbrJobs, int* mPats_sizes, SCIP
  
    SCIPfreeBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs) ;
 
-   SCIPfreeBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) ;
+   SCIPfreeBlockMemoryArray(scip, &nvars, nbrMachines) ;
 
    /* free constraint arrays*/
    SCIPfreeBlockMemoryArray(scip, &convexityCons, nbrMachines*sizeof(SCIP_CONS*)) ;
@@ -177,7 +177,7 @@ SCIP_RETCODE runShell(
    SCIP_VAR** endArr;
    SCIP_CALL( SCIPallocBlockMemoryArray(scip, &endArr, nbrMachines*nbrJobs) );
 
-   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines*sizeof(int)) );
+   SCIP_CALL( SCIPallocBlockMemoryArray(scip, &nvars, nbrMachines) );
 
    /* allocate constraint arrays*/
    SCIP_CONS** convexityCons;
