@@ -998,7 +998,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
       int iv = 0;
       for (iv=0; iv < nbrJobs; iv++) {
          pat p1;
-         SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
+         SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs) ;
          double sum = 0;
          int nextJobIdx = -1;
          for( ii = 0; ii < nbrJobs; ii++ ) {
@@ -1169,7 +1169,7 @@ SCIP_DECL_PRICERREDCOST(pricerRedcostBinpacking)
             // modify start and end time constr in master problem
             // and create new pattern
             pat p1;
-            SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs*sizeof(struct sPat)) ;
+            SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs) ;
             int j;
             for( j = 0; j < nbrJobs; ++j ) {
                SCIPaddCoefLinear(scip, startCons[i*nbrJobs + j], lambArr[i][s1->sched[i].lastIdx], SCIPgetSolVal(subscip[i], sol, startVars[j + i*nbrJobs]));

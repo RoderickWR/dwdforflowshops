@@ -100,6 +100,8 @@ SCIP_RETCODE runShell(
     * Setup *
     *********/
 
+   
+
    /* initialize SCIP */
    SCIP_CALL( SCIPcreate(&scip) );
    
@@ -159,6 +161,10 @@ SCIP_RETCODE runShell(
 
    schedule* s1;
    s1 = &sched;
+
+   // test
+   pat p1;
+   SCIPallocBlockMemoryArray(scip, &p1.job, nbrJobs) ;
   
    SCIP_CALL( SCIPsetObjsense(scip, SCIP_OBJSENSE_MINIMIZE) );
 
